@@ -18,11 +18,11 @@ test('#nextToken', (t) => {
 
   const lexer = new Lexer(input);
 
-  expected.forEach((test) => {
+  expected.forEach(([ expectedType, expectedLiteral ]) => {
     const { type, literal } = lexer.nextToken();
 
-    t.ok(type === test[0]);
-    t.ok(literal === test[1]);
+    t.ok(type === expectedType);
+    t.ok(literal === expectedLiteral);
   });
 
   t.end();
