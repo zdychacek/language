@@ -1,0 +1,34 @@
+{
+  "name": "language",
+  "version": "1.0.0",
+  "description": "A simple language parser and interpreter.",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tape tests/**/*.js | tap-spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/zdychacek/language.git"
+  },
+  "keywords": [
+    "AST",
+    "interpereter",
+    "parser",
+    "language",
+    "tokenixer",
+    "lexer"
+  ],
+  "author": "Ondrej Zdych <zdych.ondrej@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/zdychacek/language/issues"
+  },
+  "homepage": "https://github.com/zdychacek/language#readme",
+  "devDependencies": {
+    "tap-spec": "^4.1.1",
+    "tape": "^4.7.0"
+  }
+}
