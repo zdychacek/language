@@ -139,7 +139,7 @@ test('#nextToken - if/else', (t) => {
   t.end();
 });
 
-test.only('#nextToken - multi char operators', (t) => {
+test('#nextToken - multi char operators', (t) => {
   const input = `
     10 == 10;
     10 != 9;
