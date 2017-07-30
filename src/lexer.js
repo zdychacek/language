@@ -69,8 +69,6 @@ class Lexer {
   }
 
   readPunctuator () {
-    //this.readChar();
-
     switch (this.ch) {
       case ';':
         return newToken(TokenType.SEMICOLON, ';');
