@@ -1,4 +1,4 @@
-const TokenType = {
+export const TokenType = {
   ILLEGAL: 'ILLEGAL',
   EOF: 'EOF',
 
@@ -36,7 +36,7 @@ const TokenType = {
   FALSE: 'FALSE',
 };
 
-const PunctuatorType = {
+export const PunctuatorType = {
   ';': TokenType.SEMICOLON,
   '(': TokenType.LPAREN,
   ')': TokenType.RPAREN,
@@ -53,7 +53,7 @@ const PunctuatorType = {
   '>': TokenType.GT,
 };
 
-const KeywordType = {
+export const KeywordType = {
   fn: TokenType.FUNCTION,
   let: TokenType.LET,
   if: TokenType.IF,
@@ -62,5 +62,3 @@ const KeywordType = {
   true: TokenType.TRUE,
   false: TokenType.FALSE,
 };
-
-module.exports = { TokenType, PunctuatorType, KeywordType };

@@ -1,22 +1,25 @@
-const assert = require('assert');
-const {
+import assert from 'assert';
+
+import {
   TokenType,
   PunctuatorType,
   KeywordType,
- } = require('./token');
+ } from './token';
 
 class Lexer {
+  _input = '';
+  _position = 0;
+  _readPosition = 0;
+  _char = null;
+
+  _columnNo = 0;
+  _lineNo = 1;
+
+  // currently built token
+  _currToken = null;
+
   constructor (input) {
     this._input = input;
-    this._position = 0;
-    this._readPosition = 0;
-    this._char = null;
-
-    this._columnNo = 0;
-    this._lineNo = 1;
-
-    // currently built token
-    this._currToken = null;
 
     this._readChar();
   }

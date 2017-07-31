@@ -1,9 +1,9 @@
-const fs = require('fs');
-const repl = require('repl');
-const touch = require('touch');
+import fs from 'fs';
+import repl from 'repl';
+import touch from 'touch';
 
-const Lexer = require('./lexer');
-const { TokenType } = require('./token');
+import Lexer from './lexer';
+import { TokenType } from './token';
 
 const REPL_HISTORY_FILE = '.repl_history';
 

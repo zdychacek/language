@@ -1,4 +1,5 @@
 const test = require('tape');
+
 const { TokenType } = require('../src/token');
 const Lexer = require('../src/lexer');
 
