@@ -4,9 +4,9 @@ const Lexer = require('../src/lexer');
 
 function run (tests, { t, lexer }) {
   tests.forEach(([ expectedType, expectedLiteral ]) => {
-    const { type, literal } = lexer.nextToken();
+    const { type, literal/*, start, end*/ } = lexer.nextToken();
 
-    //console.log(type, literal);
+    //console.log(literal, start, end);
 
     t.ok(type === expectedType);
     t.ok(literal === expectedLiteral);
@@ -163,3 +163,5 @@ test('#nextToken - multi char operators', (t) => {
 
   t.end();
 });
+
+// TODO: write token start/end positon test

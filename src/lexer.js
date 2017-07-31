@@ -1,10 +1,9 @@
-// Lexer implementation
-
-const { TokenType, PunctuatorType, KeywordType } = require('./token');
-
-function newToken (type, literal) {
-  return { type, literal: String(literal) };
-}
+const assert = require('assert');
+const {
+  TokenType,
+  PunctuatorType,
+  KeywordType,
+ } = require('./token');
 
 class Lexer {
   constructor (input) {
@@ -12,6 +11,12 @@ class Lexer {
     this._position = 0;
     this._readPosition = 0;
     this._char = null;
+
+    this._columnNo = 0;
+    this._lineNo = 1;
+
+    // currently built token
+    this._currToken = null;
 
     this._readChar();
   }
@@ -24,6 +29,17 @@ class Lexer {
       this._char = this._input[this._readPosition];
     }
 
+    const prevChar = this._input[this._readPosition - 1];
+
+    // update source location
+    if (prevChar === '\n') {
+      this._lineNo++;
+      this._columnNo = 1;
+    }
+    else {
+      this._columnNo++;
+    }
+
     this._position = this._readPosition;
     this._readPosition++;
   }
@@ -31,32 +47,40 @@ class Lexer {
   nextToken () {
     this._skipWhitespace();
 
+    // start token
+    this._startToken();
+
     const char = this._char;
-    let token = null;
 
     if (char === null) {
-      token = newToken(TokenType.EOF, '');
+      const token = this._finishToken(TokenType.EOF, '');
+
+      this._readChar();
+
+      return token;
     }
     else if (this._isPunctuator(char)) {
-      token = this._readPunctuator();
+      const { type, literal } = this._readPunctuator();
+
+      return this._finishToken(type, literal);
     }
     else if (this._isLetter(char)) {
       const literal = this._readLiteral();
 
-      return newToken(KeywordType[literal] || TokenType.IDENT, literal);
+      return this._finishToken(KeywordType[literal] || TokenType.IDENT, literal);
     }
     else if (this._isDigit(char)) {
       const literal = this._readDigit();
 
-      return newToken(TokenType.INT, literal);
+      return this._finishToken(TokenType.INT, literal);
     }
     else {
-      token = newToken(TokenType.ILLEGAL, char);
+      const token = this._finishToken(TokenType.ILLEGAL, char);
+
+      this._readChar();
+
+      return token;
     }
-
-    this._readChar();
-
-    return token;
   }
 
   _peekChar () {
@@ -69,54 +93,76 @@ class Lexer {
   }
 
   _readPunctuator () {
+    let token = null;
+
     switch (this._char) {
       case ';':
-        return newToken(TokenType.SEMICOLON, ';');
+        token = this._newToken(TokenType.SEMICOLON, ';');
+        break;
       case '(':
-        return newToken(TokenType.LPAREN, '(');
+        token = this._newToken(TokenType.LPAREN, '(');
+        break;
       case ')':
-        return newToken(TokenType.RPAREN, ')');
+        token = this._newToken(TokenType.RPAREN, ')');
+        break;
       case ',':
-        return newToken(TokenType.COMMA, ',');
+        token = this._newToken(TokenType.COMMA, ',');
+        break;
       case '{':
-        return newToken(TokenType.LBRACE, '{');
+        token = this._newToken(TokenType.LBRACE, '{');
+        break;
       case '}':
-        return newToken(TokenType.RBRACE, '}');
+        token = this._newToken(TokenType.RBRACE, '}');
+        break;
       case '+':
-        return newToken(TokenType.PLUS, '+');
+        token = this._newToken(TokenType.PLUS, '+');
+        break;
       case '-':
-        return newToken(TokenType.MINUS, '-');
+        token = this._newToken(TokenType.MINUS, '-');
+        break;
       case '*':
-        return newToken(TokenType.ASTERISK, '*');
+        token = this._newToken(TokenType.ASTERISK, '*');
+        break;
       case '/':
-        return newToken(TokenType.SLASH, '/');
+        token = this._newToken(TokenType.SLASH, '/');
+        break;
       case '<':
-        return newToken(TokenType.LT, '<');
+        token = this._newToken(TokenType.LT, '<');
+        break;
       case '>':
-        return newToken(TokenType.GT, '>');
+        token = this._newToken(TokenType.GT, '>');
+        break;
       case '=':
         if (this._peekChar() === '=') {
           const char = this._char;
 
           this._readChar();
 
-          return newToken(TokenType.EQ, `${char}${this._char}`);
+          token = this._newToken(TokenType.EQ, `${char}${this._char}`);
+        }
+        else {
+          token = this._newToken(TokenType.ASSIGN, '=');
         }
 
-        return newToken(TokenType.ASSIGN, '=');
+        break;
       case '!':
         if (this._peekChar() === '=') {
           const char = this._char;
 
           this._readChar();
 
-          return newToken(TokenType.NOT_EQ, `${char}${this._char}`);
+          token = this._newToken(TokenType.NOT_EQ, `${char}${this._char}`);
+        }
+        else {
+          token = this._newToken(TokenType.BANG, '!');
         }
 
-        return newToken(TokenType.BANG, '!');
-      default:
-        return null;
+        break;
     }
+
+    this._readChar();
+
+    return token;
   }
 
   _readLiteral () {
@@ -164,6 +210,30 @@ class Lexer {
     ) {
       this._readChar();
     }
+  }
+
+  _newToken (type, literal) {
+    return { type, literal: String(literal) };
+  }
+
+  _startToken () {
+    assert(!this._currToken, 'Can\'t start token.');
+
+    return this._currToken = {
+      start: [ this._lineNo, this._columnNo ],
+    };
+  }
+
+  _finishToken (type, literal) {
+    const token = Object.assign(this._currToken, this._newToken(type, literal), {
+      type,
+      literal: String(literal),
+      end: [ this._lineNo, this._columnNo ],
+    });
+
+    this._currToken = null;
+
+    return token;
   }
 }
 
