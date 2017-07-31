@@ -10,14 +10,14 @@ function checkToken (tests, { t, lexer }) {
       t.fail(`tests[${i}] - tokenType wrong, expected = ${expectedType}, got = ${type}`);
     }
     else {
-      t.pass(`tests[${i}] - tokenType OK`);
+      t.pass(`tests[${i}] - tokenType`);
     }
 
     if (literal !== expectedLiteral) {
       t.fail(`tests[${i}] - literal wrong, expected = ${expectedLiteral}, got = ${literal}`);
     }
     else {
-      t.pass(`tests[${i}] - literal OK`);
+      t.pass(`tests[${i}] - literal`);
     }
   });
 }
@@ -203,17 +203,17 @@ if (a > 10) {
     const { start, end } = lexer.nextToken();
 
     if (start[0] !== expectedStart[0] || start[1] !== expectedStart[1]) {
-      t.fail(`tests[${i}] - start positions wrong, expected = ${expectedStart}, got = ${start}`);
+      t.fail(`tests[${i}] - start position wrong, expected = ${expectedStart}, got = ${start}`);
     }
     else {
-      t.pass(`tests[${i}] - start positions OK`);
+      t.pass(`tests[${i}] - start position`);
     }
 
     if (end[0] !== expectedEnd[0] || end[1] !== expectedEnd[1]) {
-      t.fail(`tests[${i}] - end positions wrong, expected = ${expectedStart}, got = ${end}`);
+      t.fail(`tests[${i}] - end position wrong, expected = ${expectedStart}, got = ${end}`);
     }
     else {
-      t.pass(`tests[${i}] - end positions OK`);
+      t.pass(`tests[${i}] - end position`);
     }
   });
 
