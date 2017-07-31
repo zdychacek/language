@@ -5,6 +5,9 @@
   "directories": {
     "test": "test"
   },
+  "quokka": {
+    "babel": true
+  },
   "scripts": {
     "start": "babel-node ./src/repl.js",
     "lint": "eslint src/**/*.js tests/**/*.js",
