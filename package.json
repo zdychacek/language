@@ -2,7 +2,6 @@
   "name": "language",
   "version": "1.0.0",
   "description": "A simple language parser and interpreter.",
-  "main": "dist/index.js",
   "directories": {
     "test": "test"
   },
