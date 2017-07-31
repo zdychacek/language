@@ -1,7 +1,7 @@
-const test = require('tape');
+import test from 'tape';
 
-const { TokenType } = require('../src/token');
-const Lexer = require('../src/lexer');
+import { TokenType } from '../src/token';
+import Lexer from '../src/lexer';
 
 function checkToken (tests, { t, lexer }) {
   tests.forEach(([ expectedType, expectedLiteral ], i) => {
