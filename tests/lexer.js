@@ -2,29 +2,37 @@ const test = require('tape');
 const { TokenType } = require('../src/token');
 const Lexer = require('../src/lexer');
 
-function run (tests, { t, lexer }) {
-  tests.forEach(([ expectedType, expectedLiteral ]) => {
-    const { type, literal/*, start, end*/ } = lexer.nextToken();
+function checkToken (tests, { t, lexer }) {
+  tests.forEach(([ expectedType, expectedLiteral ], i) => {
+    const { type, literal } = lexer.nextToken();
 
-    //console.log(literal, start, end);
+    if (type !== expectedType) {
+      t.fail(`tests[${i}] - tokenType wrong, expected = ${expectedType}, got = ${type}`);
+    }
+    else {
+      t.pass(`tests[${i}] - tokenType OK`);
+    }
 
-    t.ok(type === expectedType);
-    t.ok(literal === expectedLiteral);
+    if (literal !== expectedLiteral) {
+      t.fail(`tests[${i}] - literal wrong, expected = ${expectedLiteral}, got = ${literal}`);
+    }
+    else {
+      t.pass(`tests[${i}] - literal OK`);
+    }
   });
 }
 
 test('#nextToken - basic', (t) => {
-  const input = `
-    let five = 5;
+  const input =
+`let five = 5;
 
-    let ten = 10;
+let ten = 10;
 
-    let add = fn(x, y) {
-      x + y;
-    };
+let add = fn(x, y) {
+  x + y;
+};
 
-    let result = add(five, ten);
-  `;
+let result = add(five, ten);`;
 
   const expected = [
     [ TokenType.LET, 'let' ],
@@ -68,16 +76,15 @@ test('#nextToken - basic', (t) => {
 
   const lexer = new Lexer(input);
 
-  run(expected, { t, lexer });
+  checkToken(expected, { t, lexer });
 
   t.end();
 });
 
 test('#nextToken - operators', (t) => {
-  const input = `
-    !-/*5;
-    5 < 10 > 5;
-  `;
+  const input =
+`!-/*5;
+5 < 10 > 5;`;
 
   const expected = [
     [ TokenType.BANG, '!' ],
@@ -97,19 +104,19 @@ test('#nextToken - operators', (t) => {
 
   const lexer = new Lexer(input);
 
-  run(expected, { t, lexer });
+  checkToken(expected, { t, lexer });
 
   t.end();
 });
 
 test('#nextToken - if/else', (t) => {
-  const input = `
-    if (5 < 10) {
-      return true;
-    } else {
-      return false;
-    }
-  `;
+  const input =
+`if (5 < 10) {
+  return true;
+}
+else {
+  return false;
+}`;
 
   const expected = [
     [ TokenType.IF, 'if' ],
@@ -134,16 +141,15 @@ test('#nextToken - if/else', (t) => {
 
   const lexer = new Lexer(input);
 
-  run(expected, { t, lexer });
+  checkToken(expected, { t, lexer });
 
   t.end();
 });
 
 test('#nextToken - multi char operators', (t) => {
-  const input = `
-    10 == 10;
-    10 != 9;
-  `;
+  const input =
+`10 == 10;
+10 != 9;`;
 
   const expected = [
     [ TokenType.INT, '10' ],
@@ -159,9 +165,57 @@ test('#nextToken - multi char operators', (t) => {
 
   const lexer = new Lexer(input);
 
-  run(expected, { t, lexer });
+  checkToken(expected, { t, lexer });
 
   t.end();
 });
 
-// TODO: write token start/end positon test
+test('#nextToken - token positions', (t) => {
+  const input =
+`let a = 10;
+
+if (a > 10) {
+  return false;
+}`;
+
+  const expected = [
+    [ [ 1, 1 ], [ 1, 4 ] ],   // let
+    [ [ 1, 5 ], [ 1, 6 ] ],   // a
+    [ [ 1, 7 ], [ 1, 8 ] ],   // =
+    [ [ 1, 9 ], [ 1, 11 ] ],  // 10
+    [ [ 1, 11 ], [ 1, 12 ] ], // ;
+    [ [ 3, 1 ], [ 3, 3 ] ],   // if
+    [ [ 3, 4 ], [ 3, 5 ] ],   // (
+    [ [ 3, 5 ], [ 3, 6 ] ],   // a
+    [ [ 3, 7 ], [ 3, 8 ] ],   // >
+    [ [ 3, 9 ], [ 3, 11 ] ],  // 10
+    [ [ 3, 11 ], [ 3, 12 ] ], // )
+    [ [ 3, 13 ], [ 3, 14 ] ], // {
+    [ [ 4, 3 ], [ 4, 9 ] ],   // return
+    [ [ 4, 10 ], [ 4, 15 ] ], // false
+    [ [ 4, 15 ], [ 4, 16 ] ], // ;
+    [ [ 5, 1 ], [ 5, 2 ] ],   // }
+  ];
+
+  const lexer = new Lexer(input);
+
+  expected.forEach(([ expectedStart, expectedEnd ], i) => {
+    const { start, end } = lexer.nextToken();
+
+    if (start[0] !== expectedStart[0] || start[1] !== expectedStart[1]) {
+      t.fail(`tests[${i}] - start positions wrong, expected = ${expectedStart}, got = ${start}`);
+    }
+    else {
+      t.pass(`tests[${i}] - start positions OK`);
+    }
+
+    if (end[0] !== expectedEnd[0] || end[1] !== expectedEnd[1]) {
+      t.fail(`tests[${i}] - end positions wrong, expected = ${expectedStart}, got = ${end}`);
+    }
+    else {
+      t.pass(`tests[${i}] - end positions OK`);
+    }
+  });
+
+  t.end();
+});

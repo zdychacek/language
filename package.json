@@ -7,6 +7,8 @@
     "test": "test"
   },
   "scripts": {
+    "lint": "eslint src/**/*.js tests/**/*.js",
+    "pretest": "npm run lint --silent",
     "test": "tape tests/**/*.js | tap-spec",
     "test-watch": "node --inspect --debug-brk $(npm bin)/tape-watch tests/**/*.js -o '| tap-spec --color'"
   },
@@ -29,6 +31,7 @@
   },
   "homepage": "https://github.com/zdychacek/language#readme",
   "devDependencies": {
+    "babel-eslint": "^7.2.3",
     "tap-spec": "^4.1.1",
     "tape": "^4.7.0",
     "tape-watch": "^2.3.0"
