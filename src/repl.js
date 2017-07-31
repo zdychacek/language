@@ -42,5 +42,5 @@ fs.readFileSync(REPL_HISTORY_FILE, 'utf8')
 
 // save command history
 server.on('exit', () => {
-  fs.appendFileSync(REPL_HISTORY_FILE, server.lines.join('\n'));
+  fs.appendFileSync(REPL_HISTORY_FILE, '\n' + server.lines.join('\n'));
 });
