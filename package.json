@@ -7,6 +7,7 @@
     "test": "test"
   },
   "scripts": {
+    "start": "node ./src/repl.js",
     "lint": "eslint src/**/*.js tests/**/*.js",
     "pretest": "npm run lint --silent",
     "test": "tape tests/**/*.js | tap-spec",
@@ -35,5 +36,8 @@
     "tap-spec": "^4.1.1",
     "tape": "^4.7.0",
     "tape-watch": "^2.3.0"
+  },
+  "dependencies": {
+    "touch": "^3.1.0"
   }
 }
