@@ -1,5 +1,5 @@
-import { TokenType } from './token';
-import ast from './ast';
+//import { TokenType } from './token';
+//import ast from './ast';
 
 class Parser {
   _currToken = null;
