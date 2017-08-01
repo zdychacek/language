@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import Lexer from '../src/lexer';
+import Lexer from '../../src/lexer';
 
 test('Lexer#nextToken - token positions', (t) => {
   const input = fs.readFileSync(path.join(__dirname, './fixtures/token_positions.lang'), 'utf8');
@@ -31,19 +31,10 @@ test('Lexer#nextToken - token positions', (t) => {
   expected.forEach(([ expectedStart, expectedEnd ], i) => {
     const { start, end } = lexer.nextToken();
 
-    if (start[0] !== expectedStart[0] || start[1] !== expectedStart[1]) {
-      t.fail(`tests[${i}] - start position wrong, expected = ${expectedStart}, got = ${start}`);
-    }
-    else {
-      t.pass(`tests[${i}] - start position`);
-    }
-
-    if (end[0] !== expectedEnd[0] || end[1] !== expectedEnd[1]) {
-      t.fail(`tests[${i}] - end position wrong, expected = ${expectedStart}, got = ${end}`);
-    }
-    else {
-      t.pass(`tests[${i}] - end position`);
-    }
+    t.equal(start[0], expectedStart[0], `tests[${i}] - start line position is ${expectedStart[0]}`);
+    t.equal(start[1], expectedStart[1], `tests[${i}] - start column position is ${expectedStart[1]}`);
+    t.equal(end[0], expectedEnd[0], `tests[${i}] - end line position is ${expectedEnd[0]}`);
+    t.equal(end[1], expectedEnd[1], `tests[${i}] - end column position is ${expectedEnd[1]}`);
   });
 
   t.end();

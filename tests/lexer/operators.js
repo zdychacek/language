@@ -2,11 +2,11 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import { TokenType } from '../src/token';
-import Lexer from '../src/lexer';
+import { TokenType } from '../../src/token';
+import Lexer from '../../src/lexer';
 import { checkToken } from './utils';
 
-test('Lexer#nextToken - basic', (t) => {
+test('Lexer#nextToken - operators', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/operators.lang'), 'utf8');
 
   const expected = [

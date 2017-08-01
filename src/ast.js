@@ -38,4 +38,10 @@ export class LetStatement extends Statement {
 
 export class Identifier extends Expression {
   value = '';
+
+  constructor (token, value) {
+    super(token);
+
+    this.value = value;
+  }
 }
