@@ -17,15 +17,14 @@ function testLetStatement (t, stmt, expected) {
 test('Parser - LetStatement', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/let_statements.lang'), 'utf8');
 
+  const expected = [ 'x', 'y', 'foobar' ];
+
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-
   const program = parser.parseProgram();
 
-  t.ok(program, 'ParseProgram() is not null');
+  t.notEqual(program, null, 'ParseProgram() is not null');
   t.equal(program.statements.length, 3, 'program.statements contains 3 statements');
-
-  const expected = [ 'x', 'y', 'foobar' ];
 
   expected.forEach((value, i) => {
     const stmt = program.statements[i];
