@@ -8,6 +8,10 @@ class Node {
   tokenLiteral () {
     return this.token.literal;
   }
+
+  toString () {
+    return '<abstract Node>';
+  }
 }
 
 export class Statement extends Node {}
@@ -15,33 +19,108 @@ export class Statement extends Node {}
 export class Expression extends Node {}
 
 export class Program extends Node {
-  _statements = [];
-
-  constructor () {
+  constructor (statements) {
     super();
+
+    this.statements = statements;
   }
 
   tokenLiteral () {
-    if (this._statements.length) {
-      return this._statements[0].tokenLiteral();
+    if (this.statements.length) {
+      return this.statements[0].tokenLiteral();
     }
     else {
       return '';
     }
   }
-}
 
-export class LetStatement extends Statement {
-  identifier = null;
-  expression = null;
+  toString () {
+    return this.statements
+      .map((stmt) => stmt.toString())
+      .join('\n');
+  }
 }
 
 export class Identifier extends Expression {
-  value = '';
-
   constructor (token, value) {
     super(token);
 
     this.value = value;
+  }
+
+  toString () {
+    return this.value;
+  }
+}
+
+export class LetStatement extends Statement {
+  constructor (token, name, expression) {
+    super(token);
+
+    this.name = name;
+    this.expression = expression;
+  }
+
+  toString () {
+    let out = `${this.tokenLiteral()} `;
+
+    out += this.name.toString();
+    out += ' = ';
+
+    if (this.expression) {
+      out += this.expression.toString();
+    }
+
+    out += ';';
+
+    return out;
+  }
+}
+
+export class ReturnStatement extends Statement {
+  constructor (token, returnValue) {
+    super(token);
+
+    this.returnValue = returnValue;
+  }
+
+  toString () {
+    let out = `${this.tokenLiteral()} `;
+
+    if (this.returnValue) {
+      out += this.returnValue.toString();
+    }
+
+    out += ';';
+
+    return out;
+  }
+}
+
+export class ExpressionStatement extends Statement {
+  constructor (token, returnValue) {
+    super(token);
+
+    this.expression = returnValue;
+  }
+
+  toString () {
+    if (this.expression) {
+      return this.expression.toString();
+    }
+
+    return '';
+  }
+}
+
+export class IntegerLiteral extends Expression {
+  constructor (token, value) {
+    super(token);
+
+    this.value = value;
+  }
+
+  toString () {
+    return this.token.literal;
   }
 }

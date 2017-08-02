@@ -62,3 +62,13 @@ export const KeywordType = {
   true: TokenType.TRUE,
   false: TokenType.FALSE,
 };
+
+export const Precendence = {
+  LOWEST: 0,
+  EQUALS: 1,       // ==
+  LESSGREATER: 2,  // > or <
+  SUM: 3,          // +
+  PRODUCT: 4,      // *
+  PREFIX: 5,       // -X or !X
+  CALL: 6,         // myFunction(X)
+};
