@@ -5,7 +5,7 @@ import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import { checkParserErrors, testIntegerLiteral } from './utils';
 
-test('Integer literal expression', (t) => {
+test('Parser - Prefix expressions', (t) => {
   const tests = [
     [ '!5', '!', 5 ],
     [ '-15', '-', 15 ],
