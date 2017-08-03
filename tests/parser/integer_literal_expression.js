@@ -5,7 +5,7 @@ import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import { checkParserErrors } from './utils';
 
-test('Integer literal expression', (t) => {
+test('Parser - Integer literal expression', (t) => {
   const input = '5;';
 
   const lexer = new Lexer(input);

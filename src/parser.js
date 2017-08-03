@@ -1,4 +1,8 @@
-import { TokenType, Precendence } from './token';
+import {
+  TokenType,
+  Precedence,
+  TokenPrecedence,
+} from './token';
 import * as ast from './ast';
 
 class Parser {
@@ -16,10 +20,21 @@ class Parser {
     this.nextToken();
     this.nextToken();
 
-    this._registerPrefix(TokenType.IDENT, this.parseIdentifier);
-    this._registerPrefix(TokenType.INT, this.parseIntegerLiteral);
-    this._registerPrefix(TokenType.BANG, this.parsePrefixExpression);
-    this._registerPrefix(TokenType.MINUS, this.parsePrefixExpression);
+    // prefix parsers
+    this._registerPrefixParser(TokenType.IDENT, this.parseIdentifier);
+    this._registerPrefixParser(TokenType.INT, this.parseIntegerLiteral);
+    this._registerPrefixParser(TokenType.BANG, this.parsePrefixExpression);
+    this._registerPrefixParser(TokenType.MINUS, this.parsePrefixExpression);
+
+    // infix parsers
+    this._registerInfixParser(TokenType.PLUS, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.MINUS, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.SLASH, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.ASTERISK, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.EQ, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.NOT_EQ, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.LT, this.parseInfixExpression);
+    this._registerInfixParser(TokenType.GT, this.parseInfixExpression);
   }
 
   nextToken () {
@@ -97,7 +112,7 @@ class Parser {
   parseExpressionStatement () {
     const stmt = new ast.ExpressionStatement(this._currToken);
 
-    stmt.expression = this.parseExpression(Precendence.LOWEST);
+    stmt.expression = this.parseExpression(Precedence.LOWEST);
 
     if (this._peekTokenIs(TokenType.SEMICOLON)) {
       this.nextToken();
@@ -106,7 +121,7 @@ class Parser {
     return stmt;
   }
 
-  parseExpression () {
+  parseExpression (precedence) {
     const prefix = this._prefixParsers[this._currToken.type];
 
     if (!prefix) {
@@ -115,7 +130,19 @@ class Parser {
       return null;
     }
 
-    const leftExpr = prefix();
+    let leftExpr = prefix();
+
+    while (!this._peekTokenIs(TokenType.SEMICOLON) && precedence < this._peekPrecedence()) {
+      const infix = this._infixParsers[this._peekToken.type];
+
+      if (!infix) {
+        return null;
+      }
+
+      this.nextToken();
+
+      leftExpr = infix(leftExpr);
+    }
 
     return leftExpr;
   }
@@ -144,7 +171,18 @@ class Parser {
 
     this.nextToken();
 
-    expression.right = this.parseExpression(Precendence.PREFIX);
+    expression.right = this.parseExpression(Precedence.PREFIX);
+
+    return expression;
+  }
+
+  parseInfixExpression = (left) => {
+    const expression = new ast.InfixExpression(this._currToken, left, this._currToken.literal);
+    const precedence = this._currPrecedence();
+
+    this.nextToken();
+
+    expression.right = this.parseExpression(precedence);
 
     return expression;
   }
@@ -176,12 +214,20 @@ class Parser {
     this._errors.push(msg);
   }
 
-  _registerPrefix (tokenType, parserFn) {
+  _registerPrefixParser (tokenType, parserFn) {
     this._prefixParsers[tokenType] = parserFn;
   }
 
-  _registerInfix (tokenType, parserFn) {
+  _registerInfixParser (tokenType, parserFn) {
     this._infixParsers[tokenType] = parserFn;
+  }
+
+  _peekPrecedence () {
+    return TokenPrecedence[this._peekToken.type] || Precedence.LOWEST;
+  }
+
+  _currPrecedence () {
+    return TokenPrecedence[this._currToken.type] || Precedence.LOWEST;
   }
 }
 

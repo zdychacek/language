@@ -137,3 +137,17 @@ export class PrefixExpression extends Expression {
     return `(${this.operator}${this.right.toString()})`;
   }
 }
+
+export class InfixExpression extends Expression {
+  constructor (token, left, operator, right) {
+    super(token);
+
+    this.left = left;
+    this.operator = operator;
+    this.right = right;
+  }
+
+  toString () {
+    return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
+  }
+}

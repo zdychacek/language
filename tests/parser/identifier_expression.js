@@ -5,7 +5,7 @@ import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import { checkParserErrors } from './utils';
 
-test('Identifier expression', (t) => {
+test('Parser - Identifier expression', (t) => {
   const input = 'foobar';
 
   const lexer = new Lexer(input);

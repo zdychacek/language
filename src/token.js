@@ -63,7 +63,7 @@ export const KeywordType = {
   false: TokenType.FALSE,
 };
 
-export const Precendence = {
+export const Precedence = {
   LOWEST: 0,
   EQUALS: 1,       // ==
   LESSGREATER: 2,  // > or <
@@ -71,4 +71,15 @@ export const Precendence = {
   PRODUCT: 4,      // *
   PREFIX: 5,       // -X or !X
   CALL: 6,         // myFunction(X)
+};
+
+export const TokenPrecedence = {
+  [TokenType.EQ]: Precedence.EQUALS,
+  [TokenType.NOT_EQ]: Precedence.EQUALS,
+  [TokenType.LT]: Precedence.LESSGREATER,
+  [TokenType.GT]: Precedence.LESSGREATER,
+  [TokenType.PLUS]: Precedence.SUM,
+  [TokenType.MINUS]: Precedence.SUM,
+  [TokenType.SLASH]: Precedence.PRODUCT,
+  [TokenType.ASTERISK]: Precedence.PRODUCT,
 };
