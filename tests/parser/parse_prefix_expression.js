@@ -3,18 +3,12 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
-import { checkParserErrors } from './utils';
+import { checkParserErrors, testIntegerLiteral } from './utils';
 
-function testIntegerLiteral (t, literal, value) {
-  t.ok(literal instanceof ast.IntegerLiteral, 'literal is ast.IntegerLiteral');
-  t.equal(literal.value, value, `integer.value is ${value}`);
-  t.equal(literal.tokenLiteral(), value.toString(), `integer.tokenLiteral() is ${value}`);
-}
-
-test.skip('Integer literal expression', (t) => {
+test('Integer literal expression', (t) => {
   const tests = [
-    [ '!5', '!', '5' ],
-    [ '-15', '-', '15' ],
+    [ '!5', '!', 5 ],
+    [ '-15', '-', 15 ],
   ];
 
   tests.forEach(([ input, operator, integerValue ]) => {
@@ -33,9 +27,9 @@ test.skip('Integer literal expression', (t) => {
     const expression = stmt.expression;
 
     t.ok(expression instanceof ast.PrefixExpression, 'expression is ast.PrefixExpression');
-    t.ok(expression.operator, operator, 'expression has right operator');
+    t.equal(expression.operator, operator, 'expression has right operator');
 
-    testIntegerLiteral(t, expression.Right, integerValue);
+    testIntegerLiteral(t, expression.right, integerValue);
   });
 
   t.end();

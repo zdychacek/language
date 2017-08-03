@@ -124,3 +124,16 @@ export class IntegerLiteral extends Expression {
     return this.token.literal;
   }
 }
+
+export class PrefixExpression extends Expression {
+  constructor (token, operator, right) {
+    super(token);
+
+    this.operator = operator;
+    this.right = right;
+  }
+
+  toString () {
+    return `(${this.operator}${this.right.toString()})`;
+  }
+}

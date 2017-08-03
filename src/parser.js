@@ -18,6 +18,8 @@ class Parser {
 
     this._registerPrefix(TokenType.IDENT, this.parseIdentifier);
     this._registerPrefix(TokenType.INT, this.parseIntegerLiteral);
+    this._registerPrefix(TokenType.BANG, this.parsePrefixExpression);
+    this._registerPrefix(TokenType.MINUS, this.parsePrefixExpression);
   }
 
   nextToken () {
@@ -108,6 +110,8 @@ class Parser {
     const prefix = this._prefixParsers[this._currToken.type];
 
     if (!prefix) {
+      this._errors.push(`no prefix parse function for ${this._currToken.type} found`);
+
       return null;
     }
 
@@ -133,6 +137,16 @@ class Parser {
     literal.value = value;
 
     return literal;
+  }
+
+  parsePrefixExpression = () => {
+    const expression = new ast.PrefixExpression(this._currToken, this._currToken.literal);
+
+    this.nextToken();
+
+    expression.right = this.parseExpression(Precendence.PREFIX);
+
+    return expression;
   }
 
   _currTokenIs (type) {

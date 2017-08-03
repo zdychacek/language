@@ -201,7 +201,7 @@ class Lexer {
   }
 
   _isDigit (char) {
-    return char >= '0' && char <= '9';
+    return char !== null && char >= '0' && char <= '9';
   }
 
   _skipWhitespace () {
