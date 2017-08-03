@@ -37,7 +37,7 @@ export class Program extends Node {
   toString () {
     return this.statements
       .map((stmt) => stmt.toString())
-      .join('\n');
+      .join('');
   }
 }
 
@@ -139,7 +139,7 @@ export class PrefixExpression extends Expression {
 }
 
 export class InfixExpression extends Expression {
-  constructor (token, left, operator, right) {
+  constructor (token, left, operator, right) { // eslint-disable-line max-params
     super(token);
 
     this.left = left;
