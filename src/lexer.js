@@ -22,31 +22,6 @@ class Lexer {
     this._input = input;
   }
 
-  _getChar () {
-    const char = this._input[this._index];
-
-    if (this._isLineTerminator(char)) {
-      this._lineNo++;
-      this._columnNo = 1;
-    }
-    else {
-      this._columnNo++;
-    }
-
-    this._index++;
-
-    return char;
-  }
-
-  _peekChar (distance = 0) {
-    if (this._index >= this._input.length) {
-      return null;
-    }
-    else {
-      return this._input[this._index + distance];
-    }
-  }
-
   nextToken () {
     this._skipWhitespace();
 
@@ -83,6 +58,31 @@ class Lexer {
     }
     else {
       return this._finishToken(TokenType.ILLEGAL, char);
+    }
+  }
+
+  _getChar () {
+    const char = this._input[this._index];
+
+    if (this._isLineTerminator(char)) {
+      this._lineNo++;
+      this._columnNo = 1;
+    }
+    else {
+      this._columnNo++;
+    }
+
+    this._index++;
+
+    return char;
+  }
+
+  _peekChar (distance = 0) {
+    if (this._index >= this._input.length) {
+      return null;
+    }
+    else {
+      return this._input[this._index + distance];
     }
   }
 
