@@ -1,66 +1,39 @@
 export const TokenType = {
-  ILLEGAL: 'ILLEGAL',
+  IDENT: 'IDENT',
+  LITERAL: 'LITERAL',
+  NUMBER: 'NUMBER',
+  BOOLEAN: 'BOOLEAN',
+  KEYWORD: 'KEYWORD',
+  PUNCTUATOR: 'PUNCTUATOR',
   EOF: 'EOF',
+  ILLEGAL: 'ILLEGAL',
+};
 
-  // Identifiers + literals
-  IDENT: 'IDENT', // add, foobar, x, y, ...
-  INT: 'INT', // 1343456
-
-  // Operators
-  BANG: '!',
+export const Punctuator = {
+  SEMICOLON: ';',
+  LPAREN: '(',
+  RPAREN: ')',
+  COMMA: ',',
+  LBRACE: '{',
+  RBRACE: '}',
   ASSIGN: '=',
+  EQ: '==',
+  NOT_EQ: '!=',
+  BANG: '!',
   PLUS: '+',
   MINUS: '-',
   ASTERISK: '*',
   SLASH: '/',
   LT: '<',
   GT: '>',
-  EQ: '==',
-  NOT_EQ: '!=',
-
-  // Delimiters
-  COMMA: ',',
-  SEMICOLON: ';',
-  LPAREN: '(',
-  RPAREN: ')',
-  LBRACE: '{',
-  RBRACE: '}',
-
-  // Keywords
-  FUNCTION: 'FUNCTION',
-  LET: 'LET',
-  IF: 'IF',
-  ELSE: 'ELSE',
-  RETURN: 'RETURN',
-  TRUE: 'TRUE',
-  FALSE: 'FALSE',
 };
 
-export const PunctuatorType = {
-  ';': TokenType.SEMICOLON,
-  '(': TokenType.LPAREN,
-  ')': TokenType.RPAREN,
-  ',': TokenType.COMMA,
-  '{': TokenType.LBRACE,
-  '}': TokenType.RBRACE,
-  '=': TokenType.ASSIGN,
-  '!': TokenType.BANG,
-  '+': TokenType.PLUS,
-  '-': TokenType.MINUS,
-  '*': TokenType.ASTERISK,
-  '/': TokenType.SLASH,
-  '<': TokenType.LT,
-  '>': TokenType.GT,
-};
-
-export const KeywordType = {
-  fn: TokenType.FUNCTION,
-  let: TokenType.LET,
-  if: TokenType.IF,
-  else: TokenType.ELSE,
-  return: TokenType.RETURN,
-  true: TokenType.TRUE,
-  false: TokenType.FALSE,
+export const Keyword = {
+  FN: 'fn',
+  LET: 'let',
+  IF: 'if',
+  ELSE: 'else',
+  RETURN: 'return',
 };
 
 export const Precedence = {
@@ -74,14 +47,14 @@ export const Precedence = {
 };
 
 export const TokenPrecedence = {
-  [TokenType.EQ]: Precedence.EQUALS,
-  [TokenType.NOT_EQ]: Precedence.EQUALS,
-  [TokenType.LT]: Precedence.LESSGREATER,
-  [TokenType.GT]: Precedence.LESSGREATER,
-  [TokenType.PLUS]: Precedence.SUM,
-  [TokenType.MINUS]: Precedence.SUM,
-  [TokenType.SLASH]: Precedence.PRODUCT,
-  [TokenType.ASTERISK]: Precedence.PRODUCT,
+  [Punctuator.EQ]: Precedence.EQUALS,
+  [Punctuator.NOT_EQ]: Precedence.EQUALS,
+  [Punctuator.LT]: Precedence.LESSGREATER,
+  [Punctuator.GT]: Precedence.LESSGREATER,
+  [Punctuator.PLUS]: Precedence.SUM,
+  [Punctuator.MINUS]: Precedence.SUM,
+  [Punctuator.SLASH]: Precedence.PRODUCT,
+  [Punctuator.ASTERISK]: Precedence.PRODUCT,
 };
 
 export class Token {

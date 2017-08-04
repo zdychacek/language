@@ -10,18 +10,18 @@ test('Lexer#nextToken - operators', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/operators.lang'), 'utf8');
 
   const expected = [
-    [ TokenType.BANG, '!' ],
-    [ TokenType.MINUS, '-' ],
-    [ TokenType.SLASH, '/' ],
-    [ TokenType.ASTERISK, '*' ],
-    [ TokenType.INT, '5' ],
-    [ TokenType.SEMICOLON, ';' ],
-    [ TokenType.INT, '5' ],
-    [ TokenType.LT, '<' ],
-    [ TokenType.INT, '10' ],
-    [ TokenType.GT, '>' ],
-    [ TokenType.INT, '5' ],
-    [ TokenType.SEMICOLON, ';' ],
+    [ TokenType.PUNCTUATOR, '!' ],
+    [ TokenType.PUNCTUATOR, '-' ],
+    [ TokenType.PUNCTUATOR, '/' ],
+    [ TokenType.PUNCTUATOR, '*' ],
+    [ TokenType.NUMBER, '5' ],
+    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.NUMBER, '5' ],
+    [ TokenType.PUNCTUATOR, '<' ],
+    [ TokenType.NUMBER, '10' ],
+    [ TokenType.PUNCTUATOR, '>' ],
+    [ TokenType.NUMBER, '5' ],
+    [ TokenType.PUNCTUATOR, ';' ],
     [ TokenType.EOF, '' ],
   ];
 

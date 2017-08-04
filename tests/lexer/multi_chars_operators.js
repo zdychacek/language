@@ -10,14 +10,14 @@ test('Lexer#nextToken - multi char operators', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/multi_chars_operators.lang'), 'utf8');
 
   const expected = [
-    [ TokenType.INT, '10' ],
-    [ TokenType.EQ, '==' ],
-    [ TokenType.INT, '10' ],
-    [ TokenType.SEMICOLON, ';' ],
-    [ TokenType.INT, '10' ],
-    [ TokenType.NOT_EQ, '!=' ],
-    [ TokenType.INT, '9' ],
-    [ TokenType.SEMICOLON, ';' ],
+    [ TokenType.NUMBER, '10' ],
+    [ TokenType.PUNCTUATOR, '==' ],
+    [ TokenType.NUMBER, '10' ],
+    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.NUMBER, '10' ],
+    [ TokenType.PUNCTUATOR, '!=' ],
+    [ TokenType.NUMBER, '9' ],
+    [ TokenType.PUNCTUATOR, ';' ],
     [ TokenType.EOF, '' ],
   ];
 

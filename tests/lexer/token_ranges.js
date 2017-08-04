@@ -4,7 +4,7 @@ import test from 'tape';
 
 import Lexer from '../../src/lexer';
 
-test.only('Lexer#nextToken - token positions', (t) => {
+test('Lexer#nextToken - token positions', (t) => {
   const input = fs.readFileSync(path.join(__dirname, './fixtures/token_ranges.lang'), 'utf8');
 
   const expected = [

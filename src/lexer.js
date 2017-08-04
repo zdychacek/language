@@ -3,17 +3,15 @@ import assert from 'assert';
 import {
   Token,
   TokenType,
-  PunctuatorType,
-  KeywordType,
+  Punctuator,
+  Keyword,
  } from './token';
 
 class Lexer {
   _input = '';
-  _position = 0;
-  _readPosition = 0;
-  _char = null;
+  _index = 0;
 
-  _columnNo = 0;
+  _columnNo = 1;
   _lineNo = 1;
 
   // start position of currently built token
@@ -22,22 +20,12 @@ class Lexer {
 
   constructor (input) {
     this._input = input;
-
-    this._readChar();
   }
 
-  _readChar () {
-    if (this._readPosition >= this._input.length) {
-      this._char = null;
-    }
-    else {
-      this._char = this._input[this._readPosition];
-    }
+  _getChar () {
+    const char = this._input[this._index];
 
-    const prevChar = this._input[this._readPosition - 1];
-
-    // update source location
-    if (this._isLineTerminator(prevChar)) {
+    if (this._isLineTerminator(char)) {
       this._lineNo++;
       this._columnNo = 1;
     }
@@ -45,8 +33,18 @@ class Lexer {
       this._columnNo++;
     }
 
-    this._position = this._readPosition;
-    this._readPosition++;
+    this._index++;
+
+    return char;
+  }
+
+  _peekChar (distance = 0) {
+    if (this._index >= this._input.length) {
+      return null;
+    }
+    else {
+      return this._input[this._index + distance];
+    }
   }
 
   nextToken () {
@@ -55,14 +53,10 @@ class Lexer {
     // start token
     this._startToken();
 
-    const char = this._char;
+    const char = this._peekChar();
 
-    if (char === null) {
-      const token = this._finishToken(TokenType.EOF, '');
-
-      this._readChar();
-
-      return token;
+    if (this._isEOF()) {
+      return this._finishToken(TokenType.EOF, '');
     }
     else if (this._isPunctuator(char)) {
       const { type, literal } = this._readPunctuator();
@@ -71,127 +65,85 @@ class Lexer {
     }
     else if (this._isLetter(char)) {
       const literal = this._readLiteral();
+      let type = TokenType.IDENT;
 
-      return this._finishToken(KeywordType[literal] || TokenType.IDENT, literal);
+      if (this._isKeyword(literal)) {
+        type = TokenType.KEYWORD;
+      }
+      else if (this._isBoolean(literal)) {
+        type = TokenType.BOOLEAN;
+      }
+
+      return this._finishToken(type, literal);
     }
     else if (this._isDigit(char)) {
       const literal = this._readDigit();
 
-      return this._finishToken(TokenType.INT, literal);
+      return this._finishToken(TokenType.NUMBER, literal);
     }
     else {
-      const token = this._finishToken(TokenType.ILLEGAL, char);
-
-      this._readChar();
-
-      return token;
-    }
-  }
-
-  _peekChar () {
-    if (this._readPosition >= this._input.length) {
-      return null;
-    }
-    else {
-      return this._input[this._readPosition];
+      return this._finishToken(TokenType.ILLEGAL, char);
     }
   }
 
   _readPunctuator () {
-    let token = null;
+    let punctuator = '';
 
-    switch (this._char) {
-      case ';':
-        token = new Token(TokenType.SEMICOLON, ';');
-        break;
-      case '(':
-        token = new Token(TokenType.LPAREN, '(');
-        break;
-      case ')':
-        token = new Token(TokenType.RPAREN, ')');
-        break;
-      case ',':
-        token = new Token(TokenType.COMMA, ',');
-        break;
-      case '{':
-        token = new Token(TokenType.LBRACE, '{');
-        break;
-      case '}':
-        token = new Token(TokenType.RBRACE, '}');
-        break;
-      case '+':
-        token = new Token(TokenType.PLUS, '+');
-        break;
-      case '-':
-        token = new Token(TokenType.MINUS, '-');
-        break;
-      case '*':
-        token = new Token(TokenType.ASTERISK, '*');
-        break;
-      case '/':
-        token = new Token(TokenType.SLASH, '/');
-        break;
-      case '<':
-        token = new Token(TokenType.LT, '<');
-        break;
-      case '>':
-        token = new Token(TokenType.GT, '>');
-        break;
-      case '=':
+    switch (this._peekChar()) {
+      case Punctuator.SEMICOLON:
+      case Punctuator.LPAREN:
+      case Punctuator.RPAREN:
+      case Punctuator.COMMA:
+      case Punctuator.LBRACE:
+      case Punctuator.RBRACE:
+      case Punctuator.PLUS:
+      case Punctuator.MINUS:
+      case Punctuator.ASTERISK:
+      case Punctuator.SLASH:
+      case Punctuator.LT:
+      case Punctuator.GT:
+        return new Token(TokenType.PUNCTUATOR, this._getChar());
+      case Punctuator.ASSIGN:
+        punctuator = this._getChar();
+
         if (this._peekChar() === '=') {
-          const char = this._char;
-
-          this._readChar();
-
-          token = new Token(TokenType.EQ, `${char}${this._char}`);
-        }
-        else {
-          token = new Token(TokenType.ASSIGN, '=');
+          punctuator += this._getChar();
         }
 
-        break;
-      case '!':
+        return new Token(TokenType.PUNCTUATOR, punctuator);
+      case Punctuator.BANG:
+        punctuator = this._getChar();
+
         if (this._peekChar() === '=') {
-          const char = this._char;
-
-          this._readChar();
-
-          token = new Token(TokenType.NOT_EQ, `${char}${this._char}`);
-        }
-        else {
-          token = new Token(TokenType.BANG, '!');
+          punctuator += this._getChar();
         }
 
-        break;
+        return new Token(TokenType.PUNCTUATOR, punctuator);
     }
-
-    this._readChar();
-
-    return token;
   }
 
   _readLiteral () {
-    const position = this._position;
+    let literal = '';
 
-    while (this._isLetter(this._char)) {
-      this._readChar();
+    while (this._isLetter(this._peekChar())) {
+      literal += this._getChar();
     }
 
-    return this._input.slice(position, this._readPosition - 1);
+    return literal;
   }
 
   _readDigit () {
-    const position = this._position;
+    let literal = '';
 
-    while (this._isDigit(this._char)) {
-      this._readChar();
+    while (this._isDigit(this._peekChar())) {
+      literal += this._getChar();
     }
 
-    return this._input.slice(position, this._readPosition - 1);
+    return literal;
   }
 
   _isPunctuator (char) {
-    return Object.keys(PunctuatorType).includes(char);
+    return Object.values(Punctuator).join('').includes(char);
   }
 
   _isLetter (char) {
@@ -210,21 +162,32 @@ class Lexer {
     return char === '\n';
   }
 
+  _isWhitespace (char) {
+    return /\s/.test(char);
+  }
+
+  _isEOF () {
+    return this._index >= this._input.length;
+  }
+
+  _isKeyword (literal) {
+    return Object.values(Keyword).includes(literal);
+  }
+
+  _isBoolean (literal) {
+    return [ 'true', 'false' ].includes(literal);
+  }
+
   _skipWhitespace () {
-    while (
-      this._char === ' ' ||
-      this._char === '\t' ||
-      this._char === '\n' ||
-      this._char === '\r'
-    ) {
-      this._readChar();
+    while (this._isWhitespace(this._peekChar())) {
+      this._getChar();
     }
   }
 
   _startToken () {
     assert(!this._currTokenStart, 'Can\'t start token.');
 
-    this._currTokenStartRange = this._position;
+    this._currTokenStartRange = this._index;
 
     return this._currTokenStart = [ this._lineNo, this._columnNo ];
   }
@@ -237,7 +200,7 @@ class Lexer {
       literal,
       this._currTokenStart,
       [ this._lineNo, this._columnNo ],
-      [ this. _currTokenStartRange, this._position ],
+      [ this. _currTokenStartRange, this._index ],
     );
 
     this._currTokenStart = null;
