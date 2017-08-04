@@ -1,6 +1,7 @@
 import assert from 'assert';
 
 import {
+  Token,
   TokenType,
   PunctuatorType,
   KeywordType,
@@ -15,8 +16,9 @@ class Lexer {
   _columnNo = 0;
   _lineNo = 1;
 
-  // currently built token
-  _currToken = null;
+  // start position of currently built token
+  _currTokenStart = null;
+  _currTokenStartRange = null;
 
   constructor (input) {
     this._input = input;
@@ -35,7 +37,7 @@ class Lexer {
     const prevChar = this._input[this._readPosition - 1];
 
     // update source location
-    if (prevChar === '\n') {
+    if (this._isLineTerminator(prevChar)) {
       this._lineNo++;
       this._columnNo = 1;
     }
@@ -100,40 +102,40 @@ class Lexer {
 
     switch (this._char) {
       case ';':
-        token = this._newToken(TokenType.SEMICOLON, ';');
+        token = new Token(TokenType.SEMICOLON, ';');
         break;
       case '(':
-        token = this._newToken(TokenType.LPAREN, '(');
+        token = new Token(TokenType.LPAREN, '(');
         break;
       case ')':
-        token = this._newToken(TokenType.RPAREN, ')');
+        token = new Token(TokenType.RPAREN, ')');
         break;
       case ',':
-        token = this._newToken(TokenType.COMMA, ',');
+        token = new Token(TokenType.COMMA, ',');
         break;
       case '{':
-        token = this._newToken(TokenType.LBRACE, '{');
+        token = new Token(TokenType.LBRACE, '{');
         break;
       case '}':
-        token = this._newToken(TokenType.RBRACE, '}');
+        token = new Token(TokenType.RBRACE, '}');
         break;
       case '+':
-        token = this._newToken(TokenType.PLUS, '+');
+        token = new Token(TokenType.PLUS, '+');
         break;
       case '-':
-        token = this._newToken(TokenType.MINUS, '-');
+        token = new Token(TokenType.MINUS, '-');
         break;
       case '*':
-        token = this._newToken(TokenType.ASTERISK, '*');
+        token = new Token(TokenType.ASTERISK, '*');
         break;
       case '/':
-        token = this._newToken(TokenType.SLASH, '/');
+        token = new Token(TokenType.SLASH, '/');
         break;
       case '<':
-        token = this._newToken(TokenType.LT, '<');
+        token = new Token(TokenType.LT, '<');
         break;
       case '>':
-        token = this._newToken(TokenType.GT, '>');
+        token = new Token(TokenType.GT, '>');
         break;
       case '=':
         if (this._peekChar() === '=') {
@@ -141,10 +143,10 @@ class Lexer {
 
           this._readChar();
 
-          token = this._newToken(TokenType.EQ, `${char}${this._char}`);
+          token = new Token(TokenType.EQ, `${char}${this._char}`);
         }
         else {
-          token = this._newToken(TokenType.ASSIGN, '=');
+          token = new Token(TokenType.ASSIGN, '=');
         }
 
         break;
@@ -154,10 +156,10 @@ class Lexer {
 
           this._readChar();
 
-          token = this._newToken(TokenType.NOT_EQ, `${char}${this._char}`);
+          token = new Token(TokenType.NOT_EQ, `${char}${this._char}`);
         }
         else {
-          token = this._newToken(TokenType.BANG, '!');
+          token = new Token(TokenType.BANG, '!');
         }
 
         break;
@@ -204,6 +206,10 @@ class Lexer {
     return char !== null && char >= '0' && char <= '9';
   }
 
+  _isLineTerminator (char) {
+    return char === '\n';
+  }
+
   _skipWhitespace () {
     while (
       this._char === ' ' ||
@@ -215,26 +221,26 @@ class Lexer {
     }
   }
 
-  _newToken (type, literal) {
-    return { type, literal: String(literal) };
-  }
-
   _startToken () {
-    assert(!this._currToken, 'Can\'t start token.');
+    assert(!this._currTokenStart, 'Can\'t start token.');
 
-    return this._currToken = {
-      start: [ this._lineNo, this._columnNo ],
-    };
+    this._currTokenStartRange = this._position;
+
+    return this._currTokenStart = [ this._lineNo, this._columnNo ];
   }
 
   _finishToken (type, literal) {
-    const token = Object.assign(this._currToken, this._newToken(type, literal), {
-      type,
-      literal: String(literal),
-      end: [ this._lineNo, this._columnNo ],
-    });
+    assert(this._currTokenStart, 'Can\'t finish token.');
 
-    this._currToken = null;
+    const token = new Token(
+      type,
+      literal,
+      this._currTokenStart,
+      [ this._lineNo, this._columnNo ],
+      [ this. _currTokenStartRange, this._position ],
+    );
+
+    this._currTokenStart = null;
 
     return token;
   }

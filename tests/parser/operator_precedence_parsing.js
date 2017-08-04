@@ -27,9 +27,7 @@ test('Parser - Operator Precedence Parsing', (t) => {
 
     checkParserErrors(t, parser);
 
-    const actual = program.toString();
-
-    t.equal(actual, expected);
+    t.equal(program.toString(), expected);
   });
 
   t.end();

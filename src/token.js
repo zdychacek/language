@@ -83,3 +83,13 @@ export const TokenPrecedence = {
   [TokenType.SLASH]: Precedence.PRODUCT,
   [TokenType.ASTERISK]: Precedence.PRODUCT,
 };
+
+export class Token {
+  constructor (type, literal, start, end, range) { // eslint-disable-line max-params
+    this.type = type;
+    this.literal = literal;
+    this.start = start;
+    this.end = end;
+    this.range = range;
+  }
+}

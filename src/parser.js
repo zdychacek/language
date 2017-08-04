@@ -88,9 +88,11 @@ class Parser {
       return null;
     }
 
-    // TODO: We're skipping the expressions until we
-    // encounter a semicolon
-    while (!this._currTokenIs(TokenType.SEMICOLON)) {
+    this.nextToken();
+
+    stmt.returnValue = this.parseExpression(Precedence.LOWEST);
+
+    if (this._peekTokenIs(TokenType.SEMICOLON)) {
       this.nextToken();
     }
 
@@ -102,7 +104,9 @@ class Parser {
 
     this.nextToken();
 
-    while (!this._currTokenIs(TokenType.SEMICOLON)) {
+    stmt.returnValue = this.parseExpression(Precedence.LOWEST);
+
+    if (this._peekTokenIs(TokenType.SEMICOLON)) {
       this.nextToken();
     }
 

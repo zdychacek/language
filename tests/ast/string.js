@@ -1,19 +1,19 @@
 import test from 'tape';
 
 import * as ast from '../../src/ast';
-import { TokenType } from '../../src/token';
+import { Token, TokenType } from '../../src/token';
 
 test('AST - String', (t) => {
   const program = new ast.Program(
     [
       new ast.LetStatement(
-        { type: TokenType.LET, literal: 'let' },
+        new Token(TokenType.LET, 'let'),
         new ast.Identifier(
-          { type: TokenType.IDENT, literal: 'myVar' },
+          new Token(TokenType.IDENT, 'myVar'),
           'myVar',
         ),
         new ast.Identifier(
-          { type: TokenType.IDENT, literal: 'anotherVar' },
+          new Token(TokenType.IDENT, 'anotherVar'),
           'anotherVar',
         ),
       ),
