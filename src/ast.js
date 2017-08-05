@@ -151,3 +151,9 @@ export class InfixExpression extends Expression {
     return `(${this.left.toString()} ${this.operator} ${this.right.toString()})`;
   }
 }
+
+export class EmptyStatement extends Statement {
+  toString () {
+    return ';';
+  }
+}

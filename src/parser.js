@@ -1,17 +1,31 @@
+import parseFunction from 'parse-function';
 import {
   TokenType,
   Precedence,
   TokenPrecedence,
+  Keyword,
+  Punctuator,
 } from './token';
 import * as ast from './ast';
 
+// Helper for serializing function body
+function parsePredicate (fn) {
+  return parseFunction().parse(fn).body;
+}
+
 class Parser {
-  _currToken = null;
-  _peekToken = null;
+  // Lexer reference
   _lexer = null;
+  // current token
+  _currToken = null;
+  // next token
+  _peekToken = null;
+  // list of parser's errors
   _errors = [];
-  _prefixParsers = [];
-  _infixParsers = [];
+  // maps of parsers
+  _prefixParsers = {};
+  _infixParsers = {};
+  _statementParsers = {};
 
   constructor (lexer) {
     this._lexer = lexer;
@@ -22,19 +36,25 @@ class Parser {
 
     // prefix parsers
     this._registerPrefixParser(TokenType.IDENT, this.parseIdentifier);
-    this._registerPrefixParser(TokenType.INT, this.parseIntegerLiteral);
-    this._registerPrefixParser(TokenType.BANG, this.parsePrefixExpression);
-    this._registerPrefixParser(TokenType.MINUS, this.parsePrefixExpression);
+    this._registerPrefixParser(TokenType.NUMBER, this.parseNumberLiteral);
+    this._registerPrefixParser(Punctuator.BANG, this.parsePrefixExpression);
+    this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
 
     // infix parsers
-    this._registerInfixParser(TokenType.PLUS, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.MINUS, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.SLASH, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.ASTERISK, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.EQ, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.NOT_EQ, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.LT, this.parseInfixExpression);
-    this._registerInfixParser(TokenType.GT, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.MINUS, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.SLASH, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.ASTERISK, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.ASSIGN, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.EQ, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.NOT_EQ, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.LT, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.GT, this.parseInfixExpression);
+
+    // statements
+    this._registerStatement(Keyword.LET, this.parseLetStatement);
+    this._registerStatement(Keyword.RETURN, this.parseReturnStatement);
+    this._registerStatement(Punctuator.SEMICOLON, this.parseEmptyStatement);
   }
 
   nextToken () {
@@ -46,12 +66,12 @@ class Parser {
     return this._errors;
   }
 
-  parseProgram () {
+  parseProgram = () => {
     const program = new ast.Program();
 
     program.statements = [];
 
-    while (!this._currTokenIs(TokenType.EOF)) {
+    while (!this._currTokenIs(({ type }) => type === TokenType.EOF)) {
       const stmt = this.parseStatement();
 
       if (stmt) {
@@ -64,27 +84,27 @@ class Parser {
     return program;
   }
 
-  parseStatement () {
-    switch (this._currToken.type) {
-      case TokenType.LET:
-        return this.parseLetStatement();
-      case TokenType.RETURN:
-        return this.parseReturnStatement();
-      default:
-        return this.parseExpressionStatement();
+  parseStatement = () => {
+    const statementParser = this._getStatementParser(this._currToken);
+
+    if (statementParser) {
+      return statementParser(this);
+    }
+    else {
+      return this.parseExpressionStatement();
     }
   }
 
-  parseLetStatement () {
+  parseLetStatement = () => {
     const stmt = new ast.LetStatement(this._currToken);
 
-    if (!this._expectPeek(TokenType.IDENT)) {
+    if (!this._expectPeek(({ type }) => type === TokenType.IDENT)) {
       return null;
     }
 
     stmt.name = new ast.Identifier(this._currToken, this._currToken.literal);
 
-    if (!this._expectPeek(TokenType.ASSIGN)) {
+    if (!this._expectPeek(({ literal }) => literal === Punctuator.ASSIGN)) {
       return null;
     }
 
@@ -92,52 +112,63 @@ class Parser {
 
     stmt.returnValue = this.parseExpression(Precedence.LOWEST);
 
-    if (this._peekTokenIs(TokenType.SEMICOLON)) {
+    if (this._peekTokenIs(({ literal }) => literal === Punctuator.SEMICOLON)) {
       this.nextToken();
     }
 
     return stmt;
   }
 
-  parseReturnStatement () {
+  parseReturnStatement = () => {
     const stmt = new ast.ReturnStatement(this._currToken);
 
     this.nextToken();
 
     stmt.returnValue = this.parseExpression(Precedence.LOWEST);
 
-    if (this._peekTokenIs(TokenType.SEMICOLON)) {
+    if (this._peekTokenIs(({ literal }) => literal === Punctuator.SEMICOLON)) {
       this.nextToken();
     }
 
     return stmt;
   }
 
-  parseExpressionStatement () {
+  parseExpressionStatement = () => {
     const stmt = new ast.ExpressionStatement(this._currToken);
 
     stmt.expression = this.parseExpression(Precedence.LOWEST);
 
-    if (this._peekTokenIs(TokenType.SEMICOLON)) {
+    if (this._peekTokenIs(({ literal }) => literal === Punctuator.SEMICOLON)) {
       this.nextToken();
     }
 
     return stmt;
   }
 
-  parseExpression (precedence) {
-    const prefix = this._prefixParsers[this._currToken.type];
+  parseEmptyStatement = () => {
+    const stmt = new ast.EmptyStatement(this._currToken);
+
+    this.nextToken();
+
+    return stmt;
+  }
+
+  parseExpression = (precedence) => {
+    const prefix = this._getPrefixParser(this._currToken);
 
     if (!prefix) {
-      this._errors.push(`no prefix parse function for ${this._currToken.type} found`);
+      this._errors.push(`no prefix parse function for ${this._currToken.literal} found`);
 
       return null;
     }
 
     let leftExpr = prefix();
 
-    while (!this._peekTokenIs(TokenType.SEMICOLON) && precedence < this._peekPrecedence()) {
-      const infix = this._infixParsers[this._peekToken.type];
+    while (
+      this._peekTokenIs(({ literal }) => literal !== Punctuator.SEMICOLON) &&
+      precedence < this._peekPrecedence()
+    ) {
+      const infix = this._getInfixParser(this._peekToken);
 
       if (!infix) {
         return null;
@@ -155,7 +186,7 @@ class Parser {
     return new ast.Identifier(this._currToken, this._currToken.literal);
   }
 
-  parseIntegerLiteral = () => {
+  parseNumberLiteral = () => {
     const literal = new ast.IntegerLiteral(this._currToken);
     const value = Number.parseInt(this._currToken.literal, 10);
 
@@ -191,47 +222,65 @@ class Parser {
     return expression;
   }
 
-  _currTokenIs (type) {
-    return this._currToken.type === type;
+  _currTokenIs (predicate) {
+    return predicate(this._currToken);
   }
 
-  _peekTokenIs (type) {
-    return this._peekToken.type === type;
+  _peekTokenIs (predicate) {
+    return predicate(this._peekToken);
   }
 
-  _expectPeek (type) {
-    if (this._peekTokenIs(type)) {
+  _expectPeek (predicate) {
+    if (this._peekTokenIs(predicate)) {
       this.nextToken();
 
       return true;
     }
     else {
-      this._peekError(type);
+      this._peekError(predicate);
 
       return false;
     }
   }
 
-  _peekError (type) {
-    const msg = `expected next token to be ${type}, got ${this._peekToken.type} instead`;
+  _peekError (predicate) {
+    const { type, literal } = this._peekToken;
 
-    this._errors.push(msg);
+    this._errors.push(
+      `Expected next token to fulfill ${parsePredicate(predicate)}, got ${JSON.stringify({ type, literal })} instead.`
+    );
   }
 
-  _registerPrefixParser (tokenType, parserFn) {
-    this._prefixParsers[tokenType] = parserFn;
+  _registerPrefixParser (literal, parserFn) {
+    this._prefixParsers[literal] = parserFn;
   }
 
-  _registerInfixParser (tokenType, parserFn) {
-    this._infixParsers[tokenType] = parserFn;
+  _registerInfixParser (literal, parserFn) {
+    this._infixParsers[literal] = parserFn;
+  }
+
+  _registerStatement (literal, parserFn) {
+    this._statementParsers[literal] = parserFn;
+  }
+
+  _getPrefixParser (token) {
+    return this._prefixParsers[token.type] || this._prefixParsers[token.literal];
+  }
+
+  _getInfixParser (token) {
+    return this._infixParsers[token.type] || this._infixParsers[token.literal];
+  }
+
+  _getStatementParser (token) {
+    return this._statementParsers[token.literal];
   }
 
   _peekPrecedence () {
-    return TokenPrecedence[this._peekToken.type] || Precedence.LOWEST;
+    return TokenPrecedence[this._peekToken.literal] || Precedence.LOWEST;
   }
 
   _currPrecedence () {
-    return TokenPrecedence[this._currToken.type] || Precedence.LOWEST;
+    return TokenPrecedence[this._currToken.literal] || Precedence.LOWEST;
   }
 }
 
