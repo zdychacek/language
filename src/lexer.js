@@ -18,6 +18,9 @@ class Lexer {
   _currTokenStart = null;
   _currTokenStartRange = null;
 
+  // state capture structure for lookahead
+  _capturedState = null;
+
   constructor (input) {
     this._input = input;
   }
@@ -59,6 +62,23 @@ class Lexer {
     else {
       return this._finishToken(TokenType.ILLEGAL, char);
     }
+  }
+
+  peek (distance = 0) {
+    const peeks = [];
+
+    // capture lexer state for revovery purpose
+    this._captureState();
+
+    // fill look ahead queue
+    while (distance >= peeks.length) {
+      peeks.push(this.nextToken());
+    }
+
+    // restore lexer state
+    this._restoreState();
+
+    return peeks[distance];
   }
 
   _getChar () {
@@ -206,6 +226,28 @@ class Lexer {
     this._currTokenStart = null;
 
     return token;
+  }
+
+  _captureState () {
+    assert(!this._capturedState, 'Trying to capture unrestored state.');
+
+    return this._capturedState = {
+      index: this._index,
+      lineNo: this._lineNo,
+      columnNo: this._columnNo,
+    };
+  }
+
+  _restoreState () {
+    assert(this._capturedState, 'No state to restore.');
+
+    const { index, lineNo, columnNo } = this._capturedState;
+
+    this._index = index;
+    this._lineNo = lineNo;
+    this._columnNo = columnNo;
+
+    this._capturedState = null;
   }
 }
 
