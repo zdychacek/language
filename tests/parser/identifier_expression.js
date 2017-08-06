@@ -3,7 +3,7 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
-import { checkParserErrors } from './utils';
+import { checkParserErrors, testIdentifier } from './utils';
 
 test('Parser - Identifier expression', (t) => {
   const input = 'foobar';
@@ -20,11 +20,7 @@ test('Parser - Identifier expression', (t) => {
 
   t.ok(stmt instanceof ast.ExpressionStatement, 'program.statements[0] is ast.ExpressionStatement');
 
-  const identifier = stmt.expression;
-
-  t.ok(identifier instanceof ast.Identifier, 'expression is ast.Identifier');
-  t.equal(identifier.value, 'foobar');
-  t.equal(identifier.tokenValue(), 'foobar');
+  testIdentifier(t, stmt.expression, 'foobar');
 
   t.end();
 });

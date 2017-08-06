@@ -172,7 +172,7 @@ class Parser {
       return null;
     }
 
-    return new ast.IntegerLiteral(token, value);
+    return new ast.NumberLiteral(token, value);
   }
 
   parsePrefixExpression = () => {

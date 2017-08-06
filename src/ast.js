@@ -113,15 +113,15 @@ export class ExpressionStatement extends Statement {
   }
 }
 
-export class IntegerLiteral extends Expression {
-  constructor (token, value) {
+export class NumberLiteral extends Expression {
+  constructor (token, literal) {
     super(token);
 
-    this.value = value;
+    this.literal = literal;
   }
 
   toString () {
-    return this.token.value;
+    return this.literal;
   }
 }
 
