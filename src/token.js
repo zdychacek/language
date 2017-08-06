@@ -36,6 +36,11 @@ export const Keyword = {
   RETURN: 'return',
 };
 
+export const BooleanLiteral = {
+  TRUE: 'true',
+  FALSE: 'false',
+};
+
 export const Precedence = {
   LOWEST: 0,
   EQUALS: 1,       // ==

@@ -4,6 +4,7 @@ import {
   TokenPrecedence,
   Keyword,
   Punctuator,
+  BooleanLiteral,
 } from './token';
 import * as ast from './ast';
 
@@ -25,6 +26,7 @@ class Parser {
     // prefix parsers
     this._registerPrefixParser(TokenType.IDENT, this.parseIdentifier);
     this._registerPrefixParser(TokenType.NUMBER, this.parseNumberLiteral);
+    this._registerPrefixParser(TokenType.BOOLEAN, this.parseBooleanLiteral);
     this._registerPrefixParser(Punctuator.BANG, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
 
@@ -114,7 +116,7 @@ class Parser {
   }
 
   parseExpressionStatement = () => {
-    const stmt = new ast.ExpressionStatement(this._currToken);
+    const stmt = new ast.ExpressionStatement(this._peek());
 
     stmt.expression = this.parseExpression(Precedence.LOWEST);
 
@@ -134,9 +136,7 @@ class Parser {
     const prefix = this._getPrefixParser(token);
 
     if (!prefix) {
-      this._errors.push(`No prefix parse function for ${token.value} found.`);
-
-      return null;
+      throw new SyntaxError(`No prefix parse function for "${token.value}" found.`);
     }
 
     let leftExpr = prefix();
@@ -173,6 +173,12 @@ class Parser {
     }
 
     return new ast.NumberLiteral(token, value);
+  }
+
+  parseBooleanLiteral = () => {
+    const token = this._consumeType(TokenType.BOOLEAN);
+
+    return new ast.BooleanLiteral(token, token.value === BooleanLiteral.TRUE);
   }
 
   parsePrefixExpression = () => {

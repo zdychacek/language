@@ -5,7 +5,7 @@ class Node {
     this.token = token;
   }
 
-  tokenValue () {
+  getTokenValue () {
     return this.token.value;
   }
 
@@ -25,9 +25,9 @@ export class Program extends Node {
     this.statements = statements;
   }
 
-  tokenValue () {
+  getTokenValue () {
     if (this.statements.length) {
-      return this.statements[0].tokenValue();
+      return this.statements[0].getTokenValue();
     }
     else {
       return '';
@@ -62,7 +62,7 @@ export class LetStatement extends Statement {
   }
 
   toString () {
-    let out = `${this.tokenValue()} `;
+    let out = `${this.getTokenValue()} `;
 
     out += this.name.toString();
     out += ' = ';
@@ -85,7 +85,7 @@ export class ReturnStatement extends Statement {
   }
 
   toString () {
-    let out = `${this.tokenValue()} `;
+    let out = `${this.getTokenValue()} `;
 
     if (this.returnValue) {
       out += this.returnValue.toString();
@@ -110,18 +110,6 @@ export class ExpressionStatement extends Statement {
     }
 
     return '';
-  }
-}
-
-export class NumberLiteral extends Expression {
-  constructor (token, literal) {
-    super(token);
-
-    this.literal = literal;
-  }
-
-  toString () {
-    return this.literal;
   }
 }
 
@@ -157,3 +145,18 @@ export class EmptyStatement extends Statement {
     return ';';
   }
 }
+export class Literal extends Expression {
+  constructor (token, literal) {
+    super(token);
+
+    this.literal = literal;
+  }
+
+  toString () {
+    return this.literal.toString();
+  }
+}
+
+export class NumberLiteral extends Literal {}
+
+export class BooleanLiteral extends Literal {}
