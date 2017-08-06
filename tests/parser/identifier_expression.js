@@ -24,7 +24,7 @@ test('Parser - Identifier expression', (t) => {
 
   t.ok(identifier instanceof ast.Identifier, 'expression is ast.Identifier');
   t.equal(identifier.value, 'foobar');
-  t.equal(identifier.tokenLiteral(), 'foobar');
+  t.equal(identifier.tokenValue(), 'foobar');
 
   t.end();
 });

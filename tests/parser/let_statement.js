@@ -8,7 +8,7 @@ import { LetStatement } from '../../src/ast';
 import { checkParserErrors } from './utils';
 
 function testLetStatement (t, stmt, expected) {
-  t.equal(stmt.tokenLiteral(), 'let', 'stmt.tokenLiteral is "let"');
+  t.equal(stmt.tokenValue(), 'let', 'stmt.tokenValue is "let"');
   t.equal(stmt.constructor.name, LetStatement.name, 'stmt is LetStatement');
   t.equal(stmt.name.value, expected, `stmt.name.value is "${expected}"`);
 

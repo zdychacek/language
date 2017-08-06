@@ -8,7 +8,7 @@ import { ReturnStatement } from '../../src/ast';
 import { checkParserErrors } from './utils';
 
 function testReturnStatement (t, stmt) {
-  t.equal(stmt.tokenLiteral(), 'return', 'stmt.tokenLiteral is "return"');
+  t.equal(stmt.tokenValue(), 'return', 'stmt.tokenValue is "return"');
   t.equal(stmt.constructor.name, ReturnStatement.name, 'stmt is ReturnStatement');
 
   return true;

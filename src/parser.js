@@ -1,4 +1,3 @@
-import parseFunction from 'parse-function';
 import {
   TokenType,
   Precedence,
@@ -8,19 +7,16 @@ import {
 } from './token';
 import * as ast from './ast';
 
-// Helper for serializing function body
-function parsePredicate (fn) {
-  return parseFunction().parse(fn).body;
-}
-
 class Parser {
   // Lexer reference
   _lexer = null;
   // list of parser's errors
   _errors = [];
-  // maps of parsers
+  // map of prefix parsers, eg. `-1`
   _prefixParsers = {};
+  // map of infix parsers, eg. `1 + 2`
   _infixParsers = {};
+  // map of statement parsers, eg. `if`
   _statementParsers = {};
 
   constructor (lexer) {
@@ -58,14 +54,14 @@ class Parser {
 
     program.statements = [];
 
-    while (!this._match(({ type }) => type === TokenType.EOF)) {
+    while (!this._matchType(TokenType.EOF)) {
       const stmt = this.parseStatement();
 
       if (stmt) {
         program.statements.push(stmt);
       }
 
-      if (this._match(({ literal }) => literal === Punctuator.SEMICOLON)) {
+      if (this._match(Punctuator.SEMICOLON)) {
         this._consume();
       }
     }
@@ -85,18 +81,19 @@ class Parser {
   }
 
   parseLetStatement = () => {
-    let token = this._consume(({ literal }) => literal === Keyword.LET);
+    let token = this._consume(Keyword.LET);
+
     const stmt = new ast.LetStatement(token);
 
-    token = this._consume(({ type }) => type === TokenType.IDENT);
+    token = this._consumeType(TokenType.IDENT);
 
-    stmt.name = new ast.Identifier(token, token.literal);
+    stmt.name = new ast.Identifier(token, token.value);
 
-    this._consume(({ literal }) => literal === Punctuator.ASSIGN);
+    this._consume(Punctuator.ASSIGN);
 
     stmt.returnValue = this.parseExpression(Precedence.LOWEST);
 
-    if (this._match(({ literal }) => literal === Punctuator.SEMICOLON)) {
+    if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
     }
 
@@ -104,12 +101,12 @@ class Parser {
   }
 
   parseReturnStatement = () => {
-    const token = this._consume(({ literal }) => literal === Keyword.RETURN);
+    const token = this._consume(Keyword.RETURN);
     const stmt = new ast.ReturnStatement(token);
 
     stmt.returnValue = this.parseExpression(Precedence.LOWEST);
 
-    if (this._match(({ literal }) => literal === Punctuator.SEMICOLON)) {
+    if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
     }
 
@@ -121,7 +118,7 @@ class Parser {
 
     stmt.expression = this.parseExpression(Precedence.LOWEST);
 
-    if (this._match(({ literal }) => literal === Punctuator.SEMICOLON)) {
+    if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
     }
 
@@ -129,9 +126,7 @@ class Parser {
   }
 
   parseEmptyStatement = () => {
-    return new ast.EmptyStatement(
-      this._consume(({ type }) => type === Punctuator.SEMICOLON)
-    );
+    return new ast.EmptyStatement(this._consume(Punctuator.SEMICOLON));
   }
 
   parseExpression = (precedence) => {
@@ -139,17 +134,14 @@ class Parser {
     const prefix = this._getPrefixParser(token);
 
     if (!prefix) {
-      this._errors.push(`No prefix parse function for ${token.literal} found.`);
+      this._errors.push(`No prefix parse function for ${token.value} found.`);
 
       return null;
     }
 
     let leftExpr = prefix();
 
-    while (
-      !this._match(({ literal }) => literal === Punctuator.SEMICOLON) &&
-      precedence < this._getPeekPrecendence()
-    ) {
+    while (precedence < this._getPeekPrecendence()) {
       token = this._peek();
 
       const infix = this._getInfixParser(token);
@@ -165,30 +157,27 @@ class Parser {
   }
 
   parseIdentifier = () => {
-    const token = this._consume(({ type }) => type === TokenType.IDENT);
+    const token = this._consumeType(TokenType.IDENT);
 
-    return new ast.Identifier(token, token.literal);
+    return new ast.Identifier(token, token.value);
   }
 
   parseNumberLiteral = () => {
-    const token = this._consume(({ type }) => type === TokenType.NUMBER);
-    const literal = new ast.IntegerLiteral(token);
-    const value = Number.parseInt(token.literal, 10);
+    const token = this._consumeType(TokenType.NUMBER);
+    const value = Number.parseInt(token.value, 10);
 
     if (!Number.isInteger(value)) {
-      this._errors.push(`Could not parse ${token.literal} as integer.`);
+      this._errors.push(`Could not parse ${token.value} as integer.`);
 
       return null;
     }
 
-    literal.value = value;
-
-    return literal;
+    return new ast.IntegerLiteral(token, value);
   }
 
   parsePrefixExpression = () => {
     const token = this._consume();
-    const expression = new ast.PrefixExpression(token, token.literal);
+    const expression = new ast.PrefixExpression(token, token.value);
 
     expression.right = this.parseExpression(Precedence.PREFIX);
 
@@ -198,8 +187,8 @@ class Parser {
   parseInfixExpression = (left) => {
     const token = this._consume();
 
-    const expression = new ast.InfixExpression(token, left, token.literal);
-    const precedence = TokenPrecedence[token.literal] || TokenPrecedence.LOWEST;
+    const expression = new ast.InfixExpression(token, left, token.value);
+    const precedence = TokenPrecedence[token.value] || TokenPrecedence.LOWEST;
 
     expression.right = this.parseExpression(precedence);
 
@@ -210,54 +199,68 @@ class Parser {
     return this._lexer.peek(distance);
   }
 
-  _match (predicate) {
+  _match (expectedValue) {
     const token = this._peek();
 
-    return token && predicate(token);
+    return token && token.value === expectedValue;
   }
 
-  _consume (predicate) {
-    if (predicate) {
+  _consume (expectedValue) {
+    if (expectedValue) {
       const token = this._peek();
 
-      if (!token || !predicate(token)) {
-        const { type, literal } = token;
-
-        this._errors.push(
-          `Expected next token to fulfill ${parsePredicate(predicate)}, got ${JSON.stringify({ type, literal })} instead.` // eslint-disable-line max-len
-        );
+      if (!token || token.value !== expectedValue) {
+        this._errors.push(`Expected next token to be ${expectedValue}, got ${token.value} instead.`);
       }
     }
 
     return this._lexer.nextToken();
   }
 
-  _registerPrefixParser (literal, parserFn) {
-    this._prefixParsers[literal] = parserFn;
+  _matchType (expectedType) {
+    const token = this._peek();
+
+    return token && token.type === expectedType;
   }
 
-  _registerInfixParser (literal, parserFn) {
-    this._infixParsers[literal] = parserFn;
+  _consumeType (expectedType) {
+    if (expectedType) {
+      const token = this._peek();
+
+      if (!token || token.type !== expectedType) {
+        this._errors.push(`Expected next token to be ${expectedType}, got ${token.type} instead.`);
+      }
+    }
+
+    return this._lexer.nextToken();
   }
 
-  _registerStatement (literal, parserFn) {
-    this._statementParsers[literal] = parserFn;
+  _registerPrefixParser (value, parserFn) {
+    this._prefixParsers[value] = parserFn;
+  }
+
+  _registerInfixParser (value, parserFn) {
+    this._infixParsers[value] = parserFn;
+  }
+
+  _registerStatement (value, parserFn) {
+    this._statementParsers[value] = parserFn;
   }
 
   _getPrefixParser (token) {
-    return this._prefixParsers[token.type] || this._prefixParsers[token.literal];
+    return this._prefixParsers[token.type] || this._prefixParsers[token.value];
   }
 
   _getInfixParser (token) {
-    return this._infixParsers[token.type] || this._infixParsers[token.literal];
+    return this._infixParsers[token.type] || this._infixParsers[token.value];
   }
 
   _getStatementParser (token) {
-    return this._statementParsers[token.literal];
+    return this._statementParsers[token.value];
   }
 
   _getPeekPrecendence () {
-    return TokenPrecedence[this._peek().literal] || Precedence.LOWEST;
+    return TokenPrecedence[this._peek().value] || Precedence.LOWEST;
   }
 }
 

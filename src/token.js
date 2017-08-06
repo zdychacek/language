@@ -58,9 +58,9 @@ export const TokenPrecedence = {
 };
 
 export class Token {
-  constructor (type, literal, start, end, range) { // eslint-disable-line max-params
+  constructor (type, value, start, end, range) { // eslint-disable-line max-params
     this.type = type;
-    this.literal = literal;
+    this.value = value;
     this.start = start;
     this.end = end;
     this.range = range;

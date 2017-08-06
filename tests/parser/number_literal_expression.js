@@ -24,7 +24,7 @@ test('Parser - Number literal expression', (t) => {
 
   t.ok(literal instanceof ast.IntegerLiteral, 'expression is ast.IntegerLiteral');
   t.equal(literal.value, 5);
-  t.equal(literal.tokenLiteral(), '5');
+  t.equal(literal.tokenValue(), '5');
 
   t.end();
 });

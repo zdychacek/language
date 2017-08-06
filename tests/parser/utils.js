@@ -11,5 +11,5 @@ export function checkParserErrors (t, parser) {
 export function testIntegerLiteral (t, literal, value) {
   t.ok(literal instanceof ast.IntegerLiteral, 'literal is ast.IntegerLiteral');
   t.equal(literal.value, value, `integer.value is ${value}`);
-  t.equal(literal.tokenLiteral(), value.toString(), `integer.tokenLiteral() is ${value}`);
+  t.equal(literal.tokenValue(), value.toString(), `integer.tokenValue() is ${value}`);
 }

@@ -8,16 +8,16 @@ import {
  } from './token';
 
 class Lexer {
+  // input source code
   _input = '';
+  // current position in source code
   _index = 0;
-
+  // column and line positions in source code
   _columnNo = 1;
   _lineNo = 1;
-
   // start position of currently built token
   _currTokenStart = null;
   _currTokenStartRange = null;
-
   // state capture structure for lookahead
   _capturedState = null;
 
@@ -27,8 +27,6 @@ class Lexer {
 
   nextToken () {
     this._skipWhitespace();
-
-    // start token
     this._startToken();
 
     const char = this._peekChar();
@@ -37,27 +35,27 @@ class Lexer {
       return this._finishToken(TokenType.EOF, '');
     }
     else if (this._isPunctuator(char)) {
-      const { type, literal } = this._readPunctuator();
+      const { type, value } = this._readPunctuator();
 
-      return this._finishToken(type, literal);
+      return this._finishToken(type, value);
     }
     else if (this._isLetter(char)) {
-      const literal = this._readLiteral();
+      const value = this._readLiteral();
       let type = TokenType.IDENT;
 
-      if (this._isKeyword(literal)) {
+      if (this._isKeyword(value)) {
         type = TokenType.KEYWORD;
       }
-      else if (this._isBoolean(literal)) {
+      else if (this._isBoolean(value)) {
         type = TokenType.BOOLEAN;
       }
 
-      return this._finishToken(type, literal);
+      return this._finishToken(type, value);
     }
     else if (this._isDigit(char)) {
-      const literal = this._readDigit();
+      const value = this._readDigit();
 
-      return this._finishToken(TokenType.NUMBER, literal);
+      return this._finishToken(TokenType.NUMBER, value);
     }
     else {
       return this._finishToken(TokenType.ILLEGAL, char);
@@ -98,7 +96,7 @@ class Lexer {
   }
 
   _peekChar (distance = 0) {
-    if (this._index >= this._input.length) {
+    if (this._isEOF()) {
       return null;
     }
     else {
@@ -143,23 +141,23 @@ class Lexer {
   }
 
   _readLiteral () {
-    let literal = '';
+    let value = '';
 
     while (this._isLetter(this._peekChar())) {
-      literal += this._getChar();
+      value += this._getChar();
     }
 
-    return literal;
+    return value;
   }
 
   _readDigit () {
-    let literal = '';
+    let value = '';
 
     while (this._isDigit(this._peekChar())) {
-      literal += this._getChar();
+      value += this._getChar();
     }
 
-    return literal;
+    return value;
   }
 
   _isPunctuator (char) {
@@ -190,12 +188,12 @@ class Lexer {
     return this._index >= this._input.length;
   }
 
-  _isKeyword (literal) {
-    return Object.values(Keyword).includes(literal);
+  _isKeyword (value) {
+    return Object.values(Keyword).includes(value);
   }
 
-  _isBoolean (literal) {
-    return [ 'true', 'false' ].includes(literal);
+  _isBoolean (value) {
+    return [ 'true', 'false' ].includes(value);
   }
 
   _skipWhitespace () {
@@ -212,12 +210,12 @@ class Lexer {
     return this._currTokenStart = [ this._lineNo, this._columnNo ];
   }
 
-  _finishToken (type, literal) {
+  _finishToken (type, value) {
     assert(this._currTokenStart, 'Can\'t finish token.');
 
     const token = new Token(
       type,
-      literal,
+      value,
       this._currTokenStart,
       [ this._lineNo, this._columnNo ],
       [ this. _currTokenStartRange, this._index ],

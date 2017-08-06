@@ -5,8 +5,8 @@ class Node {
     this.token = token;
   }
 
-  tokenLiteral () {
-    return this.token.literal;
+  tokenValue () {
+    return this.token.value;
   }
 
   toString () {
@@ -25,9 +25,9 @@ export class Program extends Node {
     this.statements = statements;
   }
 
-  tokenLiteral () {
+  tokenValue () {
     if (this.statements.length) {
-      return this.statements[0].tokenLiteral();
+      return this.statements[0].tokenValue();
     }
     else {
       return '';
@@ -62,7 +62,7 @@ export class LetStatement extends Statement {
   }
 
   toString () {
-    let out = `${this.tokenLiteral()} `;
+    let out = `${this.tokenValue()} `;
 
     out += this.name.toString();
     out += ' = ';
@@ -85,7 +85,7 @@ export class ReturnStatement extends Statement {
   }
 
   toString () {
-    let out = `${this.tokenLiteral()} `;
+    let out = `${this.tokenValue()} `;
 
     if (this.returnValue) {
       out += this.returnValue.toString();
@@ -121,7 +121,7 @@ export class IntegerLiteral extends Expression {
   }
 
   toString () {
-    return this.token.literal;
+    return this.token.value;
   }
 }
 
