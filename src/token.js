@@ -52,6 +52,7 @@ export const Precedence = {
 };
 
 export const TokenPrecedence = {
+  [Punctuator.ASSIGN]: Precedence.EQUALS,
   [Punctuator.EQ]: Precedence.EQUALS,
   [Punctuator.NOT_EQ]: Precedence.EQUALS,
   [Punctuator.LT]: Precedence.LESSGREATER,

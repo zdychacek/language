@@ -1,13 +1,16 @@
+/* eslint-disable max-params */
+
 import fs from 'fs';
 import repl from 'repl';
 import touch from 'touch';
 
 import Lexer from './lexer';
-import { TokenType } from './token';
+import Parser from './parser';
+//import { TokenType } from './token';
 
 const REPL_HISTORY_FILE = '.repl_history';
 
-function lex (input, context, filename, callback) { // eslint-disable-line max-params
+/*function lex (input, context, filename, callback) {
   const lexer = new Lexer(input);
   const output = [];
 
@@ -23,12 +26,28 @@ function lex (input, context, filename, callback) { // eslint-disable-line max-p
   return callback(
     output.map((t) => JSON.stringify(t, null, 2))
   );
+}*/
+
+function parse (input, context, filename, callback) {
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
+  const program = parser.parseProgram();
+
+  const errors = parser.getErrors();
+
+  if (errors.length) {
+    return callback(JSON.stringify(errors, null, 2));
+  }
+  else {
+    return callback(JSON.stringify(program, null, 2));
+  }
 }
 
 // create REPL server
 const server = repl.start({
   prompt: '>> ',
-  eval: lex,
+  //eval: lex,
+  eval: parse,
 });
 
 touch.sync(REPL_HISTORY_FILE);

@@ -1,3 +1,5 @@
+/* eslint-disable max-params */
+
 class Node {
   token = null;
 
@@ -127,7 +129,7 @@ export class PrefixExpression extends Expression {
 }
 
 export class InfixExpression extends Expression {
-  constructor (token, left, operator, right) { // eslint-disable-line max-params
+  constructor (token, left, operator, right) {
     super(token);
 
     this.left = left;
@@ -160,3 +162,39 @@ export class Literal extends Expression {
 export class NumberLiteral extends Literal {}
 
 export class BooleanLiteral extends Literal {}
+
+export class IfExpression extends Expression {
+  constructor (token, condition, consequence, alternative) {
+    super(token);
+
+    this.condition = condition;
+    this.consequence = consequence;
+    this.alternative = alternative;
+  }
+
+  toString () {
+    let out = `if ${this.condition.toString()} `;
+
+    out += this.consequence.toString();
+
+    if (this.alternative) {
+      out += `else ${this.alternative.toString()}`;
+    }
+
+    return out;
+  }
+}
+
+export class BlockStatement extends Statement {
+  constructor (token, statements) {
+    super(token);
+
+    this.statements = statements;
+  }
+
+  toString () {
+    return this.statements
+      .map((stmt) => stmt.toString())
+      .join('');
+  }
+}

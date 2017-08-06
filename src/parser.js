@@ -30,6 +30,8 @@ class Parser {
     this._registerPrefixParser(Punctuator.BANG, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.LPAREN, this.parseGroupedExpression);
+    this._registerPrefixParser(Keyword.IF, this.parseIfExpression);
+    this._registerPrefixParser(Punctuator.LBRACE, this.parseBlockStatement);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
@@ -58,15 +60,7 @@ class Parser {
     program.statements = [];
 
     while (!this._matchType(TokenType.EOF)) {
-      const stmt = this.parseStatement();
-
-      if (stmt) {
-        program.statements.push(stmt);
-      }
-
-      if (this._match(Punctuator.SEMICOLON)) {
-        this._consume();
-      }
+      this._parseStatement(program.statements);
     }
 
     return program;
@@ -96,10 +90,6 @@ class Parser {
 
     stmt.returnValue = this.parseExpression();
 
-    if (this._match(Punctuator.SEMICOLON)) {
-      this._consume();
-    }
-
     return stmt;
   }
 
@@ -109,10 +99,6 @@ class Parser {
 
     stmt.returnValue = this.parseExpression();
 
-    if (this._match(Punctuator.SEMICOLON)) {
-      this._consume();
-    }
-
     return stmt;
   }
 
@@ -120,10 +106,6 @@ class Parser {
     const stmt = new ast.ExpressionStatement(this._peek());
 
     stmt.expression = this.parseExpression();
-
-    if (this._match(Punctuator.SEMICOLON)) {
-      this._consume();
-    }
 
     return stmt;
   }
@@ -135,6 +117,10 @@ class Parser {
   parseExpression = (precedence = Precedence.LOWEST) => {
     let token = this._peek();
     const prefix = this._getPrefixParser(token);
+
+    if (this._matchType(TokenType.EOF)) {
+      throw new SyntaxError('Unexpected end of file.');
+    }
 
     if (!prefix) {
       throw new SyntaxError(`No prefix parse function for "${token.value}" found.`);
@@ -192,6 +178,44 @@ class Parser {
     return expression;
   }
 
+  parseIfExpression = () => {
+    const token = this._consume(Keyword.IF);
+
+    this._consume(Punctuator.LPAREN);
+
+    const condition = this.parseExpression();
+
+    this._consume(Punctuator.RPAREN);
+
+    let consequence = null;
+
+    if (this._match(Punctuator.LBRACE)) {
+      consequence = this.parseBlockStatement();
+    }
+    else {
+      consequence = this.parseExpression();
+    }
+
+    // TODO: add "alternative" branch support
+
+    return new ast.IfExpression(token, condition, consequence);
+  }
+
+  parseBlockStatement = () => {
+    const token = this._consume(Punctuator.LBRACE);
+    const statements = [];
+
+    while (!this._match(Punctuator.RBRACE) && !this._matchType(TokenType.EOF)) {
+      this._parseStatement(statements);
+    }
+
+    if (this._match(Punctuator.RBRACE)) {
+      this._consume();
+    }
+
+    return new ast.BlockStatement(token, statements);
+  }
+
   parsePrefixExpression = () => {
     const token = this._consume();
     const expression = new ast.PrefixExpression(token, token.value);
@@ -208,6 +232,18 @@ class Parser {
     expression.right = this.parseExpression(TokenPrecedence[token.value]);
 
     return expression;
+  }
+
+  _parseStatement (statements) {
+    const stmt = this.parseStatement();
+
+    if (stmt) {
+      statements.push(stmt);
+    }
+
+    if (this._match(Punctuator.SEMICOLON)) {
+      this._consume();
+    }
   }
 
   _peek (distance = 0) {
