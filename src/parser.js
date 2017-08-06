@@ -29,6 +29,7 @@ class Parser {
     this._registerPrefixParser(TokenType.BOOLEAN, this.parseBooleanLiteral);
     this._registerPrefixParser(Punctuator.BANG, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
+    this._registerPrefixParser(Punctuator.LPAREN, this.parseGroupedExpression);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
@@ -93,7 +94,7 @@ class Parser {
 
     this._consume(Punctuator.ASSIGN);
 
-    stmt.returnValue = this.parseExpression(Precedence.LOWEST);
+    stmt.returnValue = this.parseExpression();
 
     if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
@@ -106,7 +107,7 @@ class Parser {
     const token = this._consume(Keyword.RETURN);
     const stmt = new ast.ReturnStatement(token);
 
-    stmt.returnValue = this.parseExpression(Precedence.LOWEST);
+    stmt.returnValue = this.parseExpression();
 
     if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
@@ -118,7 +119,7 @@ class Parser {
   parseExpressionStatement = () => {
     const stmt = new ast.ExpressionStatement(this._peek());
 
-    stmt.expression = this.parseExpression(Precedence.LOWEST);
+    stmt.expression = this.parseExpression();
 
     if (this._match(Punctuator.SEMICOLON)) {
       this._consume();
@@ -131,7 +132,7 @@ class Parser {
     return new ast.EmptyStatement(this._consume(Punctuator.SEMICOLON));
   }
 
-  parseExpression = (precedence) => {
+  parseExpression = (precedence = Precedence.LOWEST) => {
     let token = this._peek();
     const prefix = this._getPrefixParser(token);
 
@@ -181,6 +182,16 @@ class Parser {
     return new ast.BooleanLiteral(token, token.value === BooleanLiteral.TRUE);
   }
 
+  parseGroupedExpression = () => {
+    this._consume(Punctuator.LPAREN);
+
+    const expression = this.parseExpression();
+
+    this._consume(Punctuator.RPAREN);
+
+    return expression;
+  }
+
   parsePrefixExpression = () => {
     const token = this._consume();
     const expression = new ast.PrefixExpression(token, token.value);
@@ -192,11 +203,9 @@ class Parser {
 
   parseInfixExpression = (left) => {
     const token = this._consume();
-
     const expression = new ast.InfixExpression(token, left, token.value);
-    const precedence = TokenPrecedence[token.value] || TokenPrecedence.LOWEST;
 
-    expression.right = this.parseExpression(precedence);
+    expression.right = this.parseExpression(TokenPrecedence[token.value]);
 
     return expression;
   }
