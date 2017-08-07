@@ -79,6 +79,10 @@ class Lexer {
     return peeks[distance];
   }
 
+  getCurrentPosition () {
+    return [ this._lineNo, this._columnNo ];
+  }
+
   _getChar () {
     const char = this._input[this._index];
 

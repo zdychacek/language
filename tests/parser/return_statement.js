@@ -24,7 +24,6 @@ test('Parser - ReturnStatement', (t) => {
   checkParserErrors(t, parser);
 
   t.notEqual(program, null, 'ParseProgram() is not null');
-  t.equal(program.statements.length, 3, 'program.statements contains 3 statements');
 
   program.statements.forEach((stmt) => {
     if (!testReturnStatement(t, stmt)) {

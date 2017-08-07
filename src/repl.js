@@ -6,47 +6,33 @@ import touch from 'touch';
 
 import Lexer from './lexer';
 import Parser from './parser';
-//import { TokenType } from './token';
 
 const REPL_HISTORY_FILE = '.repl_history';
-
-/*function lex (input, context, filename, callback) {
-  const lexer = new Lexer(input);
-  const output = [];
-
-  let token = null;
-
-  do {
-    token = lexer.nextToken();
-
-    output.push(token);
-  }
-  while (token.type !== TokenType.EOF);
-
-  return callback(
-    output.map((t) => JSON.stringify(t, null, 2))
-  );
-}*/
 
 function parse (input, context, filename, callback) {
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  const program = parser.parseProgram();
-
+  let program = null;
   const errors = parser.getErrors();
 
+  try {
+    program = parser.parseProgram();
+  }
+  catch (ex) {
+    errors.unshift(ex.toString());
+  }
+
   if (errors.length) {
-    return callback(JSON.stringify(errors, null, 2));
+    return callback(`There are some errors:\n ${errors.join('\n')}`);
   }
   else {
-    return callback(JSON.stringify(program, null, 2));
+    return callback(program.toString());
   }
 }
 
 // create REPL server
 const server = repl.start({
   prompt: '>> ',
-  //eval: lex,
   eval: parse,
 });
 

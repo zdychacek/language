@@ -88,16 +88,21 @@ class Parser {
 
     this._consume(Punctuator.ASSIGN);
 
-    stmt.returnValue = this.parseExpression();
+    stmt.expression = this.parseExpression();
+
+    this._consume(Punctuator.SEMICOLON);
 
     return stmt;
   }
 
   parseReturnStatement = () => {
-    const token = this._consume(Keyword.RETURN);
-    const stmt = new ast.ReturnStatement(token);
+    const stmt = new ast.ReturnStatement(this._consume(Keyword.RETURN));
 
-    stmt.returnValue = this.parseExpression();
+    if (!this._match(Punctuator.SEMICOLON)) {
+      stmt.returnValue = this.parseExpression();
+    }
+
+    this._consume(Punctuator.SEMICOLON);
 
     return stmt;
   }
@@ -106,6 +111,10 @@ class Parser {
     const stmt = new ast.ExpressionStatement(this._peek());
 
     stmt.expression = this.parseExpression();
+
+    if (this._match(Punctuator.SEMICOLON)) {
+      this._consume(Punctuator.SEMICOLON);
+    }
 
     return stmt;
   }
@@ -123,7 +132,9 @@ class Parser {
     }
 
     if (!prefix) {
-      throw new SyntaxError(`No prefix parse function for "${token.value}" found.`);
+      const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
+
+      throw new SyntaxError(`Unexpected token "${token.value}" (${lineNo}:${columnNo}).`);
     }
 
     let leftExpr = prefix();
@@ -240,10 +251,6 @@ class Parser {
     if (stmt) {
       statements.push(stmt);
     }
-
-    if (this._match(Punctuator.SEMICOLON)) {
-      this._consume();
-    }
   }
 
   _peek (distance = 0) {
@@ -261,7 +268,7 @@ class Parser {
       const token = this._peek();
 
       if (!token || token.value !== expectedValue) {
-        this._errors.push(`Expected next token to be ${expectedValue}, got ${token.value} instead.`);
+        this._errors.push(`Expected next token to be ${expectedValue}, got ${token.value || 'EOF'} instead.`);
       }
     }
 
