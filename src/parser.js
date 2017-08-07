@@ -90,8 +90,6 @@ class Parser {
 
     stmt.expression = this.parseExpression();
 
-    this._consume(Punctuator.SEMICOLON);
-
     return stmt;
   }
 
@@ -102,8 +100,6 @@ class Parser {
       stmt.returnValue = this.parseExpression();
     }
 
-    this._consume(Punctuator.SEMICOLON);
-
     return stmt;
   }
 
@@ -112,15 +108,15 @@ class Parser {
 
     stmt.expression = this.parseExpression();
 
-    if (this._match(Punctuator.SEMICOLON)) {
-      this._consume(Punctuator.SEMICOLON);
-    }
-
     return stmt;
   }
 
   parseEmptyStatement = () => {
-    return new ast.EmptyStatement(this._consume(Punctuator.SEMICOLON));
+    if (!this._match(Punctuator.SEMICOLON)) {
+      return null;
+    }
+
+    return new ast.EmptyStatement(this._peek());
   }
 
   parseExpression = (precedence = Precedence.LOWEST) => {
@@ -134,7 +130,7 @@ class Parser {
     if (!prefix) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`Unexpected token "${token.value}" (${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`Unexpected token "${token.value}" at ${lineNo}:${columnNo}.`);
     }
 
     let leftExpr = prefix();
@@ -251,6 +247,9 @@ class Parser {
     if (stmt) {
       statements.push(stmt);
     }
+
+    // every statement must end with semicolon
+    this._consume(Punctuator.SEMICOLON);
   }
 
   _peek (distance = 0) {

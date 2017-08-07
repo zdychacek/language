@@ -87,10 +87,10 @@ export class ReturnStatement extends Statement {
   }
 
   toString () {
-    let out = `${this.getTokenValue()} `;
+    let out = this.getTokenValue();
 
     if (this.returnValue) {
-      out += this.returnValue.toString();
+      out += ` ${this.returnValue.toString()}`;
     }
 
     out += ';';
@@ -108,7 +108,7 @@ export class ExpressionStatement extends Statement {
 
   toString () {
     if (this.expression) {
-      return this.expression.toString();
+      return `${this.expression.toString()};`;
     }
 
     return '';

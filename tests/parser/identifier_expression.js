@@ -6,7 +6,7 @@ import * as ast from '../../src/ast';
 import { checkParserErrors, testIdentifier } from './utils';
 
 test('Parser - Identifier expression', (t) => {
-  const input = 'foobar';
+  const input = 'foobar;';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);

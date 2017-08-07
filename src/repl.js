@@ -10,13 +10,20 @@ import Parser from './parser';
 const REPL_HISTORY_FILE = '.repl_history';
 
 function parse (input, context, filename, callback) {
+  // append semicolon if missing
+  if (!/;[\s\S]*/.test(input)) {
+    input += ';';
+  }
+
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
+
   let program = null;
-  const errors = parser.getErrors();
+  let errors = [];
 
   try {
     program = parser.parseProgram();
+    errors = parser.getErrors();
   }
   catch (ex) {
     errors.unshift(ex.toString());

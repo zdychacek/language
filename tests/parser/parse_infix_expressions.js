@@ -15,9 +15,9 @@ test('Parser - Infix expressions', (t) => {
     [ '5 < 5;', 5, '<', 5 ],
     [ '5 == 5;', 5, '==', 5 ],
     [ '5 != 5;', 5, '!=', 5 ],
-    [ 'true == true', true, '==', true ],
-    [ 'true != false', true, '!=', false ],
-    [ 'false == false', false, '==', false ],
+    [ 'true == true;', true, '==', true ],
+    [ 'true != false;', true, '!=', false ],
+    [ 'false == false;', false, '==', false ],
     [ 'a = b;', 'a', '=', 'b' ],
   ];
 
