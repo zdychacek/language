@@ -202,3 +202,18 @@ export class BlockStatement extends Statement {
     return '{}';
   }
 }
+
+export class FunctionLiteral extends Expression {
+  constructor (token, parameters, body) {
+    super(token);
+
+    this.parameters = parameters;
+    this.body = body;
+  }
+
+  toString () {
+    const parameters = `(${this.parameters.join(', ')})`;
+
+    return `${this.token.getTokenValue()}${parameters}${this.body.toString()}`;
+  }
+}

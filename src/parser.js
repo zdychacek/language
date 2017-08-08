@@ -31,6 +31,7 @@ class Parser {
     this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.LPAREN, this.parseGroupedExpression);
     this._registerPrefixParser(Keyword.IF, this.parseIfExpression);
+    this._registerPrefixParser(Keyword.FN, this.parseFunctionLiteral);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
@@ -236,6 +237,27 @@ class Parser {
     }
 
     return new ast.BlockStatement(token, statements);
+  }
+
+  parseFunctionLiteral = () => {
+    const token = this._consume(Keyword.FN);
+    const params = [];
+
+    this._consume(Punctuator.LPAREN);
+
+    while (!this._match(Punctuator.RPAREN)) {
+      params.push(this.parseIdentifier());
+
+      if (!this._match(Punctuator.COMMA)) {
+        break;
+      }
+
+      this._consume(Punctuator.COMMA);
+    }
+
+    this._consume(Punctuator.RPAREN);
+
+    return new ast.FunctionLiteral(token, params, this.parseBlockStatement());
   }
 
   parsePrefixExpression = () => {
