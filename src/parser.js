@@ -203,9 +203,20 @@ class Parser {
       consequence = this.parseExpression();
     }
 
-    // TODO: add "alternative" branch support
+    let alternative = null;
 
-    return new ast.IfExpression(token, condition, consequence);
+    if (this._match(Keyword.ELSE)) {
+      this._consume();
+
+      if (this._match(Punctuator.LBRACE)) {
+        alternative = this.parseBlockStatement();
+      }
+      else {
+        alternative = this.parseExpression();
+      }
+    }
+
+    return new ast.IfExpression(token, condition, consequence, alternative);
   }
 
   parseBlockStatement = () => {
@@ -248,8 +259,13 @@ class Parser {
       statements.push(stmt);
     }
 
-    // every statement must end with semicolon
-    this._consume(Punctuator.SEMICOLON);
+    // every statement except block statements must end with semicolon
+    if (!(
+      stmt instanceof ast.ExpressionStatement &&
+      stmt.expression instanceof ast.BlockStatement)
+    ) {
+      this._consume(Punctuator.SEMICOLON);
+    }
   }
 
   _peek (distance = 0) {

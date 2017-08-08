@@ -178,7 +178,7 @@ export class IfExpression extends Expression {
     out += this.consequence.toString();
 
     if (this.alternative) {
-      out += `else ${this.alternative.toString()}`;
+      out += ` else ${this.alternative.toString()}`;
     }
 
     return out;
@@ -193,8 +193,12 @@ export class BlockStatement extends Statement {
   }
 
   toString () {
-    return this.statements
-      .map((stmt) => stmt.toString())
-      .join('');
+    if (this.statements.length) {
+      return `{ ${this.statements
+        .map((stmt) => stmt.toString())
+        .join('')} }`;
+    }
+
+    return '{}';
   }
 }

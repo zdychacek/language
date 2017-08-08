@@ -6,7 +6,7 @@ import * as ast from '../../src/ast';
 import { checkParserErrors, testIdentifier, testInfixExpression } from './utils';
 
 test('Parser - If expression', (t) => {
-  const input = 'if (x < y) { x; };';
+  const input = 'if (x < y) { x; } else { y; };';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
@@ -26,6 +26,7 @@ test('Parser - If expression', (t) => {
 
   testInfixExpression(t, expression.condition, 'x', '<', 'y');
 
+  // test consequence branch
   t.equal(expression.consequence.statements.length, 1, 'consequence has one statement');
 
   const consequence = expression.consequence.statements[0];
@@ -34,7 +35,14 @@ test('Parser - If expression', (t) => {
 
   testIdentifier(t, consequence.expression, 'x');
 
-  t.notOk(expression.alternative, 'alternative is not defined');
+  // test alternative branch
+  t.equal(expression.alternative.statements.length, 1, 'alternative has one statement');
+
+  const alternative = expression.alternative.statements[0];
+
+  t.ok(alternative instanceof ast.ExpressionStatement, 'alternative.statements[0] is ast.ExpressionStatement');
+
+  testIdentifier(t, alternative.expression, 'y');
 
   t.end();
 });
