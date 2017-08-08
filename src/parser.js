@@ -31,7 +31,6 @@ class Parser {
     this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
     this._registerPrefixParser(Punctuator.LPAREN, this.parseGroupedExpression);
     this._registerPrefixParser(Keyword.IF, this.parseIfExpression);
-    this._registerPrefixParser(Punctuator.LBRACE, this.parseBlockStatement);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
@@ -48,6 +47,7 @@ class Parser {
     this._registerStatement(Keyword.LET, this.parseLetStatement);
     this._registerStatement(Keyword.RETURN, this.parseReturnStatement);
     this._registerStatement(Punctuator.SEMICOLON, this.parseEmptyStatement);
+    this._registerStatement(Punctuator.LBRACE, this.parseBlockStatement);
   }
 
   getErrors () {
@@ -90,6 +90,8 @@ class Parser {
 
     stmt.expression = this.parseExpression();
 
+    this._consume(Punctuator.SEMICOLON);
+
     return stmt;
   }
 
@@ -100,6 +102,8 @@ class Parser {
       stmt.returnValue = this.parseExpression();
     }
 
+    this._consume(Punctuator.SEMICOLON);
+
     return stmt;
   }
 
@@ -108,13 +112,13 @@ class Parser {
 
     stmt.expression = this.parseExpression();
 
+    this._consume(Punctuator.SEMICOLON);
+
     return stmt;
   }
 
   parseEmptyStatement = () => {
-    if (!this._match(Punctuator.SEMICOLON)) {
-      return null;
-    }
+    this._consume(Punctuator.SEMICOLON);
 
     return new ast.EmptyStatement(this._peek());
   }
@@ -257,14 +261,6 @@ class Parser {
 
     if (stmt) {
       statements.push(stmt);
-    }
-
-    // every statement except block statements must end with semicolon
-    if (!(
-      stmt instanceof ast.ExpressionStatement &&
-      stmt.expression instanceof ast.BlockStatement)
-    ) {
-      this._consume(Punctuator.SEMICOLON);
     }
   }
 
