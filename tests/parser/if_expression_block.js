@@ -5,8 +5,8 @@ import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import { checkParserErrors, testIdentifier, testInfixExpression } from './utils';
 
-test('Parser - If expression 2', (t) => {
-  const input = 'if (x < y) x else y;';
+test('Parser - If expression', (t) => {
+  const input = 'if (x < y) { x; } else { y; };';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
@@ -27,18 +27,22 @@ test('Parser - If expression 2', (t) => {
   testInfixExpression(t, expression.condition, 'x', '<', 'y');
 
   // test consequence branch
-  const consequence = expression.consequence;
+  t.equal(expression.consequence.statements.length, 1, 'consequence has one statement');
 
-  t.ok(consequence instanceof ast.Identifier, 'consequence is ast.Identifier');
+  const consequence = expression.consequence.statements[0];
 
-  testIdentifier(t, consequence, 'x');
+  t.ok(consequence instanceof ast.ExpressionStatement, 'consequence.statements[0] is ast.ExpressionStatement');
+
+  testIdentifier(t, consequence.expression, 'x');
 
   // test alternative branch
-  const alternative = expression.alternative;
+  t.equal(expression.alternative.statements.length, 1, 'alternative has one statement');
 
-  t.ok(alternative instanceof ast.Identifier, 'alternative is ast.Identifier');
+  const alternative = expression.alternative.statements[0];
 
-  testIdentifier(t, alternative, 'y');
+  t.ok(alternative instanceof ast.ExpressionStatement, 'alternative.statements[0] is ast.ExpressionStatement');
+
+  testIdentifier(t, alternative.expression, 'y');
 
   t.end();
 });
