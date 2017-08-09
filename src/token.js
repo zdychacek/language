@@ -61,6 +61,7 @@ export const TokenPrecedence = {
   [Punctuator.MINUS]: Precedence.SUM,
   [Punctuator.SLASH]: Precedence.PRODUCT,
   [Punctuator.ASTERISK]: Precedence.PRODUCT,
+  [Punctuator.LPAREN]: Precedence.CALL,
 };
 
 export class Token {

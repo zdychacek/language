@@ -4,7 +4,7 @@ import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import { checkParserErrors, testLiteralExpression } from './utils';
 
-test.only('Parser - Function parameters', (t) => {
+test('Parser - Function parameters', (t) => {
   const tests = [
     [ 'fn() {};', [] ],
     [ 'fn(x) {};', [ 'x' ] ],

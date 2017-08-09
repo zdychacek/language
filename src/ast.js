@@ -217,3 +217,18 @@ export class FunctionLiteral extends Expression {
     return `${this.getTokenValue()}${parameters}${this.body.toString()}`;
   }
 }
+
+export class CallExpression extends Expression {
+  constructor (token, fn, args) {
+    super(token);
+
+    this.fn = fn;
+    this.arguments = args;
+  }
+
+  toString () {
+    const args = this.arguments.map((arg) => arg.toString()).join(', ');
+
+    return `${this.fn.toString()}(${args})`;
+  }
+}

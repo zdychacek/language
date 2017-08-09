@@ -43,6 +43,7 @@ class Parser {
     this._registerInfixParser(Punctuator.NOT_EQ, this.parseInfixExpression);
     this._registerInfixParser(Punctuator.LT, this.parseInfixExpression);
     this._registerInfixParser(Punctuator.GT, this.parseInfixExpression);
+    this._registerInfixParser(Punctuator.LPAREN, this.parseCallExpression);
 
     // statements
     this._registerStatement(Keyword.LET, this.parseLetStatement);
@@ -258,6 +259,25 @@ class Parser {
     this._consume(Punctuator.RPAREN);
 
     return new ast.FunctionLiteral(token, params, this.parseBlockStatement());
+  }
+
+  parseCallExpression = (left) => {
+    const token = this._consume(Punctuator.LPAREN);
+    const args = [];
+
+    while (!this._match(Punctuator.RPAREN)) {
+      args.push(this.parseExpression());
+
+      if (!this._match(Punctuator.COMMA)) {
+        break;
+      }
+
+      this._consume(Punctuator.COMMA);
+    }
+
+    this._consume(Punctuator.RPAREN);
+
+    return new ast.CallExpression(token, left, args);
   }
 
   parsePrefixExpression = () => {
