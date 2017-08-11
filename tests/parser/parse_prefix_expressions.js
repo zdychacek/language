@@ -3,17 +3,17 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
-import { checkParserErrors, testIntegerLiteral } from './utils';
+import { checkParserErrors, testLiteralExpression } from './utils';
 
 test('Parser - Prefix expressions', (t) => {
   const tests = [
-    [ '!5', '!', 5 ],
-    [ '-15', '-', 15 ],
+    [ '!5;', '!', 5 ],
+    [ '-15;', '-', 15 ],
     [ '!true;', '!', true ],
     [ '!false;', '!', false ],
   ];
 
-  tests.forEach(([ input, operator, integerValue ]) => {
+  tests.forEach(([ input, operator, numberValue ]) => {
     const lexer = new Lexer(input);
     const parser = new Parser(lexer);
     const program = parser.parseProgram();
@@ -31,7 +31,7 @@ test('Parser - Prefix expressions', (t) => {
     t.ok(expression instanceof ast.PrefixExpression, 'expression is ast.PrefixExpression');
     t.equal(expression.operator, operator, 'expression has right operator');
 
-    testIntegerLiteral(t, expression.right, integerValue);
+    testLiteralExpression(t, expression.right, numberValue);
   });
 
   t.end();
