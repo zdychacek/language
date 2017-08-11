@@ -1,13 +1,5 @@
 import * as ast from '../../src/ast';
 
-export function checkParserErrors (t, parser) {
-  const errors = parser.getErrors();
-
-  t.notOk(errors.length, `parser has ${errors.length} errors`);
-
-  errors.forEach((error) => t.fail(`parser error: ${error}`));
-}
-
 export function testNumberLiteral (t, node, expected) {
   t.ok(node instanceof ast.NumberLiteral, 'node is ast.NumberLiteral');
   t.equal(node.literal, expected, `node.literal is ${expected}`);

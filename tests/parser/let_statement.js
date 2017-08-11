@@ -4,7 +4,7 @@ import test from 'tape';
 
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
-import { checkParserErrors, testLetStatement } from './utils';
+import { testLetStatement } from './utils';
 
 test('Parser - LetStatement', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/let_statement.lang'), 'utf8');
@@ -13,10 +13,9 @@ test('Parser - LetStatement', (t) => {
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  const program = parser.parseProgram();
+  let program = null;
 
-  checkParserErrors(t, parser);
-
+  t.doesNotThrow(() => program = parser.parseProgram(), 'There are no parsing errors.');
   t.notEqual(program, null, 'ParseProgram() is not null');
   t.equal(program.statements.length, 3, 'program.statements contains 3 statements');
 

@@ -1,4 +1,4 @@
-return 5;
-return 10;
-return 993322;
-return;
+return 5
+return 10
+return
+return 993322

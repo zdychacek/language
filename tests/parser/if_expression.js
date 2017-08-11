@@ -3,17 +3,16 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
-import { checkParserErrors, testIdentifier, testInfixExpression } from './utils';
+import { testIdentifier, testInfixExpression } from './utils';
 
 test('Parser - If expression 2', (t) => {
-  const input = 'if (x < y) x else y;';
+  const input = 'if (x < y) x else y';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  const program = parser.parseProgram();
+  let program = null;
 
-  checkParserErrors(t, parser);
-
+  t.doesNotThrow(() => program = parser.parseProgram(), 'There are no parsing errors.');
   t.equal(program.statements.length, 1, 'program has enough statements');
 
   const stmt = program.statements[0];

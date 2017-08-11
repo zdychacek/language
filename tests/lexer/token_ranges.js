@@ -15,10 +15,12 @@ test('Lexer#nextToken - token positions', (t) => {
     [ 11, 12 ],   // (
     [ 12, 13 ],   // )
     [ 14, 15 ],   // {
+    [ 15, 16 ],   // EOL
     [ 18, 24 ],   // return
     [ 25, 29 ],   // true
-    [ 29, 30 ],   // ;
-    [ 31, 32 ],   // }
+    [ 29, 30 ],   // EOL
+    [ 30, 31 ],   // }
+    [ 31, 32 ],   // EOL
   ];
 
   const lexer = new Lexer(input);

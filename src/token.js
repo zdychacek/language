@@ -6,6 +6,7 @@ export const TokenType = {
   KEYWORD: 'KEYWORD',
   PUNCTUATOR: 'PUNCTUATOR',
   EOF: 'EOF',
+  EOL: 'EOL',
   ILLEGAL: 'ILLEGAL',
 };
 

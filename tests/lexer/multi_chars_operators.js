@@ -13,11 +13,11 @@ test('Lexer#nextToken - multi char operators', (t) => {
     [ TokenType.NUMBER, '10' ],
     [ TokenType.PUNCTUATOR, '==' ],
     [ TokenType.NUMBER, '10' ],
-    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.NUMBER, '10' ],
     [ TokenType.PUNCTUATOR, '!=' ],
     [ TokenType.NUMBER, '9' ],
-    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

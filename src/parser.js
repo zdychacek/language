@@ -11,8 +11,6 @@ import * as ast from './ast';
 class Parser {
   // Lexer reference
   _lexer = null;
-  // list of parser's errors
-  _errors = [];
   // map of prefix parsers, eg. `-1`
   _prefixParsers = {};
   // map of infix parsers, eg. `1 + 2`
@@ -48,12 +46,7 @@ class Parser {
     // statements
     this._registerStatement(Keyword.LET, this.parseLetStatement);
     this._registerStatement(Keyword.RETURN, this.parseReturnStatement);
-    this._registerStatement(Punctuator.SEMICOLON, this.parseEmptyStatement);
     this._registerStatement(Punctuator.LBRACE, this.parseBlockStatement);
-  }
-
-  getErrors () {
-    return this._errors;
   }
 
   parseProgram = () => {
@@ -92,37 +85,21 @@ class Parser {
 
     stmt.expression = this.parseExpression();
 
-    this._consume(Punctuator.SEMICOLON);
-
     return stmt;
   }
 
   parseReturnStatement = () => {
     const stmt = new ast.ReturnStatement(this._consume(Keyword.RETURN));
 
-    if (!this._match(Punctuator.SEMICOLON)) {
+    if (!this._matchType(TokenType.EOL) && !this._matchType(TokenType.EOF)) {
       stmt.returnValue = this.parseExpression();
     }
-
-    this._consume(Punctuator.SEMICOLON);
 
     return stmt;
   }
 
   parseExpressionStatement = () => {
-    const stmt = new ast.ExpressionStatement(this._peek());
-
-    stmt.expression = this.parseExpression();
-
-    this._consume(Punctuator.SEMICOLON);
-
-    return stmt;
-  }
-
-  parseEmptyStatement = () => {
-    this._consume(Punctuator.SEMICOLON);
-
-    return new ast.EmptyStatement(this._peek());
+    return new ast.ExpressionStatement(this._peek(), this.parseExpression());
   }
 
   parseExpression = (precedence = Precedence.LOWEST) => {
@@ -136,7 +113,7 @@ class Parser {
     if (!prefix) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`Unexpected token "${token.value}" at ${lineNo}:${columnNo}.`);
+      throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (@${lineNo}:${columnNo}).`);
     }
 
     let leftExpr = prefix();
@@ -167,9 +144,7 @@ class Parser {
     const value = Number.parseInt(token.value, 10);
 
     if (!Number.isInteger(value)) {
-      this._errors.push(`Could not parse ${token.value} as integer.`);
-
-      return null;
+      throw new SyntaxError(`Could not parse ${token.value} as integer.`);
     }
 
     return new ast.NumberLiteral(token, value);
@@ -194,11 +169,7 @@ class Parser {
   parseIfExpression = () => {
     const token = this._consume(Keyword.IF);
 
-    this._consume(Punctuator.LPAREN);
-
     const condition = this.parseExpression();
-
-    this._consume(Punctuator.RPAREN);
 
     let consequence = null;
 
@@ -208,6 +179,8 @@ class Parser {
     else {
       consequence = this.parseExpression();
     }
+
+    this._consumeOptionalEOL();
 
     let alternative = null;
 
@@ -233,9 +206,7 @@ class Parser {
       this._parseStatement(statements);
     }
 
-    if (this._match(Punctuator.RBRACE)) {
-      this._consume();
-    }
+    this._consume(Punctuator.RBRACE);
 
     return new ast.BlockStatement(token, statements);
   }
@@ -299,10 +270,16 @@ class Parser {
   }
 
   _parseStatement (statements) {
+    this._consumeOptionalEOL();
+
     const stmt = this.parseStatement();
 
     if (stmt) {
       statements.push(stmt);
+    }
+
+    if (!this._match(Punctuator.RBRACE) && !this._matchType(TokenType.EOF)) {
+      this._consumeType(TokenType.EOL);
     }
   }
 
@@ -321,7 +298,10 @@ class Parser {
       const token = this._peek();
 
       if (!token || token.value !== expectedValue) {
-        this._errors.push(`Expected next token to be ${expectedValue}, got ${token.value || 'EOF'} instead.`);
+        const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
+        const tokenValue = this._resolveTokenValue(token);
+
+        throw new SyntaxError(`Expected next token to be "${expectedValue}", got "${tokenValue}" instead (@${lineNo}:${columnNo}).`);
       }
     }
 
@@ -339,11 +319,33 @@ class Parser {
       const token = this._peek();
 
       if (!token || token.type !== expectedType) {
-        this._errors.push(`Expected next token to be ${expectedType}, got ${token.type} instead.`);
+        const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
+        const tokenValue = this._resolveTokenValue(token);
+
+        throw new SyntaxError(`Expected next token to be "${expectedType}", got "${tokenValue}" instead (@${lineNo}:${columnNo}).`);
       }
     }
 
     return this._lexer.nextToken();
+  }
+
+  _consumeOptionalEOL () {
+    if (this._matchType(TokenType.EOL)) {
+      this._consume();
+    }
+  }
+
+  _resolveTokenValue (token) {
+    let { value } = token;
+
+    if (token.type === TokenType.EOF) {
+      value = '<end of file>';
+    }
+    else if (token.type === TokenType.EOL) {
+      value = '<end of line>';
+    }
+
+    return value;
   }
 
   _registerPrefixParser (value, parserFn) {

@@ -20,7 +20,7 @@ test('AST - String', (t) => {
     ]
   );
 
-  t.equal(program.toString(), 'let myVar = anotherVar;', 'program.toString()');
+  t.equal(program.toString(), 'let myVar = anotherVar', 'program.toString()');
 
   t.end();
 });

@@ -5,7 +5,6 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import { ReturnStatement } from '../../src/ast';
-import { checkParserErrors } from './utils';
 
 function testReturnStatement (t, stmt) {
   t.equal(stmt.getTokenValue(), 'return', 'stmt.getTokenValue is "return"');
@@ -19,10 +18,9 @@ test('Parser - ReturnStatement', (t) => {
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  const program = parser.parseProgram();
+  let program = null;
 
-  checkParserErrors(t, parser);
-
+  t.doesNotThrow(() => program = parser.parseProgram(), 'There are no parsing errors.');
   t.notEqual(program, null, 'ParseProgram() is not null');
 
   program.statements.forEach((stmt) => {

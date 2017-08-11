@@ -15,13 +15,13 @@ test('Lexer#nextToken - operators', (t) => {
     [ TokenType.PUNCTUATOR, '/' ],
     [ TokenType.PUNCTUATOR, '*' ],
     [ TokenType.NUMBER, '5' ],
-    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.NUMBER, '5' ],
     [ TokenType.PUNCTUATOR, '<' ],
     [ TokenType.NUMBER, '10' ],
     [ TokenType.PUNCTUATOR, '>' ],
     [ TokenType.NUMBER, '5' ],
-    [ TokenType.PUNCTUATOR, ';' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

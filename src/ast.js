@@ -73,8 +73,6 @@ export class LetStatement extends Statement {
       out += this.expression.toString();
     }
 
-    out += ';';
-
     return out;
   }
 }
@@ -93,8 +91,6 @@ export class ReturnStatement extends Statement {
       out += ` ${this.returnValue.toString()}`;
     }
 
-    out += ';';
-
     return out;
   }
 }
@@ -108,7 +104,7 @@ export class ExpressionStatement extends Statement {
 
   toString () {
     if (this.expression) {
-      return `${this.expression.toString()};`;
+      return `${this.expression.toString()}`;
     }
 
     return '';
@@ -142,11 +138,6 @@ export class InfixExpression extends Expression {
   }
 }
 
-export class EmptyStatement extends Statement {
-  toString () {
-    return ';';
-  }
-}
 export class Literal extends Expression {
   constructor (token, literal) {
     super(token);

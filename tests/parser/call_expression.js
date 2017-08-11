@@ -4,20 +4,19 @@ import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import {
-  checkParserErrors,
   testLiteralExpression,
   testIdentifier,
   testInfixExpression,
 } from './utils';
 
 test('Parser - Call expression', (t) => {
-  const input = 'add(1, 2 * 3, 4 + 5);';
+  const input = 'add(1, 2 * 3, 4 + 5)';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  const program = parser.parseProgram();
+  let program = null;
 
-  checkParserErrors(t, parser);
+  t.doesNotThrow(() => program = parser.parseProgram(), 'There are no parsing errors.');
 
   t.equal(program.statements.length, 1, 'program contains 1 statement');
 

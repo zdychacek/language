@@ -27,12 +27,22 @@ class Lexer {
 
   nextToken () {
     this._skipWhitespace();
+
     this._startToken();
 
     const char = this._peekChar();
 
+    // end of file
     if (this._isEOF()) {
       return this._finishToken(TokenType.EOF, '');
+    }
+    // end of line
+    else if (this._isEOL(char)) {
+     while (this._isEOL(this._peekChar())) {
+        this._getChar();
+      }
+
+      return this._finishToken(TokenType.EOL, '');
     }
     else if (this._isPunctuator(char)) {
       const { type, value } = this._readPunctuator();
@@ -86,7 +96,7 @@ class Lexer {
   _getChar () {
     const char = this._input[this._index];
 
-    if (this._isLineTerminator(char)) {
+    if (this._isEOL(char)) {
       this._lineNo++;
       this._columnNo = 1;
     }
@@ -180,12 +190,12 @@ class Lexer {
     return char !== null && char >= '0' && char <= '9';
   }
 
-  _isLineTerminator (char) {
+  _isEOL (char) {
     return char === '\n';
   }
 
   _isWhitespace (char) {
-    return /\s/.test(char);
+    return char === ' ' || char === '\t';
   }
 
   _isEOF () {
