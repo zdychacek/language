@@ -2,7 +2,9 @@ export const ObjectType = {
   NUMBER_OBJ: 'NUMBER',
   BOOLEAN_OBJ: 'BOOLEAN',
   NULL_OBJ: 'NULL',
-
+  RETURN_VALUE_OBJ: 'RETURN_VALUE',
+  VOID_OBJ: 'VOID',
+  ERROR_OBJ: 'ERROR',
 };
 
 export class ObjectValue {
@@ -11,7 +13,7 @@ export class ObjectValue {
   }
 
   getType () {
-    return '<abstract ObjectType>';
+    throw new Error('Not implemented.');
   }
 
   $inspect () {
@@ -32,8 +34,8 @@ export class BooleanObject extends ObjectValue {
 }
 
 export class NullObject extends ObjectValue {
-  $inspect () {
-    return 'null';
+  constructor () {
+    super('null');
   }
 
   getType () {
@@ -41,3 +43,28 @@ export class NullObject extends ObjectValue {
   }
 }
 
+export class ReturnValueObject extends ObjectValue {
+  getType () {
+    return ObjectType.RETURN_VALUE_OBJ;
+  }
+}
+
+export class VoidObject extends ObjectValue {
+  constructor () {
+    super('<void>');
+  }
+
+  getType () {
+    return ObjectType.VOID_OBJ;
+  }
+}
+
+export class ErrorObject extends ObjectValue {
+  getType () {
+    return ObjectType.ERROR_OBJ;
+  }
+
+  $inspect () {
+    return `ERROR: ${this.value}`;
+  }
+}

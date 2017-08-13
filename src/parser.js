@@ -160,7 +160,9 @@ class Parser {
     const condition = this._parseExpression();
     const consequence = this._parseExpressionOrBlockStatement();
 
-    this._consumeOptionalEOL();
+    if (this._match(Keyword.ELSE, this._peek(1))) {
+      this._consumeOptionalEOL();
+    }
 
     let alternative = null;
 
