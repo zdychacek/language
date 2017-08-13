@@ -7,8 +7,11 @@ import touch from 'touch';
 import Lexer from './lexer';
 import Parser from './parser';
 import evaluate from './evaluator';
+import Environment from './environment';
 
 const REPL_HISTORY_FILE = '.repl_history';
+
+const env = new Environment();
 
 function parse (input, context, filename, callback) {
   const lexer = new Lexer(input);
@@ -22,8 +25,7 @@ function parse (input, context, filename, callback) {
     return callback(`There are some errors:\n ${ex.toString()}`);
   }
 
-  //return callback(program.toString());
-  return callback(evaluate(program).$inspect());
+  return callback(evaluate(program, env).$inspect());
 }
 
 // create REPL server

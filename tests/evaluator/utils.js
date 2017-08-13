@@ -2,6 +2,7 @@ import * as object from '../../src/object';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import evaluate from '../../src/evaluator';
+import Environment from '../../src/environment';
 import { is } from '../utils';
 
 export function testBooleanObject (t, obj, expected) {
@@ -28,5 +29,5 @@ export function testEval (input) {
   const parser = new Parser(lexer);
   const program = parser.parseProgram();
 
-  return evaluate(program);
+  return evaluate(program, new Environment());
 }

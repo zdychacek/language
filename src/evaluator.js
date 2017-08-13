@@ -10,11 +10,11 @@ const FALSE = new object.BooleanObject(false);
 const NULL = new object.NullObject();
 const VOID = new object.VoidObject();
 
-function evalProgram (statements) {
+function evalProgram (statements, env) {
   let result = null;
 
   for (const stmt of statements) {
-    result = evaluate(stmt);
+    result = evaluate(stmt, env);
 
     if (result instanceof object.ReturnValueObject) {
       return result.value;
@@ -27,11 +27,11 @@ function evalProgram (statements) {
   return result;
 }
 
-function evalBlockStatement (statements) {
+function evalBlockStatement (statements, env) {
   let result = null;
 
   for (const stmt of statements) {
-    result = evaluate(stmt);
+    result = evaluate(stmt, env);
 
     if (
       result instanceof object.ReturnValueObject ||
@@ -141,22 +141,32 @@ function isTruthy (obj) {
   }
 }
 
-function evalIfExpression (node) {
-  const condition = evaluate(node.condition);
+function evalIfExpression (node, env) {
+  const condition = evaluate(node.condition, env);
 
   if (isError(condition)) {
     return condition;
   }
 
   if (isTruthy(condition)) {
-    return evaluate(node.consequence);
+    return evaluate(node.consequence, env);
   }
   else if (node.alternative) {
-    return evaluate(node.alternative);
+    return evaluate(node.alternative, env);
   }
   else {
     return NULL;
   }
+}
+
+function evalIdentifier (node, env) {
+  const value = env.get(node.value);
+
+  if (!value) {
+    return newError(`identifier not found: ${node.value}`);
+  }
+
+  return value;
 }
 
 function newError (message) {
@@ -167,15 +177,19 @@ function isError (obj) {
   return obj instanceof object.ErrorObject;
 }
 
-export default function evaluate (node) {
+export default function evaluate (node, env) {
+  if (!node) {
+    debugger;
+  }
+
   const type = node.constructor;
 
   switch (type) {
     // Statements
     case ast.Program:
-      return evalProgram(node.statements);
+      return evalProgram(node.statements, env);
     case ast.ExpressionStatement:
-      return evaluate(node.expression);
+      return evaluate(node.expression, env);
     case ast.ReturnStatement: {
       let value = null;
 
@@ -187,10 +201,21 @@ export default function evaluate (node) {
         value = VOID;
       }
       else {
-        value = evaluate(node.returnValue);
+        value = evaluate(node.returnValue, env);
       }
 
       return new object.ReturnValueObject(value);
+    }
+    case ast.BlockStatement:
+      return evalBlockStatement(node.statements);
+    case ast.LetStatement: {
+      const value = evaluate(node.expression, env);
+
+      if (isError(value)) {
+        return value;
+      }
+
+      env.set(node.name.value, value);
     }
     // Expressions
     case ast.NumberLiteral:
@@ -198,7 +223,7 @@ export default function evaluate (node) {
     case ast.BooleanLiteral:
       return nativeBoolToBooleanObject(node.literal);
     case ast.PrefixExpression: {
-      const right = evaluate(node.right);
+      const right = evaluate(node.right, env);
 
       if (isError(right)) {
         return right;
@@ -207,13 +232,13 @@ export default function evaluate (node) {
       return evalPrefixExpression(node.operator, right);
     }
     case ast.InfixExpression: {
-      const left = evaluate(node.left);
+      const left = evaluate(node.left, env);
 
       if (isError(left)) {
         return left;
       }
 
-      const right = evaluate(node.right);
+      const right = evaluate(node.right, env);
 
       if (isError(right)) {
         return right;
@@ -221,10 +246,10 @@ export default function evaluate (node) {
 
       return evalInfixExpression(node.operator, left, right);
     }
-    case ast.BlockStatement:
-      return evalBlockStatement(node.statements);
     case ast.IfExpression:
-      return evalIfExpression(node);
+      return evalIfExpression(node, env);
+    case ast.Identifier:
+      return evalIdentifier(node, env);
   }
 
   return null;

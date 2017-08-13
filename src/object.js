@@ -17,7 +17,11 @@ export class ObjectValue {
   }
 
   $inspect () {
-    return this.value.toString();
+    if (this.value !== undefined) {
+      return this.value.toString();
+    }
+
+    return '';
   }
 }
 

@@ -39,6 +39,10 @@ test('Evaluator - Error handling', (t) => {
       }`,
       'unknown operator: BOOLEAN + BOOLEAN',
     ],
+    [
+      'foobar',
+      'identifier not found: foobar',
+    ],
   ];
 
   tests.forEach(([ input, expected ]) => {
