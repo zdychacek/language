@@ -169,6 +169,51 @@ function evalIdentifier (node, env) {
   return value;
 }
 
+function evalExpressions (exps, env) {
+  const result = [];
+
+  for (const exp of exps) {
+    const evaluated = evaluate(exp, env);
+
+    if (isError(evaluated)) {
+      return [ evaluated ];
+    }
+
+    result.push(evaluated);
+  }
+
+  return result;
+}
+
+function extendFunctionEnv (fn, args) {
+  const env = fn.env.extend();
+
+  fn.parameters.forEach((param, index) => {
+    env.set(param.value, args[index]);
+  });
+
+  return env;
+}
+
+function unwrapReturnValue (obj) {
+  if (obj instanceof object.ReturnValueObject) {
+    return obj.value;
+  }
+
+  return obj;
+}
+
+function applyFunction (fn, args) {
+  if (!(fn instanceof object.FunctionObject)) {
+    return newError(`not a function: ${fn.getType()}`);
+  }
+
+  const extendedEnv = extendFunctionEnv(fn, args);
+  const evaluated = evaluate(fn.body, extendedEnv);
+
+  return unwrapReturnValue(evaluated);
+}
+
 function newError (message) {
   return new object.ErrorObject(message);
 }
@@ -178,10 +223,6 @@ function isError (obj) {
 }
 
 export default function evaluate (node, env) {
-  if (!node) {
-    debugger;
-  }
-
   const type = node.constructor;
 
   switch (type) {
@@ -191,23 +232,20 @@ export default function evaluate (node, env) {
     case ast.ExpressionStatement:
       return evaluate(node.expression, env);
     case ast.ReturnStatement: {
-      let value = null;
+      let value = VOID;
 
       if (isError(value)) {
         return value;
       }
 
-      if (node.returnValue === undefined) {
-        value = VOID;
-      }
-      else {
+      if (node.returnValue) {
         value = evaluate(node.returnValue, env);
       }
 
       return new object.ReturnValueObject(value);
     }
     case ast.BlockStatement:
-      return evalBlockStatement(node.statements);
+      return evalBlockStatement(node.statements, env);
     case ast.LetStatement: {
       const value = evaluate(node.expression, env);
 
@@ -250,6 +288,29 @@ export default function evaluate (node, env) {
       return evalIfExpression(node, env);
     case ast.Identifier:
       return evalIdentifier(node, env);
+    case ast.FunctionLiteral: {
+      const params = node.parameters;
+      const body = node.body;
+
+      return new object.FunctionObject(params, body, env);
+    }
+    case ast.CallExpression: {
+      const fn = evaluate(node.fn, env);
+
+      debugger;
+
+      if (isError(fn)) {
+        return fn;
+      }
+
+      const args = evalExpressions(node.arguments, env);
+
+      if (args.length === 1 && isError(args[0])) {
+        return args[0];
+      }
+
+      return applyFunction(fn, args);
+    }
   }
 
   return null;

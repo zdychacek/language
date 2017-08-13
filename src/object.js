@@ -5,6 +5,7 @@ export const ObjectType = {
   RETURN_VALUE_OBJ: 'RETURN_VALUE',
   VOID_OBJ: 'VOID',
   ERROR_OBJ: 'ERROR',
+  FUNCTION_OBJ: 'FUNCTION',
 };
 
 export class ObjectValue {
@@ -70,5 +71,27 @@ export class ErrorObject extends ObjectValue {
 
   $inspect () {
     return `ERROR: ${this.value}`;
+  }
+}
+
+export class FunctionObject extends ObjectValue {
+  constructor (parameters, body, env) {
+    super();
+
+    this.parameters = parameters;
+    this.body = body;
+    this.env = env;
+  }
+
+  getType () {
+    return ObjectType.FUNCTION_OBJ;
+  }
+
+  $inspect () {
+    const params = this.parameters
+      .map((param) => param.toString())
+      .join(',');
+
+    return `(${params}) -> ${this.body.toString()}`;
   }
 }

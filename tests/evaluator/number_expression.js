@@ -24,9 +24,7 @@ test('Evaluator - Number expression', (t) => {
   ];
 
   tests.forEach(([ input, expected ]) => {
-    const evaluated = testEval(input);
-
-    testNumberObject(t, evaluated, expected);
+    testNumberObject(t, testEval(input), expected);
   });
 
   t.end();
