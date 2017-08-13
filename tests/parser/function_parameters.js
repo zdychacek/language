@@ -6,11 +6,10 @@ import { testLiteralExpression } from './utils';
 
 test('Parser - Function parameters', (t) => {
   const tests = [
-    [ 'fn() {}', [] ],
-    [ 'fn(x) {}', [ 'x' ] ],
-    // trailing comma
-    [ 'fn(x, y,) {}', [ 'x', 'y' ] ],
-    [ 'fn(x, y, z) {}', [ 'x', 'y', 'z' ] ],
+    [ '() -> {}', [] ],
+    [ '(x) -> x', [ 'x' ] ],
+    [ '(x, y,) -> {}', [ 'x', 'y' ] ], // trailing comma
+    [ '(x, y, z) -> {}', [ 'x', 'y', 'z' ] ],
   ];
 
   tests.forEach(([ input, expectedParams ]) => {

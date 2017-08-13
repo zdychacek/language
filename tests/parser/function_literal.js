@@ -6,7 +6,7 @@ import * as ast from '../../src/ast';
 import { testLiteralExpression, testInfixExpression } from './utils';
 
 test('Parser - Function literal', (t) => {
-  const input = 'fn(x, y,) { x + y }';
+  const input = '(x, y,) -> { x + y }';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);

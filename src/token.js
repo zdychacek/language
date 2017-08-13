@@ -27,10 +27,10 @@ export const Punctuator = {
   SLASH: '/',
   LT: '<',
   GT: '>',
+  DASH_ARROW: '->',
 };
 
 export const Keyword = {
-  FN: 'fn',
   LET: 'let',
   IF: 'if',
   ELSE: 'else',

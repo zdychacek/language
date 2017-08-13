@@ -130,6 +130,14 @@ class Lexer {
       case Punctuator.RBRACE:
       case Punctuator.PLUS:
       case Punctuator.MINUS:
+        punctuator = this._getChar();
+
+        // dash arrow `->`
+        if (this._peekChar() === '>') {
+          punctuator += this._getChar();
+        }
+
+        return new Token(TokenType.PUNCTUATOR, punctuator);
       case Punctuator.ASTERISK:
       case Punctuator.SLASH:
       case Punctuator.LT:

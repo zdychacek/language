@@ -22,31 +22,30 @@ class Parser {
     this._lexer = lexer;
 
     // prefix parsers
-    this._registerPrefixParser(TokenType.IDENT, this.parseIdentifier);
-    this._registerPrefixParser(TokenType.NUMBER, this.parseNumberLiteral);
-    this._registerPrefixParser(TokenType.BOOLEAN, this.parseBooleanLiteral);
-    this._registerPrefixParser(Punctuator.BANG, this.parsePrefixExpression);
-    this._registerPrefixParser(Punctuator.MINUS, this.parsePrefixExpression);
-    this._registerPrefixParser(Punctuator.LPAREN, this.parseGroupedExpression);
-    this._registerPrefixParser(Keyword.IF, this.parseIfExpression);
-    this._registerPrefixParser(Keyword.FN, this.parseFunctionLiteral);
+    this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
+    this._registerPrefixParser(TokenType.NUMBER, this._parseNumberLiteral);
+    this._registerPrefixParser(TokenType.BOOLEAN, this._parseBooleanLiteral);
+    this._registerPrefixParser(Punctuator.BANG, this._parsePrefixExpression);
+    this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
+    this._registerPrefixParser(Punctuator.LPAREN, this._parseFunctionLiteralOrGroupedExpression);
+    this._registerPrefixParser(Keyword.IF, this._parseIfExpression);
 
     // infix parsers
-    this._registerInfixParser(Punctuator.PLUS, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.MINUS, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.SLASH, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.ASTERISK, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.ASSIGN, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.EQ, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.NOT_EQ, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.LT, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.GT, this.parseInfixExpression);
-    this._registerInfixParser(Punctuator.LPAREN, this.parseCallExpression);
+    this._registerInfixParser(Punctuator.PLUS, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.MINUS, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.SLASH, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.ASTERISK, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.ASSIGN, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.EQ, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.NOT_EQ, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.LT, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.GT, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression);
 
     // statements
-    this._registerStatement(Keyword.LET, this.parseLetStatement);
-    this._registerStatement(Keyword.RETURN, this.parseReturnStatement);
-    this._registerStatement(Punctuator.LBRACE, this.parseBlockStatement);
+    this._registerStatement(Keyword.LET, this._parseLetStatement);
+    this._registerStatement(Keyword.RETURN, this._parseReturnStatement);
+    this._registerStatement(Punctuator.LBRACE, this._parseBlockStatement);
   }
 
   parseProgram = () => {
@@ -55,24 +54,24 @@ class Parser {
     program.statements = [];
 
     while (!this._matchType(TokenType.EOF)) {
-      this._parseStatement(program.statements);
+      this._doParseStatement(program.statements);
     }
 
     return program;
   }
 
-  parseStatement = () => {
+  _parseStatement = () => {
     const statementParser = this._getStatementParser(this._peek());
 
     if (statementParser) {
       return statementParser(this);
     }
     else {
-      return this.parseExpressionStatement();
+      return this._parseExpressionStatement();
     }
   }
 
-  parseLetStatement = () => {
+  _parseLetStatement = () => {
     let token = this._consume(Keyword.LET);
 
     const stmt = new ast.LetStatement(token);
@@ -83,26 +82,26 @@ class Parser {
 
     this._consume(Punctuator.ASSIGN);
 
-    stmt.expression = this.parseExpression();
+    stmt.expression = this._parseExpression();
 
     return stmt;
   }
 
-  parseReturnStatement = () => {
+  _parseReturnStatement = () => {
     const stmt = new ast.ReturnStatement(this._consume(Keyword.RETURN));
 
     if (!this._matchType(TokenType.EOL) && !this._matchType(TokenType.EOF)) {
-      stmt.returnValue = this.parseExpression();
+      stmt.returnValue = this._parseExpression();
     }
 
     return stmt;
   }
 
-  parseExpressionStatement = () => {
-    return new ast.ExpressionStatement(this._peek(), this.parseExpression());
+  _parseExpressionStatement = () => {
+    return new ast.ExpressionStatement(this._peek(), this._parseExpression());
   }
 
-  parseExpression = (precedence = Precedence.LOWEST) => {
+  _parseExpression = (precedence = Precedence.LOWEST) => {
     let token = this._peek();
     const prefix = this._getPrefixParser(token);
 
@@ -133,13 +132,13 @@ class Parser {
     return leftExpr;
   }
 
-  parseIdentifier = () => {
+  _parseIdentifier = () => {
     const token = this._consumeType(TokenType.IDENT);
 
     return new ast.Identifier(token, token.value);
   }
 
-  parseNumberLiteral = () => {
+  _parseNumberLiteral = () => {
     const token = this._consumeType(TokenType.NUMBER);
     const value = Number.parseInt(token.value, 10);
 
@@ -150,35 +149,16 @@ class Parser {
     return new ast.NumberLiteral(token, value);
   }
 
-  parseBooleanLiteral = () => {
+  _parseBooleanLiteral = () => {
     const token = this._consumeType(TokenType.BOOLEAN);
 
     return new ast.BooleanLiteral(token, token.value === BooleanLiteral.TRUE);
   }
 
-  parseGroupedExpression = () => {
-    this._consume(Punctuator.LPAREN);
-
-    const expression = this.parseExpression();
-
-    this._consume(Punctuator.RPAREN);
-
-    return expression;
-  }
-
-  parseIfExpression = () => {
+  _parseIfExpression = () => {
     const token = this._consume(Keyword.IF);
-
-    const condition = this.parseExpression();
-
-    let consequence = null;
-
-    if (this._match(Punctuator.LBRACE)) {
-      consequence = this.parseBlockStatement();
-    }
-    else {
-      consequence = this.parseExpression();
-    }
+    const condition = this._parseExpression();
+    const consequence = this._parseExpressionOrBlockStatement();
 
     this._consumeOptionalEOL();
 
@@ -187,23 +167,18 @@ class Parser {
     if (this._match(Keyword.ELSE)) {
       this._consume();
 
-      if (this._match(Punctuator.LBRACE)) {
-        alternative = this.parseBlockStatement();
-      }
-      else {
-        alternative = this.parseExpression();
-      }
+      alternative = this._parseExpressionOrBlockStatement();
     }
 
     return new ast.IfExpression(token, condition, consequence, alternative);
   }
 
-  parseBlockStatement = () => {
+  _parseBlockStatement = () => {
     const token = this._consume(Punctuator.LBRACE);
     const statements = [];
 
     while (!this._match(Punctuator.RBRACE) && !this._matchType(TokenType.EOF)) {
-      this._parseStatement(statements);
+      this._doParseStatement(statements);
     }
 
     this._consume(Punctuator.RBRACE);
@@ -211,33 +186,12 @@ class Parser {
     return new ast.BlockStatement(token, statements);
   }
 
-  parseFunctionLiteral = () => {
-    const token = this._consume(Keyword.FN);
-    const params = [];
-
-    this._consume(Punctuator.LPAREN);
-
-    while (!this._match(Punctuator.RPAREN)) {
-      params.push(this.parseIdentifier());
-
-      if (!this._match(Punctuator.COMMA)) {
-        break;
-      }
-
-      this._consume(Punctuator.COMMA);
-    }
-
-    this._consume(Punctuator.RPAREN);
-
-    return new ast.FunctionLiteral(token, params, this.parseBlockStatement());
-  }
-
-  parseCallExpression = (left) => {
+  _parseCallExpression = (left) => {
     const token = this._consume(Punctuator.LPAREN);
     const args = [];
 
     while (!this._match(Punctuator.RPAREN)) {
-      args.push(this.parseExpression());
+      args.push(this._parseExpression());
 
       if (!this._match(Punctuator.COMMA)) {
         break;
@@ -251,28 +205,93 @@ class Parser {
     return new ast.CallExpression(token, left, args);
   }
 
-  parsePrefixExpression = () => {
+  _parsePrefixExpression = () => {
     const token = this._consume();
     const expression = new ast.PrefixExpression(token, token.value);
 
-    expression.right = this.parseExpression(Precedence.PREFIX);
+    expression.right = this._parseExpression(Precedence.PREFIX);
 
     return expression;
   }
 
-  parseInfixExpression = (left) => {
+  _parseInfixExpression = (left) => {
     const token = this._consume();
     const expression = new ast.InfixExpression(token, left, token.value);
 
-    expression.right = this.parseExpression(TokenPrecedence[token.value]);
+    expression.right = this._parseExpression(TokenPrecedence[token.value]);
 
     return expression;
   }
 
-  _parseStatement (statements) {
+  /**
+   * Parse function literal or grouped expression
+   *
+   *  Grouped expression:
+   *    (exp)
+   *
+   *  Function literal:
+   *    () -> {}
+   *    (a) -> a
+   *    (a, b) -> a
+   *    (a, b,) -> a
+   */
+  _parseFunctionLiteralOrGroupedExpression = () => {
+    const token = this._consume(Punctuator.LPAREN);
+    const nextToken = this._peek(1);
+
+    if (
+      this._match(Punctuator.RPAREN) || // no params
+      this._match(Punctuator.COMMA, nextToken) || // multiple params or one with trailing comma
+      // only one param
+      this._match(Punctuator.RPAREN, nextToken) && this._match(Punctuator.DASH_ARROW, this._peek(2))
+    ) {
+      return this._parseFunctionLiteral(token);
+    }
+    else {
+      return this._parseGroupedExpression();
+    }
+  }
+
+  _parseGroupedExpression () {
+    const expression = this._parseExpression();
+
+    this._consume(Punctuator.RPAREN);
+
+    return expression;
+  }
+
+  _parseFunctionLiteral (token) {
+    const params = [];
+
+    while (!this._match(Punctuator.RPAREN)) {
+      params.push(this._parseIdentifier());
+
+      if (!this._match(Punctuator.COMMA)) {
+        break;
+      }
+
+      this._consume(Punctuator.COMMA);
+    }
+
+    this._consume(Punctuator.RPAREN);
+    this._consume(Punctuator.DASH_ARROW);
+
+    return new ast.FunctionLiteral(token, params, this._parseExpressionOrBlockStatement());
+  }
+
+  _parseExpressionOrBlockStatement () {
+    if (this._match(Punctuator.LBRACE)) {
+      return this._parseBlockStatement();
+    }
+    else {
+      return this._parseExpression();
+    }
+  }
+
+  _doParseStatement (statements) {
     this._consumeOptionalEOL();
 
-    const stmt = this.parseStatement();
+    const stmt = this._parseStatement();
 
     if (stmt) {
       statements.push(stmt);
@@ -287,10 +306,12 @@ class Parser {
     return this._lexer.peek(distance);
   }
 
-  _match (expectedValue) {
-    const token = this._peek();
-
+  _match (expectedValue, token = this._peek()) {
     return token && token.value === expectedValue;
+  }
+
+  _matchType (expectedType, token = this._peek()) {
+    return token && token.type === expectedType;
   }
 
   _consume (expectedValue) {
@@ -306,12 +327,6 @@ class Parser {
     }
 
     return this._lexer.nextToken();
-  }
-
-  _matchType (expectedType) {
-    const token = this._peek();
-
-    return token && token.type === expectedType;
   }
 
   _consumeType (expectedType) {

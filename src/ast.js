@@ -205,7 +205,7 @@ export class FunctionLiteral extends Expression {
   toString () {
     const parameters = `(${this.parameters.join(', ')})`;
 
-    return `${this.getTokenValue()}${parameters}${this.body.toString()}`;
+    return `${parameters} -> ${this.body.toString()}`;
   }
 }
 
