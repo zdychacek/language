@@ -1,0 +1,2 @@
+- add SequenceExpression parsing/evaluating test
+- add function without params parsing/evaluating test
