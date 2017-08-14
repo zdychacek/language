@@ -27,7 +27,7 @@ class Parser {
     this._registerPrefixParser(TokenType.BOOLEAN, this._parseBooleanLiteral);
     this._registerPrefixParser(Punctuator.BANG, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
-    this._registerPrefixParser(Punctuator.LPAREN, this._parseFunctionLiteralOrGroupedExpression);
+    this._registerPrefixParser(Punctuator.LPAREN, this._parseEmptyParamListOrGroupedExpression);
     this._registerPrefixParser(Keyword.IF, this._parseIfExpression);
 
     // infix parsers
@@ -41,6 +41,8 @@ class Parser {
     this._registerInfixParser(Punctuator.LT, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.GT, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression);
+    this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
+    this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -103,11 +105,12 @@ class Parser {
 
   _parseExpression = (precedence = Precedence.LOWEST) => {
     let token = this._peek();
-    const prefix = this._getPrefixParser(token);
 
     if (this._matchType(TokenType.EOF)) {
       throw new SyntaxError('Unexpected end of file.');
     }
+
+    const prefix = this._getPrefixParser(token);
 
     if (!prefix) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
@@ -193,7 +196,7 @@ class Parser {
     const args = [];
 
     while (!this._match(Punctuator.RPAREN)) {
-      args.push(this._parseExpression());
+      args.push(this._parseExpression(Precedence.SEQUENCE));
 
       if (!this._match(Punctuator.COMMA)) {
         break;
@@ -225,48 +228,12 @@ class Parser {
     return expression;
   }
 
-  /**
-   * Parse function literal or grouped expression
-   *
-   *  Grouped expression:
-   *    (exp)
-   *
-   *  Function literal:
-   *    () -> {}
-   *    (a) -> a
-   *    (a, b) -> a
-   *    (a, b,) -> a
-   */
-  _parseFunctionLiteralOrGroupedExpression = () => {
-    const token = this._consume(Punctuator.LPAREN);
-    const nextToken = this._peek(1);
+  _parseSequenceExpression = (left) => {
+    const token = this._consume(Punctuator.COMMA);
+    const expressions = [ left ];
 
-    if (
-      this._match(Punctuator.RPAREN) || // no params
-      this._match(Punctuator.COMMA, nextToken) || // multiple params or one with trailing comma
-      // only one param
-      this._match(Punctuator.RPAREN, nextToken) && this._match(Punctuator.DASH_ARROW, this._peek(2))
-    ) {
-      return this._parseFunctionLiteral(token);
-    }
-    else {
-      return this._parseGroupedExpression();
-    }
-  }
-
-  _parseGroupedExpression () {
-    const expression = this._parseExpression();
-
-    this._consume(Punctuator.RPAREN);
-
-    return expression;
-  }
-
-  _parseFunctionLiteral (token) {
-    const params = [];
-
-    while (!this._match(Punctuator.RPAREN)) {
-      params.push(this._parseIdentifier());
+    while (!this._match(Punctuator.COMMA)) {
+      expressions.push(this._parseExpression(Precedence.SEQUENCE));
 
       if (!this._match(Punctuator.COMMA)) {
         break;
@@ -275,10 +242,60 @@ class Parser {
       this._consume(Punctuator.COMMA);
     }
 
-    this._consume(Punctuator.RPAREN);
-    this._consume(Punctuator.DASH_ARROW);
+    return new ast.SequenceExpression(token, expressions);
+  }
 
-    return new ast.FunctionLiteral(token, params, this._parseExpressionOrBlockStatement());
+  _parseEmptyParamListOrGroupedExpression = () => {
+    const token = this._consume(Punctuator.LPAREN);
+
+    if (
+      this._match(Punctuator.RPAREN, this._peek()) &&
+      this._match(Punctuator.DASH_ARROW, this._peek(1))
+    ) {
+      this._consume();
+
+      return new ast.EmptyParamListPlaceholder(token);
+    }
+    else {
+      const expression = this._parseExpression();
+
+      this._consume(Punctuator.RPAREN);
+
+      return expression;
+    }
+  }
+
+  _parseFunctionLiteral = (left) => {
+    const token = this._consume(Punctuator.DASH_ARROW);
+    const params = [];
+
+    if (left instanceof ast.Identifier) {
+      params.push(left);
+    }
+    // we get multiple parameters as a `SequenceExpression,`
+    // so we have to map this expression to identifiers or throw an error
+    else if (left instanceof ast.SequenceExpression) {
+      left.expressions.forEach((exp) => {
+        if (exp instanceof ast.Identifier) {
+          params.push(exp);
+        }
+        else {
+          const { start } = exp.token;
+
+          throw new SyntaxError(`Function argument must be an identifier, got "${exp.toString()}" (@${start.join(':')}).`);
+        }
+      });
+    }
+    // throw if we get anything else except `EmptyParamListPlaceholder`
+    else if (!(left instanceof ast.EmptyParamListPlaceholder)) {
+      const { start } = left.token;
+
+      throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (@${start.join(':')}).`);
+    }
+
+    const body = this._parseExpressionOrBlockStatement();
+
+    return new ast.FunctionLiteral(token, params, body);
   }
 
   _parseExpressionOrBlockStatement () {

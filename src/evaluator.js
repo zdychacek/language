@@ -297,8 +297,6 @@ export default function evaluate (node, env) {
     case ast.CallExpression: {
       const fn = evaluate(node.fn, env);
 
-      debugger;
-
       if (isError(fn)) {
         return fn;
       }
@@ -310,6 +308,15 @@ export default function evaluate (node, env) {
       }
 
       return applyFunction(fn, args);
+    }
+    case ast.SequenceExpression: {
+      const exps = evalExpressions(node.expressions, env);
+
+      if (exps.length === 1 && isError(exps[0])) {
+        return exps[0];
+      }
+
+      return exps[exps.length - 1];
     }
   }
 

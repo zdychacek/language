@@ -20,6 +20,9 @@ export class Statement extends Node {}
 
 export class Expression extends Node {}
 
+// just a placeholder for empty param list
+export class EmptyParamListPlaceholder extends Node {}
+
 export class Program extends Node {
   constructor (statements) {
     super();
@@ -221,5 +224,19 @@ export class CallExpression extends Expression {
     const args = this.arguments.map((arg) => arg.toString()).join(', ');
 
     return `${this.fn.toString()}(${args})`;
+  }
+}
+
+export class SequenceExpression extends Expression {
+  constructor (token, expressions) {
+    super(token);
+
+    this.expressions = expressions;
+  }
+
+  toString () {
+    return this.expressions
+      .map((exp) => exp.toString())
+      .join(', ');
   }
 }

@@ -8,7 +8,7 @@ test('Parser - Function parameters', (t) => {
   const tests = [
     [ '() -> {}', [] ],
     [ '(x) -> x', [ 'x' ] ],
-    [ '(x, y,) -> x + y', [ 'x', 'y' ] ], // trailing comma
+    [ '(x, y) -> x + y', [ 'x', 'y' ] ],
     [ '(x, y, z) -> {}', [ 'x', 'y', 'z' ] ],
   ];
 

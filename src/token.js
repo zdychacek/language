@@ -44,12 +44,14 @@ export const BooleanLiteral = {
 
 export const Precedence = {
   LOWEST: 0,
-  EQUALS: 1,       // ==
-  LESSGREATER: 2,  // > or <
-  SUM: 3,          // +
-  PRODUCT: 4,      // *
-  PREFIX: 5,       // -X or !X
-  CALL: 6,         // myFunction(X)
+  SEQUENCE: 5,      // ,
+  EQUALS: 10,       // ==
+  LESSGREATER: 20,  // > or <
+  SUM: 30,          // +
+  PRODUCT: 40,      // *
+  PREFIX: 50,       // -X or !X
+  DASH_ARROW: 55,   // ->
+  CALL: 60,         // myFunction(X)
 };
 
 export const TokenPrecedence = {
@@ -63,6 +65,8 @@ export const TokenPrecedence = {
   [Punctuator.SLASH]: Precedence.PRODUCT,
   [Punctuator.ASTERISK]: Precedence.PRODUCT,
   [Punctuator.LPAREN]: Precedence.CALL,
+  [Punctuator.COMMA]: Precedence.SEQUENCE,
+  [Punctuator.DASH_ARROW]: Precedence.DASH_ARROW,
 };
 
 export class Token {

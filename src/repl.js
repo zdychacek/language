@@ -25,6 +25,7 @@ function parse (input, context, filename, callback) {
     return callback(`There are some errors:\n ${ex.toString()}`);
   }
 
+  //return callback(program.toString());
   return callback(evaluate(program, env).$inspect());
 }
 
