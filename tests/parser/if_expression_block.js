@@ -9,7 +9,8 @@ test('Parser - If expression', (t) => {
   const input =
 `if x < y {
   x
-} else {
+}
+else {
   y
 }`;
 

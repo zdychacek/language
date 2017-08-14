@@ -161,7 +161,18 @@ class Parser {
   _parseIfExpression = () => {
     const token = this._consume(Keyword.IF);
     const condition = this._parseExpression();
-    const consequence = this._parseExpressionOrBlockStatement();
+    let consequence = null;
+
+    // `if a > b: <exp>`
+    if (this._match(Punctuator.COLON)) {
+      this._consume();
+
+      consequence = this._parseExpression();
+    }
+    // `if a > b { <exp> }`
+    else {
+      consequence = this._parseBlockStatement();
+    }
 
     if (this._match(Keyword.ELSE, this._peek(1))) {
       this._consumeOptionalEOL();

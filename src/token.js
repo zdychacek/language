@@ -28,6 +28,7 @@ export const Punctuator = {
   LT: '<',
   GT: '>',
   DASH_ARROW: '->',
+  COLON: ':',
 };
 
 export const Keyword = {

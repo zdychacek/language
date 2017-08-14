@@ -6,7 +6,7 @@ import * as ast from '../../src/ast';
 import { testIdentifier, testInfixExpression } from './utils';
 
 test('Parser - If expression 2', (t) => {
-  const input = 'if x < y x else y';
+  const input = 'if x < y: x else y';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);

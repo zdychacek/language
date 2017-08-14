@@ -123,12 +123,18 @@ class Lexer {
 
     switch (this._peekChar()) {
       case Punctuator.SEMICOLON:
+      case Punctuator.COLON:
       case Punctuator.LPAREN:
       case Punctuator.RPAREN:
       case Punctuator.COMMA:
       case Punctuator.LBRACE:
       case Punctuator.RBRACE:
       case Punctuator.PLUS:
+      case Punctuator.ASTERISK:
+      case Punctuator.SLASH:
+      case Punctuator.LT:
+      case Punctuator.GT:
+        return new Token(TokenType.PUNCTUATOR, this._getChar());
       case Punctuator.MINUS:
         punctuator = this._getChar();
 
@@ -138,11 +144,6 @@ class Lexer {
         }
 
         return new Token(TokenType.PUNCTUATOR, punctuator);
-      case Punctuator.ASTERISK:
-      case Punctuator.SLASH:
-      case Punctuator.LT:
-      case Punctuator.GT:
-        return new Token(TokenType.PUNCTUATOR, this._getChar());
       case Punctuator.ASSIGN:
         punctuator = this._getChar();
 
