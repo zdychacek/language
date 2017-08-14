@@ -1,2 +1,2 @@
-- add SequenceExpression parsing/evaluating test
+- add `else if` support
 - add function without params parsing/evaluating test
