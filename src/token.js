@@ -46,6 +46,7 @@ export const BooleanLiteral = {
 export const Precedence = {
   LOWEST: 0,
   SEQUENCE: 5,      // ,
+  ASSIGN: 7,        // =
   EQUALS: 10,       // ==
   LESSGREATER: 20,  // > or <
   SUM: 30,          // +
@@ -56,7 +57,7 @@ export const Precedence = {
 };
 
 export const TokenPrecedence = {
-  [Punctuator.ASSIGN]: Precedence.EQUALS,
+  [Punctuator.ASSIGN]: Precedence.ASSIGN,
   [Punctuator.EQ]: Precedence.EQUALS,
   [Punctuator.NOT_EQ]: Precedence.EQUALS,
   [Punctuator.LT]: Precedence.LESSGREATER,

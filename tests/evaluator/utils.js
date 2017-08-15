@@ -24,10 +24,10 @@ export function testVoidObject (t, obj) {
   t.equal(obj.value, '<void>', 'object has void value');
 }
 
-export function testEval (input) {
+export function testEval (input, env = new Environment()) {
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
   const program = parser.parseProgram();
 
-  return evaluate(program, new Environment());
+  return evaluate(program, env);
 }

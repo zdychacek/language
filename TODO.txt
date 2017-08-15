@@ -1,1 +1,2 @@
 - add function without params parsing/evaluating test
+- refactor parser error throwing (line, column)

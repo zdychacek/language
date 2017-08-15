@@ -141,6 +141,8 @@ export class InfixExpression extends Expression {
   }
 }
 
+export class AssignmentExpression extends InfixExpression {}
+
 export class Literal extends Expression {
   constructor (token, literal) {
     super(token);

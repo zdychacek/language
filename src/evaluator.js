@@ -318,6 +318,23 @@ export default function evaluate (node, env) {
 
       return exps[exps.length - 1];
     }
+    case ast.AssignmentExpression: {
+      const bindingName = node.left.value;
+
+      if (env.get(bindingName)) {
+        return newError(`cannot assign to undeclared identifier: "${bindingName}"`);
+      }
+
+      const right = evaluate(node.right, env);
+
+      if (isError(right)) {
+        return right;
+      }
+
+      env.set(bindingName, right);
+
+      return right;
+    }
   }
 
   return null;

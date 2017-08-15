@@ -35,7 +35,6 @@ class Parser {
     this._registerInfixParser(Punctuator.MINUS, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.SLASH, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.ASTERISK, this._parseInfixExpression);
-    this._registerInfixParser(Punctuator.ASSIGN, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.EQ, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.NOT_EQ, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.LT, this._parseInfixExpression);
@@ -43,6 +42,7 @@ class Parser {
     this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression);
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
+    this._registerInfixParser(Punctuator.ASSIGN, this._parseAssignmentExpression);
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -230,13 +230,31 @@ class Parser {
     return expression;
   }
 
-  _parseInfixExpression = (left) => {
+  _parseAssignmentExpression = (left) => {
     const token = this._consume();
-    const expression = new ast.InfixExpression(token, left, token.value);
+    const expression = new ast.AssignmentExpression(token, left, token.value);
 
-    expression.right = this._parseExpression(TokenPrecedence[token.value]);
+    // TODO: add MemberExpression when implemented
+    if (!(left instanceof ast.Identifier)) {
+      const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
+
+      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (@${lineNo}:${columnNo}).`);
+    }
+
+    expression.right = this._parseExpression(Precedence.ASSIGN - 1);
 
     return expression;
+  }
+
+  _parseInfixExpression = (left) => {
+    const token = this._consume();
+
+    return new ast.InfixExpression(
+      token,
+      left,
+      token.value,
+      this._parseExpression(TokenPrecedence[token.value])
+    );
   }
 
   _parseSequenceExpression = (left) => {
