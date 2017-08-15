@@ -5,12 +5,12 @@ import Parser from '../../src/parser';
 import * as ast from '../../src/ast';
 import { testIdentifier, testInfixExpression } from './utils';
 
-test('Parser - If expression', (t) => {
+test('Parser - If/else if expression', (t) => {
   const input =
 `if x < y {
   x
 }
-else {
+else if x > z  {
   y
 }`;
 
@@ -39,13 +39,17 @@ else {
   t.ok(consequence instanceof ast.ExpressionStatement, 'consequence.statements[0] is ast.ExpressionStatement');
   testIdentifier(t, consequence.expression, 'x');
 
-  // test alternative branch
-  t.equal(expression.alternative.statements.length, 1, 'alternative has one statement');
+  // test alternative branch (else if)
+  const alternative = expression.alternative;
 
-  const alternative = expression.alternative.statements[0];
+  t.ok(alternative instanceof ast.IfExpression, 'alternative is ast.IfExpression');
+  testInfixExpression(t, alternative.condition, 'x', '>', 'z');
+  t.equal(alternative.consequence.statements.length, 1, 'alternative.consequence has one statement');
 
-  t.ok(alternative instanceof ast.ExpressionStatement, 'alternative.statements[0] is ast.ExpressionStatement');
-  testIdentifier(t, alternative.expression, 'y');
+  const alternativeConsequence = alternative.consequence.statements[0];
+
+  t.ok(alternativeConsequence instanceof ast.ExpressionStatement, 'alternative.consequence.statements[0] is ast.ExpressionStatement');
+  testIdentifier(t, alternativeConsequence.expression, 'y');
 
   t.end();
 });
