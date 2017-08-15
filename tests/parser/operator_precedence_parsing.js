@@ -3,7 +3,7 @@ import test from 'tape';
 import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 
-test('Parser - Operator Precedence Parsing', (t) => {
+test('Parser - Operator precedence parsing', (t) => {
   const tests = [
     [ '-a * b', '((-a) * b)' ],
     [ '!-a', '(!(-a))' ],

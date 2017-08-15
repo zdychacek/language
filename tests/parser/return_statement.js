@@ -13,7 +13,7 @@ function testReturnStatement (t, stmt) {
   return true;
 }
 
-test('Parser - ReturnStatement', (t) => {
+test('Parser - Return statement', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/return_statement.lang'), 'utf8');
 
   const lexer = new Lexer(input);

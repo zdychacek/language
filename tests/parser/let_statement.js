@@ -6,7 +6,7 @@ import Lexer from '../../src/lexer';
 import Parser from '../../src/parser';
 import { testLetStatement } from './utils';
 
-test('Parser - LetStatement', (t) => {
+test('Parser - Let statement', (t) => {
   const input = fs.readFileSync(path.join(__dirname, 'fixtures/let_statement.lang'), 'utf8');
 
   const expected = [ 'x', 'y', 'foobar' ];
