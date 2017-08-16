@@ -321,7 +321,7 @@ export default function evaluate (node, env) {
     case ast.AssignmentExpression: {
       const bindingName = node.left.value;
 
-      if (env.get(bindingName)) {
+      if (!env.get(bindingName)) {
         return newError(`cannot assign to undeclared identifier: "${bindingName}"`);
       }
 
