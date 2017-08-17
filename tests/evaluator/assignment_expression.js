@@ -10,7 +10,7 @@ test('Evaluator - Assignment expression', (t) => {
     [ 'a = 0', { a: 0 } ],
     [ 'a = b = 2', { a: 2, b: 2 } ],
     [ 'a = b = c = 3', { a: 3, b: 3, c: 3 } ],
-    [ 'd = 3', 'cannot assign to undeclared identifier: "d"' ],
+    [ 'd = 3', 'Cannot assign to undeclared identifier: "d".' ],
   ];
 
   tests.forEach(([ input, expected ]) => {

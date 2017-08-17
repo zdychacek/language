@@ -3,6 +3,7 @@
 import * as ast from '../parser/ast';
 import * as object from './object';
 import * as consts from './constants';
+import builtins from './builtins';
 
 const ObjectType = object.ObjectType;
 
@@ -55,7 +56,7 @@ function evalPrefixExpression (operator, right) {
     case '-':
       return evalMinusPrefixOperatorExpression(right);
     default:
-      return newError(`unknown operator: ${operator}${right.getType()}`);
+      return new object.ErrorObject(`Unknown operator: ${operator}${right.getType()}.`);
   }
 }
 
@@ -74,7 +75,7 @@ function evalBangOperatorExpression (right) {
 
 function evalMinusPrefixOperatorExpression (right) {
   if (right.getType() !== ObjectType.NUMBER_OBJ) {
-    return newError(`unknown operator: -${right.getType()}`);
+    return new object.ErrorObject(`Unknown operator: -${right.getType()}.`);
   }
 
   return new object.NumberObject(-right.value);
@@ -102,13 +103,13 @@ function evalNumberInfixExpression (operator, left, right) {
     case '!=':
       return nativeBoolToBooleanObject(leftValue !== rightValue);
     default:
-      return newError(`unknown operator: ${left.getType()} ${operator} ${right.getType()}`);
+      return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
   }
 }
 
 function evalStringInfixExpression (operator, left, right) {
   if (operator !== '+') {
-    return newError(`unknown operator: ${left.getType()} ${operator} ${right.getType()}`);
+    return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
   }
 
   return new object.StringObject(left.value + right.value);
@@ -126,13 +127,13 @@ function evalInfixExpression (operator, left, right) {
     return nativeBoolToBooleanObject(left !== right);
   }
   else if (left.getType() !== right.getType()) {
-    return newError(`type mismatch: ${left.getType()} ${operator} ${right.getType()}`);
+    return new object.ErrorObject(`Type mismatch: ${left.getType()} ${operator} ${right.getType()}.`);
   }
   else if (left.getType() === ObjectType.STRING_OBJ && right.getType() === ObjectType.STRING_OBJ) {
     return evalStringInfixExpression(operator, left, right);
   }
 
-  return newError(`unknown operator: ${left.getType()} ${operator} ${right.getType()}`);
+  return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
 }
 
 function isTruthy (obj) {
@@ -169,8 +170,18 @@ function evalIfExpression (node, env) {
 function evalIdentifier (node, env) {
   const value = env.get(node.value);
 
+  if (value) {
+    return value;
+  }
+
+  const builtin = builtins[node.value];
+
+  if (builtin) {
+    return builtin;
+  }
+
   if (!value) {
-    return newError(`identifier not found: ${node.value}`);
+    return new object.ErrorObject(`Identifier not found: ${node.value}.`);
   }
 
   return value;
@@ -211,18 +222,18 @@ function unwrapReturnValue (obj) {
 }
 
 function applyFunction (fn, args) {
-  if (!(fn instanceof object.FunctionObject)) {
-    return newError(`not a function: ${fn.getType()}`);
+  if (fn instanceof object.FunctionObject) {
+    const extendedEnv = extendFunctionEnv(fn, args);
+    const evaluated = evaluate(fn.body, extendedEnv);
+
+    return unwrapReturnValue(evaluated);
   }
-
-  const extendedEnv = extendFunctionEnv(fn, args);
-  const evaluated = evaluate(fn.body, extendedEnv);
-
-  return unwrapReturnValue(evaluated);
-}
-
-function newError (message) {
-  return new object.ErrorObject(message);
+  else if (fn instanceof object.BuiltinObject) {
+    return fn.value(...args);
+  }
+  else {
+    return new object.ErrorObject(`Not a function: ${fn.getType()}.`);
+  }
 }
 
 function isError (obj) {
@@ -331,7 +342,7 @@ export default function evaluate (node, env) {
       const bindingName = node.left.value;
 
       if (!env.get(bindingName)) {
-        return newError(`cannot assign to undeclared identifier: "${bindingName}"`);
+        return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
       }
 
       const right = evaluate(node.right, env);

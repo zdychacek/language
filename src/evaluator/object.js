@@ -110,6 +110,6 @@ export class BuiltinObject extends ObjectValue {
   }
 
   $inspect () {
-    return 'builtin function';
+    return '<builtin function>';
   }
 }
