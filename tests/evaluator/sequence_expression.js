@@ -6,7 +6,7 @@ import {
   testBooleanObject,
 } from './utils';
 import { is } from '../utils';
-import * as object from '../../src/object';
+import * as object from '../../src/evaluator/object';
 
 test('Evaluator - Sequence expression', (t) => {
   const tests = [

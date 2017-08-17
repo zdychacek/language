@@ -1,14 +1,10 @@
 /* eslint-disable no-use-before-define */
 
-import * as ast from './ast';
+import * as ast from '../parser/ast';
 import * as object from './object';
+import * as consts from './constants';
 
 const ObjectType = object.ObjectType;
-
-const TRUE = new object.BooleanObject(true);
-const FALSE = new object.BooleanObject(false);
-const NULL = new object.NullObject();
-const VOID = new object.VoidObject();
 
 function evalProgram (statements, env) {
   let result = null;
@@ -46,10 +42,10 @@ function evalBlockStatement (statements, env) {
 
 function nativeBoolToBooleanObject (value) {
   if (value) {
-    return TRUE;
+    return consts.TRUE;
   }
 
-  return FALSE;
+  return consts.FALSE;
 }
 
 function evalPrefixExpression (operator, right) {
@@ -65,14 +61,14 @@ function evalPrefixExpression (operator, right) {
 
 function evalBangOperatorExpression (right) {
   switch (right) {
-    case TRUE:
-      return FALSE;
-    case FALSE:
-      return TRUE;
-    case NULL:
-      return TRUE;
+    case consts.TRUE:
+      return consts.FALSE;
+    case consts.FALSE:
+      return consts.TRUE;
+    case consts.NULL:
+      return consts.TRUE;
     default:
-      return FALSE;
+      return consts.FALSE;
   }
 }
 
@@ -110,6 +106,14 @@ function evalNumberInfixExpression (operator, left, right) {
   }
 }
 
+function evalStringInfixExpression (operator, left, right) {
+  if (operator !== '+') {
+    return newError(`unknown operator: ${left.getType()} ${operator} ${right.getType()}`);
+  }
+
+  return new object.StringObject(left.value + right.value);
+}
+
 function evalInfixExpression (operator, left, right) {
   if (left.getType() === ObjectType.NUMBER_OBJ && right.getType() === ObjectType.NUMBER_OBJ) {
     return evalNumberInfixExpression(operator, left, right);
@@ -124,17 +128,20 @@ function evalInfixExpression (operator, left, right) {
   else if (left.getType() !== right.getType()) {
     return newError(`type mismatch: ${left.getType()} ${operator} ${right.getType()}`);
   }
+  else if (left.getType() === ObjectType.STRING_OBJ && right.getType() === ObjectType.STRING_OBJ) {
+    return evalStringInfixExpression(operator, left, right);
+  }
 
   return newError(`unknown operator: ${left.getType()} ${operator} ${right.getType()}`);
 }
 
 function isTruthy (obj) {
   switch (obj) {
-    case NULL:
+    case consts.NULL:
       return false;
-    case TRUE:
+    case consts.TRUE:
       return true;
-    case FALSE:
+    case consts.FALSE:
       return false;
     default:
       return true;
@@ -155,7 +162,7 @@ function evalIfExpression (node, env) {
     return evaluate(node.alternative, env);
   }
   else {
-    return NULL;
+    return consts.NULL;
   }
 }
 
@@ -232,7 +239,7 @@ export default function evaluate (node, env) {
     case ast.ExpressionStatement:
       return evaluate(node.expression, env);
     case ast.ReturnStatement: {
-      let value = VOID;
+      let value = consts.VOID;
 
       if (isError(value)) {
         return value;

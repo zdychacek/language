@@ -1,6 +1,6 @@
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
+import Lexer from '../../src/lexer/lexer';
 
 test('Lexer - unterminated string', (t) => {
   const input = '"a';

@@ -7,6 +7,7 @@ export const ObjectType = {
   VOID_OBJ: 'VOID',
   ERROR_OBJ: 'ERROR',
   FUNCTION_OBJ: 'FUNCTION',
+  BUILTIN_OBJ: 'BUILTIN',
 };
 
 export class ObjectValue {
@@ -100,5 +101,15 @@ export class FunctionObject extends ObjectValue {
       .join(',');
 
     return `(${params}) -> ${this.body.toString()}`;
+  }
+}
+
+export class BuiltinObject extends ObjectValue {
+  getType () {
+    return ObjectType.BUILTIN_OBJ;
+  }
+
+  $inspect () {
+    return 'builtin function';
   }
 }

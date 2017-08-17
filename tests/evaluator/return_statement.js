@@ -6,7 +6,7 @@ import {
   testEval,
 } from './utils';
 import { is } from '../utils';
-import * as object from '../../src/object';
+import * as object from '../../src/evaluator/object';
 
 test('Evaluator - Return statement', (t) => {
   const tests = [

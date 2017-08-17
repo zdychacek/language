@@ -1,8 +1,8 @@
-import * as object from '../../src/object';
-import Lexer from '../../src/lexer';
-import Parser from '../../src/parser';
-import evaluate from '../../src/evaluator';
-import Environment from '../../src/environment';
+import * as object from '../../src/evaluator/object';
+import Lexer from '../../src/lexer/lexer';
+import Parser from '../../src/parser/parser';
+import evaluate from '../../src/evaluator/evaluate';
+import Environment from '../../src/evaluator/environment';
 import { is } from '../utils';
 
 export function testBooleanObject (t, obj, expected) {

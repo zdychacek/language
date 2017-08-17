@@ -2,8 +2,8 @@ import test from 'tape';
 
 import { testEval } from './utils';
 import { is } from '../utils';
-import * as object from '../../src/object';
-import Environment from '../../src/environment';
+import * as object from '../../src/evaluator/object';
+import Environment from '../../src/evaluator/environment';
 
 test('Evaluator - Assignment expression', (t) => {
   const tests = [

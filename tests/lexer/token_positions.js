@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
+import Lexer from '../../src/lexer/lexer';
 
 test('Lexer#nextToken - token positions', (t) => {
   const input = fs.readFileSync(path.join(__dirname, './fixtures/token_positions.lang'), 'utf8');

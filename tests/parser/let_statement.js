@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
-import Parser from '../../src/parser';
+import Lexer from '../../src/lexer/lexer';
+import Parser from '../../src/parser/parser';
 import { testLetStatement } from './utils';
 
 test('Parser - Let statement', (t) => {

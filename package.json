@@ -6,10 +6,12 @@
     "test": "test"
   },
   "quokka": {
-    "babel": true
+    "babel": true,
+    "pro": true
   },
   "scripts": {
-    "start": "babel-node ./src/repl.js",
+    "start": "babel-node ./src/interpreter.js",
+    "repl": "babel-node ./src/repl.js",
     "lint": "eslint src/**/*.js tests/**/*.js",
     "pretest": "npm run lint --silent",
     "test": "babel-tape-runner tests/**/*.js | tap-spec",

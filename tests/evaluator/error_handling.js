@@ -1,7 +1,7 @@
 import test from 'tape';
 
 import { testEval } from './utils';
-import * as object from '../../src/object';
+import * as object from '../../src/evaluator/object';
 import { is } from '../utils';
 
 test('Evaluator - Error handling', (t) => {
@@ -42,6 +42,10 @@ test('Evaluator - Error handling', (t) => {
     [
       'foobar',
       'identifier not found: foobar',
+    ],
+    [
+      '"Hello" - "World"',
+      'unknown operator: STRING - STRING',
     ],
   ];
 

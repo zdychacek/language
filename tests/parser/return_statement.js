@@ -2,9 +2,9 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
-import Parser from '../../src/parser';
-import { ReturnStatement } from '../../src/ast';
+import Lexer from '../../src/lexer/lexer';
+import Parser from '../../src/parser/parser';
+import { ReturnStatement } from '../../src/parser/ast';
 
 function testReturnStatement (t, stmt) {
   t.equal(stmt.getTokenValue(), 'return', 'stmt.getTokenValue is "return"');

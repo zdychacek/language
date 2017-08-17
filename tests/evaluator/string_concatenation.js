@@ -4,8 +4,8 @@ import { testEval } from './utils';
 import { is } from '../utils';
 import * as object from '../../src/evaluator/object';
 
-test('Evaluator - String literal', (t) => {
-  const input = '"Hello World!"';
+test('Evaluator - String concatenation', (t) => {
+  const input = '"Hello" + " " +  "World!"';
 
   const str = testEval(input);
 

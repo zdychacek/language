@@ -1,2 +1,3 @@
 - add function without params parsing/evaluating test
 - refactor parser/evaluator error throwing (line, column)
+- implement `toString` and `toNumber` builtins

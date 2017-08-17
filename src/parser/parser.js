@@ -5,7 +5,7 @@ import {
   Keyword,
   Punctuator,
   BooleanLiteral,
-} from './token';
+} from '../lexer/token';
 import * as ast from './ast';
 
 class Parser {

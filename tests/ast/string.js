@@ -1,7 +1,7 @@
 import test from 'tape';
 
-import * as ast from '../../src/ast';
-import { Token, TokenType } from '../../src/token';
+import * as ast from '../../src/parser/ast';
+import { Token, TokenType } from '../../src/lexer/token';
 
 test('AST - String', (t) => {
   const program = new ast.Program(

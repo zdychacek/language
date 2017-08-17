@@ -1,8 +1,8 @@
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
-import Parser from '../../src/parser';
-import * as ast from '../../src/ast';
+import Lexer from '../../src/lexer/lexer';
+import Parser from '../../src/parser/parser';
+import * as ast from '../../src/parser/ast';
 import { testIdentifier, testInfixExpression } from './utils';
 
 test('Parser - If/else if expression', (t) => {

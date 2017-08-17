@@ -1,4 +1,4 @@
-import * as ast from '../../src/ast';
+import * as ast from '../../src/parser/ast';
 
 export function testNumberLiteral (t, node, expected) {
   t.ok(node instanceof ast.NumberLiteral, 'node is ast.NumberLiteral');

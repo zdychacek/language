@@ -2,7 +2,7 @@ import test from 'tape';
 
 import { testEval } from './utils';
 import { is } from './../utils';
-import * as object from '../../src/object';
+import * as object from '../../src/evaluator/object';
 
 test('Evaluator - Function object', (t) => {
   const input = '(x) -> x + 2';

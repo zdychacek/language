@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import test from 'tape';
 
-import Lexer from '../../src/lexer';
-import { TokenType } from '../../src/token';
+import Lexer from '../../src/lexer/lexer';
+import { TokenType } from '../../src/lexer/token';
 import { checkToken } from './utils';
 
 test('Lexer#nextToken - operators', (t) => {

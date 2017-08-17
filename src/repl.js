@@ -4,10 +4,10 @@ import fs from 'fs';
 import repl from 'repl';
 import touch from 'touch';
 
-import Lexer from './lexer';
-import Parser from './parser';
-import evaluate from './evaluator';
-import Environment from './environment';
+import Lexer from './lexer/lexer';
+import Parser from './parser/parser';
+import evaluate from './evaluator/evaluate';
+import Environment from './evaluator/environment';
 
 const REPL_HISTORY_FILE = '.repl_history';
 

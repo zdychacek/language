@@ -1,0 +1,4 @@
+let makeGreeter = greeting -> name -> greeting + " " + name + "!"
+let hello = makeGreeter("Hello")
+
+hello("Ondrej")
