@@ -44,6 +44,10 @@ export class StringObject extends ObjectValue {
   getType () {
     return ObjectType.STRING_OBJ;
   }
+
+  $inspect () {
+    return `"${this.value.toString()}"`;
+  }
 }
 
 export class NullObject extends ObjectValue {
@@ -98,7 +102,7 @@ export class FunctionObject extends ObjectValue {
   $inspect () {
     const params = this.parameters
       .map((param) => param.toString())
-      .join(',');
+      .join(', ');
 
     return `(${params}) -> ${this.body.toString()}`;
   }

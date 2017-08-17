@@ -4,7 +4,7 @@ import { testEval, testNumberObject } from './utils';
 import { is } from '../utils';
 import * as object from '../../src/evaluator/object';
 
-test('Evaluator - Builtin functions', (t) => {
+test('Evaluator - `len` builtin function', (t) => {
   const tests = [
     // strings
     [ 'len("")', 0 ],
