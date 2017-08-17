@@ -6,13 +6,11 @@ import * as object from '../../src/evaluator/object';
 
 test('Evaluator - `len` builtin function', (t) => {
   const tests = [
-    // strings
     [ 'len("")', 0 ],
     [ 'len("four")', 4 ],
     [ 'len("hello world")', 11 ],
     [ 'len(1)', 'Argument to `len` not supported, got NUMBER.' ],
     [ 'len("one", "two")', 'Wrong number of arguments, got=2, want=1.' ],
-    // functions
     [ 'len(() -> x)', 0 ],
     [ 'len(x -> y -> x)', 1 ],
     [ 'len((x, y) -> x)', 2 ],
