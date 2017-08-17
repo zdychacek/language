@@ -1,6 +1,7 @@
 export const ObjectType = {
   NUMBER_OBJ: 'NUMBER',
   BOOLEAN_OBJ: 'BOOLEAN',
+  STRING_OBJ: 'STRING',
   NULL_OBJ: 'NULL',
   RETURN_VALUE_OBJ: 'RETURN_VALUE',
   VOID_OBJ: 'VOID',
@@ -35,6 +36,12 @@ export class NumberObject extends ObjectValue {
 export class BooleanObject extends ObjectValue {
   getType () {
     return ObjectType.BOOLEAN_OBJ;
+  }
+}
+
+export class StringObject extends ObjectValue {
+  getType () {
+    return ObjectType.STRING_OBJ;
   }
 }
 

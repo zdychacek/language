@@ -258,6 +258,8 @@ export default function evaluate (node, env) {
     // Expressions
     case ast.NumberLiteral:
       return new object.NumberObject(node.literal);
+    case ast.StringLiteral:
+      return new object.StringObject(node.literal);
     case ast.BooleanLiteral:
       return nativeBoolToBooleanObject(node.literal);
     case ast.PrefixExpression: {

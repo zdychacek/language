@@ -67,6 +67,11 @@ class Lexer {
 
       return this._finishToken(TokenType.NUMBER, value);
     }
+    else if (char === '"') {
+      const value = this._readString();
+
+      return this._finishToken(TokenType.STRING, value);
+    }
     else {
       return this._finishToken(TokenType.ILLEGAL, char);
     }
@@ -179,6 +184,24 @@ class Lexer {
     while (this._isDigit(this._peekChar())) {
       value += this._getChar();
     }
+
+    return value;
+  }
+
+  _readString () {
+    let value = '';
+
+    this._getChar(); // read starting "
+
+    while (this._peekChar() !== '"') {
+      if (this._isEOF()) {
+        throw new SyntaxError(`Unterminated string (@${this._lineNo}:${this._columnNo}).`);
+      }
+
+      value += this._getChar();
+    }
+
+    this._getChar(); // read trailing "
 
     return value;
   }

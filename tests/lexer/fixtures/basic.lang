@@ -4,3 +4,9 @@ let add = (x, y) -> {
   x + y
 }
 let result = add(five, ten)
+"foobar"
+"foo bar"
+""
+"a
+b
+"

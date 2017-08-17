@@ -159,6 +159,8 @@ export class NumberLiteral extends Literal {}
 
 export class BooleanLiteral extends Literal {}
 
+export class StringLiteral extends Literal {}
+
 export class IfExpression extends Expression {
   constructor (token, condition, consequence, alternative) {
     super(token);

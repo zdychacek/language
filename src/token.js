@@ -3,6 +3,7 @@ export const TokenType = {
   LITERAL: 'LITERAL',
   NUMBER: 'NUMBER',
   BOOLEAN: 'BOOLEAN',
+  STRING: 'STRING',
   KEYWORD: 'KEYWORD',
   PUNCTUATOR: 'PUNCTUATOR',
   EOF: 'EOF',

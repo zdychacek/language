@@ -25,6 +25,7 @@ class Parser {
     this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
     this._registerPrefixParser(TokenType.NUMBER, this._parseNumberLiteral);
     this._registerPrefixParser(TokenType.BOOLEAN, this._parseBooleanLiteral);
+    this._registerPrefixParser(TokenType.STRING, this._parseStringLiteral);
     this._registerPrefixParser(Punctuator.BANG, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.LPAREN, this._parseEmptyParamListOrGroupedExpression);
@@ -325,6 +326,12 @@ class Parser {
     const body = this._parseExpressionOrBlockStatement();
 
     return new ast.FunctionLiteral(token, params, body);
+  }
+
+  _parseStringLiteral = () => {
+    const token = this._consumeType(TokenType.STRING);
+
+    return new ast.StringLiteral(token, token.value);
   }
 
   _parseExpressionOrBlockStatement () {
