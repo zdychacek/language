@@ -167,6 +167,22 @@ export class NullLiteral extends Literal {
   }
 }
 
+export class ArrayLiteral extends Literal {
+  constructor (token, elements) {
+    super(token, null);
+
+    this.elements = elements;
+  }
+
+  toString () {
+    const elements = this.elements
+      .map((el) => el.toString())
+      .join(', ');
+
+    return `[${elements}]`;
+  }
+}
+
 export class IfExpression extends Expression {
   constructor (token, condition, consequence, alternative) {
     super(token);
@@ -248,5 +264,18 @@ export class SequenceExpression extends Expression {
     return this.expressions
       .map((exp) => exp.toString())
       .join(', ');
+  }
+}
+
+export class IndexExpression extends Expression {
+  constructor (token, left, index) {
+    super(token);
+
+    this.left = left;
+    this.index = index;
+  }
+
+  toString () {
+    return `(${this.left.toString()}[${this.index.toString()}])`;
   }
 }

@@ -31,6 +31,7 @@ class Parser {
     this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.LPAREN, this._parseEmptyParamListOrGroupedExpression);
     this._registerPrefixParser(Keyword.IF, this._parseIfExpression);
+    this._registerPrefixParser(Punctuator.LBRACKET, this._parseArrayLiteral);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this._parseInfixExpression);
@@ -45,6 +46,7 @@ class Parser {
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
     this._registerInfixParser(Punctuator.ASSIGN, this._parseAssignmentExpression);
+    this._registerInfixParser(Punctuator.LBRACKET, this._parseIndexExpression);
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -337,6 +339,34 @@ class Parser {
     const token = this._consumeType(TokenType.STRING);
 
     return new ast.StringLiteral(token, token.value);
+  }
+
+  _parseArrayLiteral = () => {
+    const token = this._consume(Punctuator.LBRACKET);
+    const elements = [];
+
+    if (!this._match(Punctuator.RBRACKET)) {
+      elements.push(this._parseExpression(Precedence.SEQUENCE));
+
+      while (this._match(Punctuator.COMMA)) {
+        this._consume(Punctuator.COMMA);
+        elements.push(this._parseExpression(Precedence.SEQUENCE));
+      }
+    }
+
+    this._consume(Punctuator.RBRACKET);
+
+    return new ast.ArrayLiteral(token, elements);
+  }
+
+  _parseIndexExpression = (left) => {
+    const token = this._consume(Punctuator.LBRACKET);
+
+    const indexExpression = new ast.IndexExpression(token, left, this._parseExpression(Precedence.SEQUENCE));
+
+    this._consume(Punctuator.RBRACKET);
+
+    return indexExpression;
   }
 
   _parseExpressionOrBlockStatement () {

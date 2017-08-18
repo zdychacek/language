@@ -31,6 +31,8 @@ export const Punctuator = {
   GT: '>',
   DASH_ARROW: '->',
   COLON: ':',
+  LBRACKET: '[',
+  RBRACKET: ']',
 };
 
 export const Keyword = {
@@ -56,6 +58,7 @@ export const Precedence = {
   PREFIX: 50,       // -X or !X
   DASH_ARROW: 55,   // ->
   CALL: 60,         // myFunction(X)
+  INDEX: 70,        // []
 };
 
 export const TokenPrecedence = {
@@ -71,6 +74,7 @@ export const TokenPrecedence = {
   [Punctuator.LPAREN]: Precedence.CALL,
   [Punctuator.COMMA]: Precedence.SEQUENCE,
   [Punctuator.DASH_ARROW]: Precedence.DASH_ARROW,
+  [Punctuator.LBRACKET]: Precedence.INDEX,
 };
 
 export class Token {

@@ -3,3 +3,4 @@
 - implement error stack traces
 - implement `|>` function chaining operator: `arg |> fn1 |> fn2`
 - implement `>>` function composition operator: `let composed = fn1 >> fn2`
+- create new environment when interpreting free block statement

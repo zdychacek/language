@@ -137,6 +137,8 @@ class Lexer {
       case Punctuator.COMMA:
       case Punctuator.LBRACE:
       case Punctuator.RBRACE:
+      case Punctuator.LBRACKET:
+      case Punctuator.RBRACKET:
       case Punctuator.PLUS:
       case Punctuator.ASTERISK:
       case Punctuator.SLASH:
