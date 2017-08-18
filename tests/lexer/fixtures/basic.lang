@@ -10,3 +10,4 @@ let result = add(five, ten)
 "a
 b
 "
+null

@@ -59,6 +59,9 @@ class Lexer {
       else if (this._isBoolean(value)) {
         type = TokenType.BOOLEAN;
       }
+      else if (value === 'null') {
+        type = TokenType.NULL;
+      }
 
       return this._finishToken(type, value);
     }

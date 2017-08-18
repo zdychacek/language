@@ -161,6 +161,12 @@ export class BooleanLiteral extends Literal {}
 
 export class StringLiteral extends Literal {}
 
+export class NullLiteral extends Literal {
+  constructor (token) {
+    super(token, 'null');
+  }
+}
+
 export class IfExpression extends Expression {
   constructor (token, condition, consequence, alternative) {
     super(token);

@@ -25,6 +25,7 @@ class Parser {
     this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
     this._registerPrefixParser(TokenType.NUMBER, this._parseNumberLiteral);
     this._registerPrefixParser(TokenType.BOOLEAN, this._parseBooleanLiteral);
+    this._registerPrefixParser(TokenType.NULL, this._parseNullLiteral);
     this._registerPrefixParser(TokenType.STRING, this._parseStringLiteral);
     this._registerPrefixParser(Punctuator.BANG, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
@@ -157,6 +158,10 @@ class Parser {
     const token = this._consumeType(TokenType.BOOLEAN);
 
     return new ast.BooleanLiteral(token, token.value === BooleanLiteral.TRUE);
+  }
+
+  _parseNullLiteral = () => {
+    return new ast.NullLiteral(this._consumeType(TokenType.NULL));
   }
 
   _parseIfExpression = () => {

@@ -55,6 +55,8 @@ test('Lexer#nextToken - basic', (t) => {
     [ TokenType.EOL, '' ],
     [ TokenType.STRING, 'a\nb\n' ],
     [ TokenType.EOL, '' ],
+    [ TokenType.NULL, 'null' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 
