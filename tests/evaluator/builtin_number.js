@@ -10,6 +10,7 @@ test('Evaluator - `number` builtin function', (t) => {
     [ 'number("123")', 123 ],
     [ 'number("1a2b3")', 'null' ],
     [ 'number(() -> x)', 'null' ],
+    [ 'number(null)', 0 ],
   ];
 
   tests.forEach(([ input, expected ]) => {

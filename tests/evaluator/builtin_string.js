@@ -10,6 +10,7 @@ test('Evaluator - `string` builtin function', (t) => {
     [ 'string((x, y) -> x + 1 - 2)', '(x, y) -> ((x + 1) - 2)' ],
     [ 'string(true)', 'true' ],
     [ 'string(false)', 'false' ],
+    [ 'string(null)', 'null' ],
   ];
 
   tests.forEach(([ input, expected ]) => {

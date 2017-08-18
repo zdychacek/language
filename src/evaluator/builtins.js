@@ -14,13 +14,14 @@ export default {
       return new object.NumberObject(arg.value.length);
     }
 
+    // get parameters count
     if (arg instanceof object.FunctionObject) {
       return new object.NumberObject(arg.parameters.length);
     }
 
     return new object.ErrorObject(`Argument to \`len\` not supported, got ${arg.getType()}.`);
   }),
-  // Convert an argument to string
+  // Convert an argument to string value or return NULL
   string: new object.BuiltinObject((...args) => {
     if (args.length !== 1) {
       return new object.ErrorObject(`Wrong number of arguments, got=${args.length}, want=1.`);
@@ -44,9 +45,13 @@ export default {
       return new object.StringObject(arg.$inspect());
     }
 
+    if (arg instanceof object.NullObject) {
+      return new object.StringObject(arg.$inspect());
+    }
+
     return consts.NULL;
   }),
-  // Convert an argument to number
+  // Convert an argument to number value or return NULL
   number: new object.BuiltinObject((...args) => {
     if (args.length !== 1) {
       return new object.ErrorObject(`Wrong number of arguments, got=${args.length}, want=1.`);
@@ -75,6 +80,46 @@ export default {
       }
       else if (arg === consts.FALSE) {
         return new object.NumberObject(0);
+      }
+    }
+
+    if (arg instanceof object.NullObject) {
+      return new object.NumberObject(0);
+    }
+
+    return consts.NULL;
+  }),
+  // Convert an argument to boolean value or return NULL
+  boolean: new object.BuiltinObject((...args) => {
+    if (args.length !== 1) {
+      return new object.ErrorObject(`Wrong number of arguments, got=${args.length}, want=1.`);
+    }
+
+    const [ arg ] = args;
+
+    if (arg instanceof object.BooleanObject) {
+      return arg;
+    }
+
+    if (arg instanceof object.NullObject) {
+      return consts.FALSE;
+    }
+
+    if (arg instanceof object.StringObject) {
+      if (!arg.value.length) {
+        return consts.FALSE;
+      }
+      else {
+        return consts.TRUE;
+      }
+    }
+
+    if (arg instanceof object.NumberObject) {
+      if (!arg.value) {
+        return consts.FALSE;
+      }
+      else {
+        return consts.TRUE;
       }
     }
 
