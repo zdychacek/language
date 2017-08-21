@@ -7,11 +7,11 @@ import builtins from './builtins';
 
 const ObjectType = object.ObjectType;
 
-function evalProgram (statements, env) {
+function evalProgram (statements, env, state) {
   let result = null;
 
   for (const stmt of statements) {
-    result = evaluate(stmt, env);
+    result = evaluate(stmt, env, state);
 
     if (result instanceof object.ReturnValueObject) {
       return result.value;
@@ -24,11 +24,13 @@ function evalProgram (statements, env) {
   return result;
 }
 
-function evalBlockStatement (statements, env) {
+function evalBlockStatement (statements, env, state) {
   let result = null;
 
+  env = env.extend();
+
   for (const stmt of statements) {
-    result = evaluate(stmt, env);
+    result = evaluate(stmt, env, state);
 
     if (
       result instanceof object.ReturnValueObject ||
@@ -149,7 +151,7 @@ function isTruthy (obj) {
   }
 }
 
-function evalIfExpression (node, env) {
+function evalIfExpression (node, env, state) {
   const condition = evaluate(node.condition, env);
 
   if (isError(condition)) {
@@ -157,10 +159,10 @@ function evalIfExpression (node, env) {
   }
 
   if (isTruthy(condition)) {
-    return evaluate(node.consequence, env);
+    return evaluate(node.consequence, env, state);
   }
   else if (node.alternative) {
-    return evaluate(node.alternative, env);
+    return evaluate(node.alternative, env, state);
   }
   else {
     return consts.NULL;
@@ -187,11 +189,11 @@ function evalIdentifier (node, env) {
   return value;
 }
 
-function evalExpressions (exps, env) {
+function evalExpressions (exps, env, state) {
   const result = [];
 
   for (const exp of exps) {
-    const evaluated = evaluate(exp, env);
+    const evaluated = evaluate(exp, env, state);
 
     if (isError(evaluated)) {
       return [ evaluated ];
@@ -221,10 +223,12 @@ function unwrapReturnValue (obj) {
   return obj;
 }
 
-function applyFunction (fn, args) {
+function applyFunction (fn, args, state) {
   if (fn instanceof object.FunctionObject) {
     const extendedEnv = extendFunctionEnv(fn, args);
-    const evaluated = evaluate(fn.body, extendedEnv);
+    const evaluated = evaluate(fn.body, extendedEnv, { ...state, isInFunction: true });
+
+    state.isInFunction = false;
 
     return unwrapReturnValue(evaluated);
   }
@@ -240,15 +244,19 @@ function isError (obj) {
   return obj instanceof object.ErrorObject;
 }
 
-export default function evaluate (node, env) {
+const initialState = {
+  isInFunction: false,
+};
+
+export default function evaluate (node, env, state = initialState) {
   const type = node.constructor;
 
   switch (type) {
     // Statements
     case ast.Program:
-      return evalProgram(node.statements, env);
+      return evalProgram(node.statements, env, state);
     case ast.ExpressionStatement:
-      return evaluate(node.expression, env);
+      return evaluate(node.expression, env, state);
     case ast.ReturnStatement: {
       let value = consts.VOID;
 
@@ -257,15 +265,15 @@ export default function evaluate (node, env) {
       }
 
       if (node.returnValue) {
-        value = evaluate(node.returnValue, env);
+        value = evaluate(node.returnValue, env, state);
       }
 
       return new object.ReturnValueObject(value);
     }
     case ast.BlockStatement:
-      return evalBlockStatement(node.statements, env);
+      return evalBlockStatement(node.statements, env, state);
     case ast.LetStatement: {
-      const value = evaluate(node.expression, env);
+      const value = evaluate(node.expression, env, state);
 
       if (isError(value)) {
         return value;
@@ -283,7 +291,7 @@ export default function evaluate (node, env) {
     case ast.BooleanLiteral:
       return nativeBoolToBooleanObject(node.literal);
     case ast.PrefixExpression: {
-      const right = evaluate(node.right, env);
+      const right = evaluate(node.right, env, state);
 
       if (isError(right)) {
         return right;
@@ -292,13 +300,13 @@ export default function evaluate (node, env) {
       return evalPrefixExpression(node.operator, right);
     }
     case ast.InfixExpression: {
-      const left = evaluate(node.left, env);
+      const left = evaluate(node.left, env, state);
 
       if (isError(left)) {
         return left;
       }
 
-      const right = evaluate(node.right, env);
+      const right = evaluate(node.right, env, state);
 
       if (isError(right)) {
         return right;
@@ -307,9 +315,9 @@ export default function evaluate (node, env) {
       return evalInfixExpression(node.operator, left, right);
     }
     case ast.IfExpression:
-      return evalIfExpression(node, env);
+      return evalIfExpression(node, env, state);
     case ast.Identifier:
-      return evalIdentifier(node, env);
+      return evalIdentifier(node, env, state);
     case ast.FunctionLiteral: {
       const params = node.parameters;
       const body = node.body;
@@ -317,22 +325,22 @@ export default function evaluate (node, env) {
       return new object.FunctionObject(params, body, env);
     }
     case ast.CallExpression: {
-      const fn = evaluate(node.fn, env);
+      const fn = evaluate(node.fn, env, state);
 
       if (isError(fn)) {
         return fn;
       }
 
-      const args = evalExpressions(node.arguments, env);
+      const args = evalExpressions(node.arguments, env, state);
 
       if (args.length === 1 && isError(args[0])) {
         return args[0];
       }
 
-      return applyFunction(fn, args);
+      return applyFunction(fn, args, state);
     }
     case ast.SequenceExpression: {
-      const exps = evalExpressions(node.expressions, env);
+      const exps = evalExpressions(node.expressions, env, state);
 
       if (exps.length === 1 && isError(exps[0])) {
         return exps[0];
@@ -347,7 +355,7 @@ export default function evaluate (node, env) {
         return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
       }
 
-      const right = evaluate(node.right, env);
+      const right = evaluate(node.right, env, state);
 
       if (isError(right)) {
         return right;
