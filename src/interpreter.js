@@ -38,7 +38,9 @@ try {
   const program = parser.parseProgram();
   const result = evaluate(program, env);
 
-  console.log(result.$inspect());
+  if (result) {
+    console.log(result.$inspect());
+  }
 }
 catch (ex) {
   die(ex.toString());

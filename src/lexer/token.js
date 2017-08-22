@@ -10,6 +10,7 @@ export const TokenType = {
   EOF: 'EOF',
   EOL: 'EOL',
   ILLEGAL: 'ILLEGAL',
+  COMMENT: 'COMMENT',
 };
 
 export const Punctuator = {

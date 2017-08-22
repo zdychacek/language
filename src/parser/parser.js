@@ -387,6 +387,7 @@ class Parser {
       statements.push(stmt);
     }
 
+
     if (!this._match(Punctuator.RBRACE) && !this._matchType(TokenType.EOF)) {
       this._consumeType(TokenType.EOL);
     }
