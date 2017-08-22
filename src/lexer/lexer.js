@@ -20,13 +20,18 @@ class Lexer {
   _currTokenStartRange = null;
   // state capture structure for lookahead
   _capturedState = null;
+  // previous token
+  _prevToken = null;
 
   constructor (input) {
     this._input = input;
   }
 
   nextToken () {
-    this._skipWhitespace();
+    do {
+      this._skipWhitespaces();
+    }
+    while (this._skipComments());
 
     this._startToken();
 
@@ -38,7 +43,7 @@ class Lexer {
     }
     // end of line
     else if (this._isEOL(char)) {
-     while (this._isEOL(this._peekChar())) {
+      while (this._isEOL(this._peekChar())) {
         this._getChar();
       }
 
@@ -247,10 +252,30 @@ class Lexer {
     return [ 'true', 'false' ].includes(value);
   }
 
-  _skipWhitespace () {
+  _skipWhitespaces () {
     while (this._isWhitespace(this._peekChar())) {
       this._getChar();
     }
+  }
+
+  _skipComments () {
+    if (this._peekChar() === '#') {
+      this._getChar();
+
+      while (!this._isEOL(this._peekChar()) && !this._isEOF(this._peekChar())) {
+        this._getChar();
+      }
+
+      if (!this._prevToken || this._prevToken.start[0] !== this._lineNo) {
+        while (this._isEOL(this._peekChar())) {
+          this._getChar();
+        }
+      }
+
+      return true;
+    }
+
+    return false;
   }
 
   _startToken () {
@@ -274,7 +299,7 @@ class Lexer {
 
     this._currTokenStart = null;
 
-    return token;
+    return this._prevToken = token;
   }
 
   _captureState () {

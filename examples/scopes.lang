@@ -1,0 +1,14 @@
+# beginning of a program
+let a = 1 # declaration of variable a
+{
+  # this is some
+  # inner block
+  let a = 1
+
+  a # note
+  # this is another nested block
+  {
+    let a = 2
+  }
+  a
+} # end of block
