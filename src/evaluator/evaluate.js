@@ -244,6 +244,25 @@ function isError (obj) {
   return obj instanceof object.ErrorObject;
 }
 
+function evalArrayIndexExpression (array, index) {
+  const idx = index.value;
+  const max = array.elements.length - 1;
+
+  if (idx < 0 || idx > max) {
+    return consts.NULL;
+  }
+
+  return array.elements[idx];
+}
+
+function evalIndexExpression (left, index) {
+  if (left.getType() === ObjectType.ARRAY_OBJ && index.getType() === ObjectType.NUMBER_OBJ) {
+    return evalArrayIndexExpression(left, index);
+  }
+
+  return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
+}
+
 const initialState = {
   isInFunction: false,
 };
@@ -364,6 +383,30 @@ export default function evaluate (node, env, state = initialState) {
       env.set(bindingName, right);
 
       return right;
+    }
+    case ast.ArrayLiteral: {
+      const elements = evalExpressions(node.elements, env);
+
+      if (elements.length === 1 && isError(elements[0])) {
+        return elements[0];
+      }
+
+      return new object.ArrayObject(elements);
+    }
+    case ast.IndexExpression: {
+      const left = evaluate(node.left, env);
+
+      if (isError(left)) {
+        return left;
+      }
+
+      const index = evaluate(node.index, env);
+
+      if (isError(index)) {
+        return index;
+      }
+
+      return evalIndexExpression(left, index);
     }
   }
 

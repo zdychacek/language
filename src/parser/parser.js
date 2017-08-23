@@ -174,6 +174,7 @@ class Parser {
     // `if a > b: <exp>`
     if (this._match(Punctuator.COLON)) {
       this._consume();
+      this._consumeOptionalEOL();
 
       consequence = this._parseExpression();
     }
@@ -190,6 +191,7 @@ class Parser {
 
     if (this._match(Keyword.ELSE)) {
       this._consume();
+      this._consumeOptionalEOL();
 
       alternative = this._parseExpressionOrBlockStatement();
     }
@@ -215,6 +217,8 @@ class Parser {
     const args = [];
 
     while (!this._match(Punctuator.RPAREN)) {
+      this._consumeOptionalEOL();
+
       args.push(this._parseExpression(Precedence.SEQUENCE));
 
       if (!this._match(Punctuator.COMMA)) {
@@ -224,6 +228,7 @@ class Parser {
       this._consume(Punctuator.COMMA);
     }
 
+    this._consumeOptionalEOL();
     this._consume(Punctuator.RPAREN);
 
     return new ast.CallExpression(token, left, args);
@@ -240,6 +245,9 @@ class Parser {
 
   _parseAssignmentExpression = (left) => {
     const token = this._consume();
+
+    this._consumeOptionalEOL();
+
     const expression = new ast.AssignmentExpression(token, left, token.value);
 
     // TODO: add MemberExpression when implemented
@@ -343,6 +351,9 @@ class Parser {
 
   _parseArrayLiteral = () => {
     const token = this._consume(Punctuator.LBRACKET);
+
+    this._consumeOptionalEOL();
+
     const elements = [];
 
     if (!this._match(Punctuator.RBRACKET)) {
@@ -350,10 +361,12 @@ class Parser {
 
       while (this._match(Punctuator.COMMA)) {
         this._consume(Punctuator.COMMA);
+        this._consumeOptionalEOL();
         elements.push(this._parseExpression(Precedence.SEQUENCE));
       }
     }
 
+    this._consumeOptionalEOL();
     this._consume(Punctuator.RBRACKET);
 
     return new ast.ArrayLiteral(token, elements);

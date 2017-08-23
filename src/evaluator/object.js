@@ -8,6 +8,7 @@ export const ObjectType = {
   ERROR_OBJ: 'ERROR',
   FUNCTION_OBJ: 'FUNCTION',
   BUILTIN_OBJ: 'BUILTIN',
+  ARRAY_OBJ: 'ARRAY',
 };
 
 export class ObjectValue {
@@ -115,5 +116,25 @@ export class BuiltinObject extends ObjectValue {
 
   $inspect () {
     return '<builtin function>';
+  }
+}
+
+export class ArrayObject extends ObjectValue {
+  constructor (elements) {
+    super();
+
+    this.elements = elements;
+  }
+
+  getType () {
+    return ObjectType.ARRAY_OBJ;
+  }
+
+  $inspect () {
+    const elements = this.elements
+      .map((el) => el.$inspect())
+      .join(', ');
+
+    return `[${elements}]`;
   }
 }
