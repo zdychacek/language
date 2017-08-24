@@ -1,6 +1,7 @@
 /* eslint-disable max-params */
 
 import fs from 'fs';
+import path from 'path';
 import repl from 'repl';
 import touch from 'touch';
 
@@ -8,31 +9,41 @@ import Lexer from './lexer/lexer';
 import Parser from './parser/parser';
 import evaluate from './evaluator/evaluate';
 import Environment from './evaluator/environment';
+import { loadFile } from './utils';
 
 const REPL_HISTORY_FILE = '.repl_history';
 
-const env = new Environment();
-
-function parse (input, context, filename, callback) {
+function interpret (input, env) {
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
-  let program = null;
+  const program = parser.parseProgram();
+
+  return evaluate(program, env);
+}
+
+// create global environment
+const globalEnv = new Environment();
+
+// load and interpret standard library first
+interpret(loadFile(path.join(__dirname, '../lib/stdlib.lang')), globalEnv);
+
+function doInterpret (input, context, filename, callback) {
+  let result = null;
 
   try {
-    program = parser.parseProgram();
+    result = interpret(input, globalEnv);
   }
   catch (ex) {
     return callback(`There are some errors:\n ${ex.toString()}`);
   }
 
-  //return callback(program.toString());
-  return callback(evaluate(program, env).$inspect());
+  return callback(result.$inspect());
 }
 
 // create REPL server
 const server = repl.start({
   prompt: '>> ',
-  eval: parse,
+  eval: doInterpret,
 });
 
 touch.sync(REPL_HISTORY_FILE);

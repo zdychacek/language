@@ -15,6 +15,11 @@ export function testNumberObject (t, obj, expected) {
   t.equal(obj.value, expected, 'object has right value');
 }
 
+export function testStringObject (t, obj, expected) {
+  t.ok(is(obj, object.StringObject), 'object is String');
+  t.equal(obj.value, expected, 'object has right value');
+}
+
 export function testNullObject (t, obj) {
   t.ok(is(obj, object.NullObject), 'object is Null');
 }

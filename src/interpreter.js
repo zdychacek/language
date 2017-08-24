@@ -1,34 +1,20 @@
 /* eslint-disable no-console */
 
-import fs from 'fs';
+import path from 'path';
 import Lexer from './lexer/lexer';
 import Parser from './parser/parser';
 import evaluate from './evaluator/evaluate';
 import Environment from './evaluator/environment';
+import { loadFile, die } from './utils';
 
-const fileName = process.argv[2];
+const sourceFileName = process.argv[2];
 
-function die (message) {
-  console.log(message);
-  process.exit();
-}
-
-if (!fileName) {
+if (!sourceFileName) {
   die('You have to specify file to interpret.');
 }
 
-let input = '';
-
-try {
-  input = fs.readFileSync(fileName, 'utf8');
-}
-catch (ex) {
-  if (ex.code === 'ENOENT') {
-    die(`File "${fileName}" not found.`);
-  }
-
-  die(ex.message);
-}
+// load stdlib and source file
+const input = loadFile(path.join(__dirname, '../lib/stdlib.lang')) + '\n' + loadFile(sourceFileName);
 
 const lexer = new Lexer(input);
 const parser = new Parser(lexer);

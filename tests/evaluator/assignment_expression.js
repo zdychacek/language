@@ -17,9 +17,9 @@ test('Evaluator - Assignment expression', (t) => {
     const env = new Environment();
 
     // initialize environment
-    env.set('a', new object.NumberObject(1));
-    env.set('b', new object.NumberObject(1));
-    env.set('c', new object.NumberObject(1));
+    env.assign('a', new object.NumberObject(1));
+    env.assign('b', new object.NumberObject(1));
+    env.assign('c', new object.NumberObject(1));
 
     const result = testEval(input, env);
 

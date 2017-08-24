@@ -191,7 +191,6 @@ class Parser {
 
     if (this._match(Keyword.ELSE)) {
       this._consume();
-      this._consumeOptionalEOL();
 
       alternative = this._parseExpressionOrBlockStatement();
     }
@@ -387,6 +386,8 @@ class Parser {
       return this._parseBlockStatement();
     }
     else {
+      this._consumeOptionalEOL();
+
       return this._parseExpression();
     }
   }

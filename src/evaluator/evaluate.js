@@ -110,11 +110,16 @@ function evalNumberInfixExpression (operator, left, right) {
 }
 
 function evalStringInfixExpression (operator, left, right) {
-  if (operator !== '+') {
-    return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
+  switch (operator) {
+    case '+':
+      return new object.StringObject(left.value + right.value);
+    case '==':
+      return new object.BooleanObject(left.value === right.value);
+    case '!=':
+      return new object.BooleanObject(left.value !== right.value);
+    default:
+      return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
   }
-
-  return new object.StringObject(left.value + right.value);
 }
 
 function evalInfixExpression (operator, left, right) {
@@ -122,17 +127,20 @@ function evalInfixExpression (operator, left, right) {
     return evalNumberInfixExpression(operator, left, right);
   }
 
+  if (left.getType() === ObjectType.STRING_OBJ && right.getType() === ObjectType.STRING_OBJ) {
+    return evalStringInfixExpression(operator, left, right);
+  }
+
   if (operator === '==') {
     return nativeBoolToBooleanObject(left === right);
   }
-  else if (operator === '!=') {
+
+  if (operator === '!=') {
     return nativeBoolToBooleanObject(left !== right);
   }
-  else if (left.getType() !== right.getType()) {
+
+  if (left.getType() !== right.getType()) {
     return new object.ErrorObject(`Type mismatch: ${left.getType()} ${operator} ${right.getType()}.`);
-  }
-  else if (left.getType() === ObjectType.STRING_OBJ && right.getType() === ObjectType.STRING_OBJ) {
-    return evalStringInfixExpression(operator, left, right);
   }
 
   return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
@@ -183,7 +191,7 @@ function evalIdentifier (node, env) {
   }
 
   if (!value) {
-    return new object.ErrorObject(`Identifier not found: ${node.value}.`);
+    return new object.ErrorObject(`Identifier not found: "${node.value}".`);
   }
 
   return value;
@@ -209,7 +217,7 @@ function extendFunctionEnv (fn, args) {
   const env = fn.env.extend();
 
   fn.parameters.forEach((param, index) => {
-    env.set(param.value, args[index]);
+    env.assign(param.value, args[index]);
   });
 
   return env;
@@ -244,20 +252,37 @@ function isError (obj) {
   return obj instanceof object.ErrorObject;
 }
 
-function evalArrayIndexExpression (array, index) {
+function evalArrayOrStringIndexExpression (arrayOrString, index) {
   const idx = index.value;
-  const max = array.elements.length - 1;
+  let max = null;
+
+  if (arrayOrString.getType() === ObjectType.ARRAY_OBJ) {
+    max = arrayOrString.elements.length - 1;
+  }
+
+  if (arrayOrString.getType() === ObjectType.STRING_OBJ) {
+    max = arrayOrString.value.length - 1;
+  }
 
   if (idx < 0 || idx > max) {
     return consts.NULL;
   }
 
-  return array.elements[idx];
+  if (arrayOrString.getType() === ObjectType.ARRAY_OBJ) {
+    return arrayOrString.elements[idx];
+  }
+
+  if (arrayOrString.getType() === ObjectType.STRING_OBJ) {
+    return new object.StringObject(arrayOrString.value[idx]);
+  }
 }
 
 function evalIndexExpression (left, index) {
-  if (left.getType() === ObjectType.ARRAY_OBJ && index.getType() === ObjectType.NUMBER_OBJ) {
-    return evalArrayIndexExpression(left, index);
+  if (
+    (left.getType() === ObjectType.ARRAY_OBJ || left.getType() === ObjectType.STRING_OBJ) &&
+    index.getType() === ObjectType.NUMBER_OBJ
+  ) {
+    return evalArrayOrStringIndexExpression(left, index);
   }
 
   return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
@@ -298,7 +323,7 @@ export default function evaluate (node, env, state = initialState) {
         return value;
       }
 
-      env.set(node.name.value, value);
+      env.assign(node.name.value, value);
     }
     // Expressions
     case ast.NumberLiteral:
@@ -380,7 +405,9 @@ export default function evaluate (node, env, state = initialState) {
         return right;
       }
 
-      env.set(bindingName, right);
+      if (!env.set(bindingName, right)) {
+        return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+      }
 
       return right;
     }

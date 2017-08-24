@@ -1,0 +1,66 @@
+# Array map function
+let map = (arr, predicate) -> {
+  let iterator = (arr, accumulated, index) -> {
+    if len(arr) == 0:
+      accumulated
+    else {
+      iterator(
+        rest(arr),
+        push(accumulated, predicate(first(arr))),
+        index + 1
+      )
+    }
+  }
+
+  iterator(arr, [], 0)
+}
+
+# Array foreach function
+let foreach = (arr, predicate) -> {
+  let iterator = (arr, index) -> {
+    if len(arr) == 0 {
+      return
+    }
+    else {
+      predicate(first(arr), index)
+
+      iterator(rest(arr), index + 1)
+    }
+  }
+
+  iterator(arr, 0)
+}
+
+# Array reduce function
+let reduce = (arr, initial, predicate) -> {
+  let iterator = (arr, result, index) -> {
+    if len(arr) == 0:
+      result
+    else {
+      iterator(
+        rest(arr),
+        predicate(result, first(arr)),
+        index + 1
+      )
+    }
+  }
+
+  iterator(arr, initial, 0)
+}
+
+# Array filter function
+let filter = (arr, predicate) -> {
+  let iterator = (arr, accumulated, index) -> {
+    if len(arr) == 0:
+      accumulated
+    else {
+      let item = first(arr)
+
+      accumulated = if predicate(item): push(accumulated, item) else accumulated
+
+      iterator(rest(arr), accumulated, index + 1)
+    }
+  }
+
+  iterator(arr, [], 0)
+}

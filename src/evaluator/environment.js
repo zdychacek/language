@@ -12,8 +12,22 @@ export default class Environment {
     return result;
   }
 
-  set (name, value) {
+  assign (name, value) {
     return this._store[name] = value;
+  }
+
+  set (name, value) {
+    let env = this;
+
+    while (env) {
+      if (env._store[name]) {
+        return env.assign(name, value);
+      }
+
+      env = env._outer;
+    }
+
+    return null;
   }
 
   extend () {

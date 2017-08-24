@@ -1,62 +1,10 @@
-# Array map function
-let map = (arr, f) -> {
-  let iterator = (arr, accumulated, index) -> {
-    if len(arr) == 0:
-      accumulated
-    else {
-      iterator(
-        rest(arr),
-        push(accumulated,
-        f(first(arr))), index + 1
-      )
-    }
-  }
-
-  iterator(arr, [], 0)
-}
-
-# Array reduce function
-let reduce = (arr, initial, f) -> {
-  let iterator = (arr, result, index) -> {
-    if len(arr) == 0:
-      result
-    else {
-      iterator(
-        rest(arr),
-        f(result, first(arr)),
-        index + 1
-      )
-    }
-  }
-
-  iterator(arr, initial, 0)
-}
-
-# Array filter function
-let filter = (arr, f) -> {
-  let iterator = (arr, accumulated, index) -> {
-    if len(arr) == 0:
-      accumulated
-    else {
-      let item = first(arr)
-
-      accumulated =
-        if f(item):
-          push(accumulated, item)
-        else
-          accumulated
-
-      iterator(rest(arr), accumulated, index + 1)
-    }
-  }
-
-  iterator(arr, [], 0)
-}
-
 # Predicates
-let square = el -> el * el
-let sum = arr -> reduce(arr, 0, (initial, el) -> initial + el)
-let greaterThenTwo = (el) -> el > 2
+let square = item -> item * item
+
+let sum = arr ->
+  reduce(arr, 0, (initial, item) -> initial + item)
+
+let greaterThenTwo = item -> item > 2
 
 # Testing array
 let array = [
@@ -65,6 +13,19 @@ let array = [
 ]
 
 # Output
+foreach(array, (item, index) -> puts("Item:", item, "at index:", index))
 puts("Array squares:", map(array, square))
 puts("Array sum:", sum(array))
 puts("Only > 2:", filter(array, greaterThenTwo))
+
+let reverse = arr -> {
+  let reversed = []
+
+  foreach(arr, (_, index) -> {
+    reversed = push(reversed, arr[len(arr) - 1 - index ])
+  })
+
+  reversed
+}
+
+puts(reverse(array))

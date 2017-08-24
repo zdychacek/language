@@ -1,5 +1,4 @@
-- implement string comparison
-- add function without params parsing/evaluating test
+- implement basic module imports
 - refactor parser/evaluator error throwing (line, column)
 - implement error stack traces
 - implement `|>` function chaining operator: `arg |> fn1 |> fn2`
