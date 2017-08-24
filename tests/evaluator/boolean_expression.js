@@ -27,6 +27,11 @@ test('Evaluator - Boolean expression', (t) => {
     [ '"a" == "ba"', false ],
     [ '"a" != "a"', false ],
     [ '"a" != "ba"', true ],
+    [ 'true && false', false ],
+    [ 'true || false', true ],
+    [ 'false || true && false', false ],
+    [ 'true && false || true', true ],
+    [ 'false && true || true', true ],
   ];
 
   tests.forEach(([ input, expected ]) => {

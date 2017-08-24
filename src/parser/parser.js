@@ -42,6 +42,8 @@ class Parser {
     this._registerInfixParser(Punctuator.NOT_EQ, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.LT, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.GT, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.DOUBLE_AMPERSAND, this._parseInfixExpression);
+    this._registerInfixParser(Punctuator.DOUBLE_PIPE, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression);
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);

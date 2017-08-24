@@ -41,7 +41,7 @@ test('Evaluator - Error handling', (t) => {
     ],
     [
       'foobar',
-      'Identifier not found: foobar.',
+      'Identifier not found: "foobar".',
     ],
     [
       '"Hello" - "World"',

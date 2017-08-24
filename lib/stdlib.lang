@@ -39,7 +39,7 @@ let reduce = (arr, initial, predicate) -> {
     else {
       iterator(
         rest(arr),
-        predicate(result, first(arr)),
+        predicate(result, first(arr), index),
         index + 1
       )
     }
@@ -64,3 +64,9 @@ let filter = (arr, predicate) -> {
 
   iterator(arr, [], 0)
 }
+
+let every = (arr, predicate) ->
+  reduce(arr, true, (acc, item, index) -> acc && predicate(item, index))
+
+let some = (arr, predicate) ->
+  reduce(arr, false, (acc, item, index) -> predicate(item, index) || acc)

@@ -34,6 +34,10 @@ export const Punctuator = {
   COLON: ':',
   LBRACKET: '[',
   RBRACKET: ']',
+  PIPE: '|',
+  AMPERSAND: '&',
+  DOUBLE_PIPE: '||',
+  DOUBLE_AMPERSAND: '&&',
 };
 
 export const Keyword = {
@@ -50,16 +54,18 @@ export const BooleanLiteral = {
 
 export const Precedence = {
   LOWEST: 0,
-  SEQUENCE: 5,      // ,
-  ASSIGN: 7,        // =
-  EQUALS: 10,       // ==
-  LESSGREATER: 20,  // > or <
-  SUM: 30,          // +
-  PRODUCT: 40,      // *
-  PREFIX: 50,       // -X or !X
-  DASH_ARROW: 55,   // ->
-  CALL: 60,         // myFunction(X)
-  INDEX: 70,        // []
+  SEQUENCE: 10,     // ,
+  ASSIGN: 20,       // =
+  BITWISE_OR: 30,   // ||
+  BITWISE_AND: 31,  // &&
+  EQUALS: 40,       // ==
+  LESSGREATER: 50,  // > or <
+  SUM: 60,          // +
+  PRODUCT: 70,      // *
+  PREFIX: 80,       // -X or !X
+  DASH_ARROW: 90,   // ->
+  CALL: 100,        // myFunction(X)
+  INDEX: 110,       // []
 };
 
 export const TokenPrecedence = {
@@ -76,6 +82,8 @@ export const TokenPrecedence = {
   [Punctuator.COMMA]: Precedence.SEQUENCE,
   [Punctuator.DASH_ARROW]: Precedence.DASH_ARROW,
   [Punctuator.LBRACKET]: Precedence.INDEX,
+  [Punctuator.DOUBLE_PIPE]: Precedence.BITWISE_OR,
+  [Punctuator.DOUBLE_AMPERSAND]: Precedence.BITWISE_AND,
 };
 
 export class Token {

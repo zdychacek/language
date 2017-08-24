@@ -19,6 +19,8 @@ test('Parser - Infix expressions', (t) => {
     [ 'true != false', true, '!=', false ],
     [ 'false == false', false, '==', false ],
     [ 'a = b', 'a', '=', 'b' ],
+    [ 'a && b', 'a', '&&', 'b' ],
+    [ 'a || b', 'a', '||', 'b' ],
   ];
 
   tests.forEach(([ input, leftValue, operator, rightValue ]) => {

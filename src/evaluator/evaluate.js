@@ -146,6 +146,47 @@ function evalInfixExpression (operator, left, right) {
   return new object.ErrorObject(`Unknown operator: ${left.getType()} ${operator} ${right.getType()}.`);
 }
 
+function evalLogicalExpression (node, env, state) {
+  const left = evaluate(node.left, env, state);
+  const { operator } = node;
+
+  if (isError(left)) {
+    return left;
+  }
+
+  if (left.getType() !== ObjectType.BOOLEAN_OBJ) {
+    return new object.ErrorObject(`Operator ${operator} can be used only with ${ObjectType.BOOLEAN_OBJ}, got ${left.getType()} instead.`);
+  }
+
+  // lazy evaluation
+  if (left === consts.FALSE && operator === '&&') {
+    return consts.FALSE;
+  }
+
+  if (left === consts.TRUE && operator === '||') {
+    return consts.TRUE;
+  }
+
+  const right = evaluate(node.right, env, state);
+
+  if (isError(right)) {
+    return right;
+  }
+
+  if (right.getType() !== ObjectType.BOOLEAN_OBJ) {
+    return new object.ErrorObject(`Operator ${operator} can be used only with ${ObjectType.BOOLEAN_OBJ}, got ${right.getType()} instead.`);
+  }
+
+  switch (operator) {
+    case '&&':
+      return nativeBoolToBooleanObject(left.value && right.value);
+    case '||':
+      return nativeBoolToBooleanObject(left.value || right.value);
+    default:
+      return new object.ErrorObject(`Unsupported ${operator}.`);
+  }
+}
+
 function isTruthy (obj) {
   switch (obj) {
     case consts.NULL:
@@ -344,6 +385,10 @@ export default function evaluate (node, env, state = initialState) {
       return evalPrefixExpression(node.operator, right);
     }
     case ast.InfixExpression: {
+      if ([ '&&', '||' ].includes(node.operator)) {
+        return evalLogicalExpression(node, env, state);
+      }
+
       const left = evaluate(node.left, env, state);
 
       if (isError(left)) {

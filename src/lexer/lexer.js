@@ -162,6 +162,7 @@ class Lexer {
       case Punctuator.ASSIGN:
         punctuator = this._getChar();
 
+        // ==
         if (this._peekChar() === '=') {
           punctuator += this._getChar();
         }
@@ -170,7 +171,26 @@ class Lexer {
       case Punctuator.BANG:
         punctuator = this._getChar();
 
+        // !=
         if (this._peekChar() === '=') {
+          punctuator += this._getChar();
+        }
+
+        return new Token(TokenType.PUNCTUATOR, punctuator);
+      case Punctuator.AMPERSAND:
+        punctuator = this._getChar();
+
+        // &&
+        if (this._peekChar() === '&') {
+          punctuator += this._getChar();
+        }
+
+        return new Token(TokenType.PUNCTUATOR, punctuator);
+      case Punctuator.PIPE:
+        punctuator = this._getChar();
+
+        // ||
+        if (this._peekChar() === '|') {
           punctuator += this._getChar();
         }
 

@@ -2,14 +2,14 @@
 let square = item -> item * item
 
 let sum = arr ->
-  reduce(arr, 0, (initial, item) -> initial + item)
+  reduce(arr, 0, (acc, item) -> acc + item)
 
 let greaterThenTwo = item -> item > 2
 
 # Testing array
 let array = [
-  1, 2, 3,
-  4, 5, 6
+  0, 1, 2, 3,
+  4, 5, 6, 7
 ]
 
 # Output
@@ -28,4 +28,9 @@ let reverse = arr -> {
   reversed
 }
 
-puts(reverse(array))
+puts("Reversed array:", reverse(array))
+
+let isTruthy = item -> boolean(item)
+
+puts("Some array element are truthy:", some(array, isTruthy))
+puts("All array element are truthy:", every(array, isTruthy))
