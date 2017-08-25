@@ -24,9 +24,10 @@ export class Expression extends Node {}
 export class EmptyParamListPlaceholder extends Node {}
 
 export class Program extends Node {
-  constructor (statements) {
+  constructor (fileName, statements) {
     super();
 
+    this.fileName = fileName;
     this.statements = statements;
   }
 

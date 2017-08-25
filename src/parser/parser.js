@@ -61,15 +61,13 @@ class Parser {
   }
 
   parseProgram = () => {
-    const program = new ast.Program();
-
-    program.statements = [];
+    const statements = [];
 
     while (!this._matchType(TokenType.EOF)) {
-      this._doParseStatement(program.statements);
+      this._doParseStatement(statements);
     }
 
-    return program;
+    return new ast.Program(this._fileName, statements);
   }
 
   _parseStatement = () => {

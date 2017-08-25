@@ -1,4 +1,4 @@
-import a from "../../lib/stdlib.lang"
+import a from "../lib/stdlib.lang"
 
 # Predicates
 let square = item -> item * item

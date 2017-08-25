@@ -5,6 +5,7 @@ import { Token, TokenType } from '../../src/lexer/token';
 
 test('AST - String', (t) => {
   const program = new ast.Program(
+    'noname.lang',
     [
       new ast.LetStatement(
         new Token(TokenType.LET, 'let'),

@@ -13,7 +13,7 @@ import Environment from './evaluator/environment';
 const REPL_HISTORY_FILE = '.repl_history';
 
 function interpret (input, env) {
-  const parser = new Parser(new Lexer(input), 'repl');
+  const parser = new Parser(new Lexer(input), path.join(__dirname, '..', 'repl'));
   const program = parser.parseProgram();
 
   return evaluate(program, env);

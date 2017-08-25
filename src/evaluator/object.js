@@ -165,7 +165,7 @@ export class ModuleObject extends ObjectValue {
           bindingValue = `(${signature}) -> { ... }`;
         }
         else {
-          bindingValue = binding.$inspect;
+          bindingValue = binding.$inspect();
         }
 
         return `\t${name}: ${bindingValue}`;
