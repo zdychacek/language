@@ -12,6 +12,12 @@ export function testBooleanLiteral (t, node, expected) {
   t.equal(node.getTokenValue(), expected.toString(), `node.getTokenValue() is "${expected.toString()}"`);
 }
 
+export function testStringLiteral (t, node, expected) {
+  t.ok(node instanceof ast.StringLiteral, 'node is ast.StringLiteral');
+  t.equal(node.literal, expected, `node.literal is ${expected}`);
+  t.equal(node.getTokenValue(), expected.toString(), `node.getTokenValue() is "${expected.toString()}"`);
+}
+
 export function testIdentifier (t, node, expected) {
   t.ok(node instanceof ast.Identifier, 'node is ast.Identifier');
   t.equal(node.value, expected, `node.value is ${expected}`);

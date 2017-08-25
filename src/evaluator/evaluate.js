@@ -1,9 +1,14 @@
 /* eslint-disable no-use-before-define */
 
+import fs from 'fs';
+import path from 'path';
 import * as ast from '../parser/ast';
 import * as object from './object';
 import * as consts from './constants';
 import builtins from './builtins';
+import Environment from './environment';
+import Lexer from '../lexer/lexer';
+import Parser from '../parser/parser';
 
 const ObjectType = object.ObjectType;
 
@@ -329,6 +334,40 @@ function evalIndexExpression (left, index) {
   return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
 }
 
+function evalImportStatement (node, env) {
+  // TODO: implement parser check if `node.source` has some length
+  const sourceFilePath = path.resolve(__dirname, node.source.literal);
+
+  let fileContent = '';
+
+  try {
+    fileContent = fs.readFileSync(sourceFilePath, 'utf8');
+  }
+  catch (ex) {
+    return new object.ErrorObject(`Can't import "${sourceFilePath}" module file.`);
+  }
+
+  const moduleEnv = new Environment();
+
+  try {
+    const parser = new Parser(new Lexer(fileContent), sourceFilePath);
+
+    evaluate(parser.parseProgram(), moduleEnv);
+  }
+  catch (ex) {
+    // TODO: implement better error handling
+    return new object.ErrorObject(ex);
+  }
+
+  const bindings = moduleEnv.getAllBindings();
+
+  // merge module environment with current one
+  Object.entries(bindings)
+    .forEach(([ name, value ]) => env.assign(name, value));
+
+  return new object.ModuleObject(sourceFilePath, bindings);
+}
+
 const initialState = {
   isInFunction: false,
 };
@@ -365,7 +404,12 @@ export default function evaluate (node, env, state = initialState) {
       }
 
       env.assign(node.name.value, value);
+
+      return value;
     }
+    case ast.ImportStatement:
+      return evalImportStatement(node, env, state);
+
     // Expressions
     case ast.NumberLiteral:
       return new object.NumberObject(node.literal);

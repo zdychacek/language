@@ -69,6 +69,11 @@ test('Lexer#nextToken - basic', (t) => {
     [ TokenType.PUNCTUATOR, '||' ],
     [ TokenType.IDENT, 'c' ],
     [ TokenType.EOL, '' ],
+    [ TokenType.KEYWORD, 'import' ],
+    [ TokenType.IDENT, 'a' ],
+    [ TokenType.KEYWORD, 'from' ],
+    [ TokenType.STRING, './a' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

@@ -9,6 +9,7 @@ export const ObjectType = {
   FUNCTION_OBJ: 'FUNCTION',
   BUILTIN_OBJ: 'BUILTIN',
   ARRAY_OBJ: 'ARRAY',
+  MODULE_OBJ: 'MODULE',
 };
 
 export class ObjectValue {
@@ -136,5 +137,41 @@ export class ArrayObject extends ObjectValue {
       .join(', ');
 
     return `[${elements}]`;
+  }
+}
+
+export class ModuleObject extends ObjectValue {
+  constructor (name, bindings) {
+    super();
+
+    this.name = name;
+    this.bindings = bindings;
+  }
+
+  getType () {
+    return ObjectType.MODULE_OBJ;
+  }
+
+  $inspect () {
+    const bindings = Object.entries(this.bindings)
+      .map(([ name, binding ]) => {
+        let bindingValue = '';
+
+        if (binding instanceof FunctionObject) {
+          const signature = binding.parameters
+            .map((param) => param.toString())
+            .join(', ');
+
+          bindingValue = `(${signature}) -> { ... }`;
+        }
+        else {
+          bindingValue = binding.$inspect;
+        }
+
+        return `\t${name}: ${bindingValue}`;
+      })
+      .join(',\n');
+
+    return `<Module: "${this.name}"> {\n${bindings}\n}`;
   }
 }

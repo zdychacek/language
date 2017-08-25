@@ -1,4 +1,6 @@
-- implement basic module imports
+- add tests for basic module evaluation
+- implement module imports with simple specifier
+- track AST node start/end positions
 - refactor parser/evaluator error throwing (line, column)
 - implement error stack traces
 - implement `|>` function chaining operator: `arg |> fn1 |> fn2`

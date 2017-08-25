@@ -11,6 +11,8 @@ import * as ast from './ast';
 class Parser {
   // Lexer reference
   _lexer = null;
+  // file name we are parsing
+  _fileName = '';
   // map of prefix parsers, eg. `-1`
   _prefixParsers = {};
   // map of infix parsers, eg. `1 + 2`
@@ -18,8 +20,9 @@ class Parser {
   // map of statement parsers, eg. `if`
   _statementParsers = {};
 
-  constructor (lexer) {
+  constructor (lexer, fileName = '') {
     this._lexer = lexer;
+    this._fileName = fileName;
 
     // prefix parsers
     this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
@@ -54,6 +57,7 @@ class Parser {
     this._registerStatement(Keyword.LET, this._parseLetStatement);
     this._registerStatement(Keyword.RETURN, this._parseReturnStatement);
     this._registerStatement(Punctuator.LBRACE, this._parseBlockStatement);
+    this._registerStatement(Keyword.IMPORT, this._parseImportStatement);
   }
 
   parseProgram = () => {
@@ -95,6 +99,18 @@ class Parser {
     return stmt;
   }
 
+  _parseImportStatement = () => {
+    const token = this._consume(Keyword.IMPORT);
+
+    const specifier = this._parseIdentifier();
+
+    this._consume(Keyword.FROM);
+
+    const source = this._parseStringLiteral();
+
+    return new ast.ImportStatement(token, specifier, source);
+  }
+
   _parseReturnStatement = () => {
     const stmt = new ast.ReturnStatement(this._consume(Keyword.RETURN));
 
@@ -113,15 +129,16 @@ class Parser {
     let token = this._peek();
 
     if (this._matchType(TokenType.EOF)) {
-      throw new SyntaxError('Unexpected end of file.');
+      throw new SyntaxError(`Unexpected end of file (${this._fileName}).`);
     }
 
     const prefix = this._getPrefixParser(token);
 
     if (!prefix) {
+      // TODO: refactor printing errors
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (${this._fileName}@${lineNo}:${columnNo}).`);
     }
 
     let leftExpr = prefix();
@@ -152,7 +169,9 @@ class Parser {
     const value = Number.parseInt(token.value, 10);
 
     if (!Number.isInteger(value)) {
-      throw new SyntaxError(`Could not parse ${token.value} as integer.`);
+      const [ lineNo, columnNo ] = token.start;
+
+      throw new SyntaxError(`Could not parse ${token.value} as integer (${this._fileName}@${lineNo}:${columnNo}).`);
     }
 
     return new ast.NumberLiteral(token, value);
@@ -255,7 +274,7 @@ class Parser {
     if (!(left instanceof ast.Identifier)) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (${this._fileName}@${lineNo}:${columnNo}).`);
     }
 
     expression.right = this._parseExpression(Precedence.ASSIGN - 1);
@@ -328,7 +347,7 @@ class Parser {
         else {
           const { start } = exp.token;
 
-          throw new SyntaxError(`Function argument must be an identifier, got "${exp.toString()}" (@${start.join(':')}).`);
+          throw new SyntaxError(`Function argument must be an identifier, got "${exp.toString()}" (${this._fileName}@${start.join(':')}).`);
         }
       });
     }
@@ -336,7 +355,7 @@ class Parser {
     else if (!(left instanceof ast.EmptyParamListPlaceholder)) {
       const { start } = left.token;
 
-      throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (@${start.join(':')}).`);
+      throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (${this._fileName}@${start.join(':')}).`);
     }
 
     const body = this._parseExpressionOrBlockStatement();
@@ -429,7 +448,7 @@ class Parser {
         const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
         const tokenValue = this._resolveTokenValue(token);
 
-        throw new SyntaxError(`Expected next token to be "${expectedValue}", got "${tokenValue}" instead (@${lineNo}:${columnNo}).`);
+        throw new SyntaxError(`Expected next token to be "${expectedValue}", got "${tokenValue}" instead (${this._fileName}@${lineNo}:${columnNo}).`);
       }
     }
 
@@ -444,7 +463,7 @@ class Parser {
         const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
         const tokenValue = this._resolveTokenValue(token);
 
-        throw new SyntaxError(`Expected next token to be "${expectedType}", got "${tokenValue}" instead (@${lineNo}:${columnNo}).`);
+        throw new SyntaxError(`Expected next token to be "${expectedType}", got "${tokenValue}" instead (${this._fileName}@${lineNo}:${columnNo}).`);
       }
     }
 

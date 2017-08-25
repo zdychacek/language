@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 
-import path from 'path';
 import Lexer from './lexer/lexer';
 import Parser from './parser/parser';
 import evaluate from './evaluator/evaluate';
@@ -14,10 +13,9 @@ if (!sourceFileName) {
 }
 
 // load stdlib and source file
-const input = loadFile(path.join(__dirname, '../lib/stdlib.lang')) + '\n' + loadFile(sourceFileName);
+const input = loadFile(sourceFileName);
 
-const lexer = new Lexer(input);
-const parser = new Parser(lexer);
+const parser = new Parser(new Lexer(input), sourceFileName);
 const env = new Environment();
 
 try {

@@ -9,13 +9,11 @@ import Lexer from './lexer/lexer';
 import Parser from './parser/parser';
 import evaluate from './evaluator/evaluate';
 import Environment from './evaluator/environment';
-import { loadFile } from './utils';
 
 const REPL_HISTORY_FILE = '.repl_history';
 
 function interpret (input, env) {
-  const lexer = new Lexer(input);
-  const parser = new Parser(lexer);
+  const parser = new Parser(new Lexer(input), 'repl');
   const program = parser.parseProgram();
 
   return evaluate(program, env);
@@ -23,9 +21,6 @@ function interpret (input, env) {
 
 // create global environment
 const globalEnv = new Environment();
-
-// load and interpret standard library first
-interpret(loadFile(path.join(__dirname, '../lib/stdlib.lang')), globalEnv);
 
 function doInterpret (input, context, filename, callback) {
   let result = null;

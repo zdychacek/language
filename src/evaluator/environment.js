@@ -37,4 +37,8 @@ export default class Environment {
 
     return env;
   }
+
+  getAllBindings () {
+    return this._store;
+  }
 }

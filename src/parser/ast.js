@@ -279,3 +279,16 @@ export class IndexExpression extends Expression {
     return `(${this.left.toString()}[${this.index.toString()}])`;
   }
 }
+
+export class ImportStatement extends Statement {
+  constructor (token, specifier, source) {
+    super(token);
+
+    this.specifier = specifier;
+    this.source = source;
+  }
+
+  toString () {
+    return `${this.getTokenValue()} ${this.specifier} from "${this.source}"`;
+  }
+}
