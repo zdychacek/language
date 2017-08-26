@@ -47,6 +47,10 @@ test('Evaluator - Error handling', (t) => {
       '"Hello" - "World"',
       'Unknown operator: STRING - STRING.',
     ],
+    [
+      'import "module.lang"',
+      'Error while importing "module.lang" file.',
+    ],
   ];
 
   tests.forEach(([ input, expected ]) => {

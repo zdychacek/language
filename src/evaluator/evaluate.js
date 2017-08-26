@@ -515,8 +515,8 @@ class Evaluator {
     try {
       fileContent = fs.readFileSync(sourceFilePath, 'utf8');
     }
-    catch (ex) {
-      return new object.ErrorObject(`Can't import "${sourceFilePath}" module file.`);
+    catch (_) {
+      return new object.ErrorObject(`Error while importing "${sourceFilePath}" file.`);
     }
 
     const moduleEnv = new Environment();
