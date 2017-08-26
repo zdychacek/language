@@ -13,7 +13,8 @@ import Environment from './evaluator/environment';
 const REPL_HISTORY_FILE = '.repl_history';
 
 function interpret (input, env) {
-  const parser = new Parser(new Lexer(input), path.join(__dirname, '..', 'repl'));
+  const lexer = new Lexer(input);
+  const parser = new Parser(lexer);
   const program = parser.parseProgram();
 
   return evaluate(program, env);
@@ -32,7 +33,7 @@ function doInterpret (input, context, filename, callback) {
     return callback(`There are some errors:\n ${ex.toString()}`);
   }
 
-  return callback(result.$inspect());
+  return callback(result.toString());
 }
 
 // create REPL server

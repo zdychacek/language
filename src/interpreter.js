@@ -14,8 +14,8 @@ if (!sourceFileName) {
 }
 
 const input = loadFile(sourceFileName);
-const lexer = new Lexer(input);
-const parser = new Parser(lexer, sourceFileName);
+const lexer = new Lexer(input, sourceFileName);
+const parser = new Parser(lexer);
 const env = new Environment();
 
 try {
@@ -23,7 +23,7 @@ try {
   const result = evaluate(program, env);
 
   if (result) {
-    console.log(result.$inspect());
+    console.log(result.toString());
   }
 }
 catch (ex) {

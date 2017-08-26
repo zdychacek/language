@@ -14,19 +14,19 @@ export default new object.BuiltinObject((...args) => {
   }
 
   if (arg instanceof object.NumberObject) {
-    return new object.StringObject(arg.$inspect());
+    return new object.StringObject(arg.toString());
   }
 
   if (arg instanceof object.BooleanObject) {
-    return new object.StringObject(arg.$inspect());
+    return new object.StringObject(arg.toString());
   }
 
   if (arg instanceof object.FunctionObject) {
-    return new object.StringObject(arg.$inspect());
+    return new object.StringObject(arg.toString());
   }
 
   if (arg instanceof object.NullObject) {
-    return new object.StringObject(arg.$inspect());
+    return new object.StringObject(arg.toString());
   }
 
   return consts.NULL;

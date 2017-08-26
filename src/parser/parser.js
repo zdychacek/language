@@ -20,9 +20,8 @@ class Parser {
   // map of statement parsers, eg. `if`
   _statementParsers = {};
 
-  constructor (lexer, fileName = '') {
+  constructor (lexer) {
     this._lexer = lexer;
-    this._fileName = fileName;
 
     // prefix parsers
     this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
@@ -67,7 +66,7 @@ class Parser {
       this._doParseStatement(statements);
     }
 
-    return new ast.Program(this._fileName, statements);
+    return new ast.Program(this._lexer.getFileName(), statements);
   }
 
   _parseStatement = () => {
@@ -127,7 +126,7 @@ class Parser {
     let token = this._peek();
 
     if (this._matchType(TokenType.EOF)) {
-      throw new SyntaxError(`Unexpected end of file (${this._fileName}).`);
+      throw new SyntaxError(`Unexpected end of file (${this._lexer.getFileName()}).`);
     }
 
     const prefix = this._getPrefixParser(token);
@@ -136,7 +135,7 @@ class Parser {
       // TODO: refactor printing errors
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (${this._fileName}@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
     }
 
     let leftExpr = prefix();
@@ -169,7 +168,7 @@ class Parser {
     if (!Number.isInteger(value)) {
       const [ lineNo, columnNo ] = token.start;
 
-      throw new SyntaxError(`Could not parse ${token.value} as integer (${this._fileName}@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`Could not parse ${token.value} as integer (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
     }
 
     return new ast.NumberLiteral(token, value);
@@ -272,7 +271,7 @@ class Parser {
     if (!(left instanceof ast.Identifier)) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (${this._fileName}@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
     }
 
     expression.right = this._parseExpression(Precedence.ASSIGN - 1);
@@ -345,7 +344,7 @@ class Parser {
         else {
           const { start } = exp.token;
 
-          throw new SyntaxError(`Function argument must be an identifier, got "${exp.toString()}" (${this._fileName}@${start.join(':')}).`);
+          throw new SyntaxError(`Function argument must be an identifier, got "${exp.toString()}" (${this._lexer.getFileName()}@${start.join(':')}).`);
         }
       });
     }
@@ -353,7 +352,7 @@ class Parser {
     else if (!(left instanceof ast.EmptyParamListPlaceholder)) {
       const { start } = left.token;
 
-      throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (${this._fileName}@${start.join(':')}).`);
+      throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (${this._lexer.getFileName()}@${start.join(':')}).`);
     }
 
     const body = this._parseExpressionOrBlockStatement();
@@ -446,7 +445,7 @@ class Parser {
         const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
         const tokenValue = this._resolveTokenValue(token);
 
-        throw new SyntaxError(`Expected next token to be "${expectedValue}", got "${tokenValue}" instead (${this._fileName}@${lineNo}:${columnNo}).`);
+        throw new SyntaxError(`Expected next token to be "${expectedValue}", got "${tokenValue}" instead (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
       }
     }
 
@@ -461,7 +460,7 @@ class Parser {
         const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
         const tokenValue = this._resolveTokenValue(token);
 
-        throw new SyntaxError(`Expected next token to be "${expectedType}", got "${tokenValue}" instead (${this._fileName}@${lineNo}:${columnNo}).`);
+        throw new SyntaxError(`Expected next token to be "${expectedType}", got "${tokenValue}" instead (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
       }
     }
 

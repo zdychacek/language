@@ -10,6 +10,8 @@ import {
 class Lexer {
   // input source code
   _input = '';
+  // file name we are lexing
+  _fileName = '';
   // current position in source code
   _index = 0;
   // column and line positions in source code
@@ -23,8 +25,9 @@ class Lexer {
   // previous token
   _prevToken = null;
 
-  constructor (input) {
+  constructor (input, fileName = '') {
     this._input = input;
+    this._fileName = fileName;
   }
 
   nextToken () {
@@ -104,6 +107,10 @@ class Lexer {
 
   getCurrentPosition () {
     return [ this._lineNo, this._columnNo ];
+  }
+
+  getFileName () {
+    return this._fileName;
   }
 
   _getChar () {
@@ -225,7 +232,7 @@ class Lexer {
 
     while (this._peekChar() !== '"') {
       if (this._isEOF()) {
-        throw new SyntaxError(`Unterminated string (@${this._lineNo}:${this._columnNo}).`);
+        throw new SyntaxError(`Unterminated string (${this._fileName}@${this._lineNo}:${this._columnNo}).`);
       }
 
       value += this._getChar();

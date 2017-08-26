@@ -21,7 +21,7 @@ export class ObjectValue {
     throw new Error('Not implemented.');
   }
 
-  $inspect () {
+  toString () {
     if (this.value !== undefined) {
       return this.value.toString();
     }
@@ -47,7 +47,7 @@ export class StringObject extends ObjectValue {
     return ObjectType.STRING_OBJ;
   }
 
-  $inspect () {
+  toString () {
     return `"${this.value.toString()}"`;
   }
 }
@@ -83,7 +83,7 @@ export class ErrorObject extends ObjectValue {
     return ObjectType.ERROR_OBJ;
   }
 
-  $inspect () {
+  toString () {
     return `ERROR: ${this.value}`;
   }
 }
@@ -101,7 +101,15 @@ export class FunctionObject extends ObjectValue {
     return ObjectType.FUNCTION_OBJ;
   }
 
-  $inspect () {
+  toShortString () {
+    const params = this.parameters
+      .map((param) => param.toString())
+      .join(', ');
+
+    return `(${params}) -> { ... }`;
+  }
+
+  toString () {
     const params = this.parameters
       .map((param) => param.toString())
       .join(', ');
@@ -115,7 +123,7 @@ export class BuiltinObject extends ObjectValue {
     return ObjectType.BUILTIN_OBJ;
   }
 
-  $inspect () {
+  toString () {
     return '<builtin function>';
   }
 }
@@ -131,9 +139,9 @@ export class ArrayObject extends ObjectValue {
     return ObjectType.ARRAY_OBJ;
   }
 
-  $inspect () {
+  toString () {
     const elements = this.elements
-      .map((el) => el.$inspect())
+      .map((el) => el.toString())
       .join(', ');
 
     return `[${elements}]`;
@@ -152,26 +160,16 @@ export class ModuleObject extends ObjectValue {
     return ObjectType.MODULE_OBJ;
   }
 
-  $inspect () {
+  toString () {
     const bindings = Object.entries(this.bindings)
       .map(([ name, binding ]) => {
-        let bindingValue = '';
-
-        if (binding instanceof FunctionObject) {
-          const signature = binding.parameters
-            .map((param) => param.toString())
-            .join(', ');
-
-          bindingValue = `(${signature}) -> { ... }`;
-        }
-        else {
-          bindingValue = binding.$inspect();
-        }
+        const bindingValue = binding instanceof FunctionObject ?
+          binding.toShortString() : binding.toString();
 
         return `\t${name}: ${bindingValue}`;
       })
       .join(',\n');
 
-    return `<Module: "${this.name}"> {\n${bindings}\n}`;
+    return `<Module: "${this.name}"> ${bindings.length ? `{\n${bindings}\n}` : '{}'}`;
   }
 }

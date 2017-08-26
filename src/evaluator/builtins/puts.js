@@ -5,11 +5,11 @@ import * as consts from '../constants';
 export default new object.BuiltinObject((...args) => {
   const out = args
     .map((arg) => {
-      let value = arg.$inspect();
+      let value = arg.toString();
 
       if (arg instanceof object.StringObject) {
         // we want strings to be logged without quotes
-        value = arg.$inspect().replace(/^"|"$/g, '');
+        value = arg.toString().replace(/^"|"$/g, '');
       }
 
       return value;

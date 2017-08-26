@@ -30,8 +30,8 @@ export function testVoidObject (t, obj) {
 }
 
 export function testEval (input, env = new Environment(), fileName = '') {
-  const lexer = new Lexer(input);
-  const parser = new Parser(lexer, fileName);
+  const lexer = new Lexer(input, fileName);
+  const parser = new Parser(lexer);
   const program = parser.parseProgram();
 
   return evaluate(program, env);

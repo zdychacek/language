@@ -13,8 +13,10 @@ import Parser from '../parser/parser';
 const ObjectType = object.ObjectType;
 
 class Evaluator {
-  _state = {};
+  // file name we are evaluating
   _fileName = '';
+  // evaluator internal state
+  _state = {};
 
   evaluate (node, env) {
     const type = node.constructor;
@@ -22,6 +24,7 @@ class Evaluator {
     switch (type) {
       // Statements
       case ast.Program:
+        // save file name
         this._fileName = node.fileName;
 
         return this.evalProgram(node.statements, env);
@@ -511,14 +514,14 @@ class Evaluator {
     const moduleEnv = new Environment();
 
     try {
-      const lexer = new Lexer(fileContent);
-      const parser = new Parser(lexer, sourceFilePath);
+      const lexer = new Lexer(fileContent, sourceFilePath);
+      const parser = new Parser(lexer);
 
       this.evaluate(parser.parseProgram(), moduleEnv);
     }
     catch (ex) {
       // TODO: implement better error handling
-      return new object.ErrorObject(ex);
+      return new object.ErrorObject(ex.message);
     }
 
     const bindings = moduleEnv.getAllBindings();

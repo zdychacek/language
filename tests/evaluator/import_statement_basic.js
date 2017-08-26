@@ -7,7 +7,7 @@ import { testEval } from './utils';
 //import * as object from '../../src/evaluator/object';
 import Environment from '../../src/evaluator/environment';
 
-test.only('Evaluator - Import statement basic', (t) => {
+test.skip('Evaluator - Import statement basic', (t) => {
   const fileName = path.join(__dirname, 'fixtures/module1.lang');
   const input = fs.readFileSync(fileName, 'utf8');
 
