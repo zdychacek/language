@@ -15,6 +15,8 @@ const ObjectType = object.ObjectType;
 class Evaluator {
   // file name we are evaluating
   _fileName = '';
+  // contains error object if any occured while importing modules
+  _moduleImportError = null;
   // evaluator internal state
   _state = {};
 
@@ -56,9 +58,15 @@ class Evaluator {
 
         return value;
       }
-      case ast.ImportStatement:
-        return this.evalImportStatement(node, env);
+      case ast.ImportStatement: {
+        const result = this.evalImportStatement(node, env);
 
+        if (this._moduleImportError) {
+          return this._moduleImportError;
+        }
+
+        return result;
+      }
       // Expressions
       case ast.NumberLiteral:
         return new object.NumberObject(node.literal);
@@ -521,7 +529,7 @@ class Evaluator {
     }
     catch (ex) {
       // TODO: implement better error handling
-      return new object.ErrorObject(ex.message);
+      return this._moduleImportError = new object.ErrorObject(ex.message);
     }
 
     const bindings = moduleEnv.getAllBindings();
