@@ -99,13 +99,17 @@ class Parser {
   _parseImportStatement = () => {
     const token = this._consume(Keyword.IMPORT);
 
-    const specifier = this._parseIdentifier();
-
-    this._consume(Keyword.FROM);
-
     const source = this._parseStringLiteral();
+    let alias = null;
 
-    return new ast.ImportStatement(token, specifier, source);
+    // aliased import
+    if (this._match(Keyword.AS)) {
+      this._consume(Keyword.AS);
+
+      alias = this._parseIdentifier();
+    }
+
+    return new ast.ImportStatement(token, alias, source);
   }
 
   _parseReturnStatement = () => {

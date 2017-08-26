@@ -3,10 +3,10 @@ import test from 'tape';
 import Lexer from '../../src/lexer/lexer';
 import Parser from '../../src/parser/parser';
 import * as ast from '../../src/parser/ast';
-import { testStringLiteral } from './utils';
+import { testIdentifier, testStringLiteral } from './utils';
 
-test('Parser - Import statement', (t) => {
-  const input = 'import "./module"';
+test('Parser - Import statement: with alias', (t) => {
+  const input = 'import "./module" as mod';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);
@@ -20,7 +20,7 @@ test('Parser - Import statement', (t) => {
 
   t.ok(importStmt instanceof ast.ImportStatement, 'node is ImportStatement');
   t.equal(importStmt.getTokenValue(), 'import', 'node.getTokenValue is "import"');
-  t.equal(importStmt.alias, null, 'alias is not present');
+  testIdentifier(t, importStmt.alias, 'mod');
   testStringLiteral(t, importStmt.source, './module');
 
   t.end();

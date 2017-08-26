@@ -282,14 +282,18 @@ export class IndexExpression extends Expression {
 }
 
 export class ImportStatement extends Statement {
-  constructor (token, specifier, source) {
+  constructor (token, alias, source) {
     super(token);
 
-    this.specifier = specifier;
+    this.alias = alias;
     this.source = source;
   }
 
   toString () {
-    return `${this.getTokenValue()} ${this.specifier} from "${this.source}"`;
+    if (this.alias) {
+      return `${this.getTokenValue()} ${this.alias} from "${this.source}"`;
+    }
+
+    return `${this.getTokenValue()} "${this.source}"`;
   }
 }

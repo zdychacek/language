@@ -46,7 +46,7 @@ export const Keyword = {
   ELSE: 'else',
   RETURN: 'return',
   IMPORT: 'import',
-  FROM: 'from',
+  AS: 'as',
 };
 
 export const BooleanLiteral = {
