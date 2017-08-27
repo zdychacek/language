@@ -4,8 +4,8 @@ import { testEval, testNumberObject, testNullObject } from './utils';
 
 test('Evaluator - Object index expression', (t) => {
   const tests = [
-    [ '({ "foo": 5 })["foo"]', 5 ],
-    [ '({ "foo": 5 })["bar"]', null ],
+    [ '({ "foo": 5 }).foo', 5 ],
+    [ '({ "foo": 5 }).bar', null ],
     [ 'let key = "foo"\n ({ "foo": 5 })[key]', 5 ],
     [ '({})["foo"]', null ],
     [ '({ 5: 5 })[5]', 5 ],

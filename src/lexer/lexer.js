@@ -156,6 +156,7 @@ class Lexer {
       case Punctuator.SLASH:
       case Punctuator.LT:
       case Punctuator.GT:
+      case Punctuator.DOT:
         return new Token(TokenType.PUNCTUATOR, this._getChar());
       case Punctuator.MINUS:
         punctuator = this._getChar();

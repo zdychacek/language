@@ -142,60 +142,10 @@ class Evaluator {
       }
       case ast.AssignmentExpression: {
         if (node.left instanceof ast.MemberExpression) {
-          const memberExpression = node.left;
-          const obj = this.evaluate(memberExpression.left, env);
-
-          if (this.isError(obj)) {
-            return obj;
-          }
-
-          const index = this.evaluate(memberExpression.index, env);
-
-          if (this.isError(index)) {
-            return index;
-          }
-
-          if (!index.getHashKey) {
-            return new object.ErrorObject(`Unusable as object key: ${index.getType()}.`);
-          }
-
-          const value = this.evaluate(node.right, env);
-
-          if (this.isError(value)) {
-            return value;
-          }
-
-          const pair = obj.pairs.get(index.getHashKey());
-
-          // if pair exists, update it
-          if (pair) {
-            pair.value = value;
-          }
-          // ... pair does not exist, so create new
-          else {
-            obj.pairs.set(index.getHashKey(), { key: index, value });
-          }
-
-          return obj;
+          return this.evalMemberExpressionAssignment(node, env);
         }
         else {
-          const bindingName = node.left.value;
-
-          if (!env.get(bindingName)) {
-            return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
-          }
-
-          const right = this.evaluate(node.right, env);
-
-          if (this.isError(right)) {
-            return right;
-          }
-
-          if (!env.set(bindingName, right)) {
-            return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
-          }
-
-          return right;
+          return this.evalExpressionAssignment(node, env);
         }
       }
       case ast.ArrayLiteral: {
@@ -214,10 +164,17 @@ class Evaluator {
           return left;
         }
 
-        const index = this.evaluate(node.index, env);
+        let index = null;
 
-        if (this.isError(index)) {
-          return index;
+        if (node.computed) {
+          index = this.evaluate(node.index, env);
+
+          if (this.isError(index)) {
+            return index;
+          }
+        }
+        else {
+          index = new object.StringObject(node.index.value);
         }
 
         return this.evalMemberExpression(left, index);
@@ -623,6 +580,71 @@ class Evaluator {
     }
 
     return new object.ObjectObject(pairs);
+  }
+
+  evalExpressionAssignment (node, env) {
+    const bindingName = node.left.value;
+
+    if (!env.get(bindingName)) {
+      return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+    }
+
+    const right = this.evaluate(node.right, env);
+
+    if (this.isError(right)) {
+      return right;
+    }
+
+    if (!env.set(bindingName, right)) {
+      return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+    }
+
+    return right;
+  }
+
+  evalMemberExpressionAssignment (node, env) {
+    const memberExpression = node.left;
+    const obj = this.evaluate(memberExpression.left, env);
+
+    if (this.isError(obj)) {
+      return obj;
+    }
+
+    let index = null;
+
+    if (memberExpression.computed) {
+      index = this.evaluate(memberExpression.index, env);
+    }
+    else {
+      index = new object.StringObject(memberExpression.index.value);
+    }
+
+    if (this.isError(index)) {
+      return index;
+    }
+
+    if (!index.getHashKey) {
+      return new object.ErrorObject(`Unusable as object key: ${index.getType()}.`);
+    }
+
+    const value = this.evaluate(node.right, env);
+
+    if (this.isError(value)) {
+      return value;
+    }
+
+    const pair = obj.pairs.get(index.getHashKey());
+
+    // if pair exists, update it
+    if (pair) {
+      pair.value = value;
+    }
+    // ... pair does not exist, so create new
+    else {
+      obj.pairs.set(index.getHashKey(), { key: index, value });
+    }
+
+    return obj;
   }
 }
 

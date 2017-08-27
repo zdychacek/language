@@ -77,6 +77,10 @@ test('Lexer#nextToken - basic', (t) => {
     [ TokenType.KEYWORD, 'import' ],
     [ TokenType.STRING, './module' ],
     [ TokenType.EOL, '' ],
+    [ TokenType.IDENT, 'obj' ],
+    [ TokenType.PUNCTUATOR, '.' ],
+    [ TokenType.IDENT, 'property' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

@@ -38,6 +38,7 @@ export const Punctuator = {
   AMPERSAND: '&',
   DOUBLE_PIPE: '||',
   DOUBLE_AMPERSAND: '&&',
+  DOT: '.',
 };
 
 export const Keyword = {
@@ -67,7 +68,7 @@ export const Precedence = {
   PREFIX: 80,       // -X or !X
   DASH_ARROW: 90,   // ->
   CALL: 100,        // myFunction(X)
-  INDEX: 110,       // []
+  INDEX: 110,       // [] or .
 };
 
 export const TokenPrecedence = {
@@ -84,6 +85,7 @@ export const TokenPrecedence = {
   [Punctuator.COMMA]: Precedence.SEQUENCE,
   [Punctuator.DASH_ARROW]: Precedence.DASH_ARROW,
   [Punctuator.LBRACKET]: Precedence.INDEX,
+  [Punctuator.DOT]: Precedence.INDEX,
   [Punctuator.DOUBLE_PIPE]: Precedence.BITWISE_OR,
   [Punctuator.DOUBLE_AMPERSAND]: Precedence.BITWISE_AND,
 };

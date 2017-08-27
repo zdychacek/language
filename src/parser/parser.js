@@ -51,7 +51,8 @@ class Parser {
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
     this._registerInfixParser(Punctuator.ASSIGN, this._parseAssignmentExpression);
-    this._registerInfixParser(Punctuator.LBRACKET, this._parseMemberExpression);
+    this._registerInfixParser(Punctuator.LBRACKET, this._parseMemberExpression(true));
+    this._registerInfixParser(Punctuator.DOT, this._parseMemberExpression(false));
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -274,7 +275,7 @@ class Parser {
     if (!(left instanceof ast.Identifier) && !(left instanceof ast.MemberExpression)) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
-      throw new SyntaxError(`The left-hand side of an assignment must be an identifier (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`The left-hand side of an assignment must be an identifier or a member expression (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
     }
 
     expression.right = this._parseExpression(Precedence.ASSIGN - 1);
@@ -427,12 +428,20 @@ class Parser {
     return objectLiteral;
   }
 
-  _parseMemberExpression = (left) => {
-    const token = this._consume(Punctuator.LBRACKET);
+  _parseMemberExpression = (computed) => (left) => {
+    const memberExpression = new ast.MemberExpression(this._consume(), left);
 
-    const memberExpression = new ast.MemberExpression(token, left, this._parseExpression(Precedence.SEQUENCE));
+    memberExpression.computed = computed;
 
-    this._consume(Punctuator.RBRACKET);
+    // [index] variant
+    if (computed) {
+      memberExpression.index = this._parseExpression(Precedence.SEQUENCE);
+      this._consume(Punctuator.RBRACKET);
+    }
+    // . variant
+    else {
+      memberExpression.index = this._parseIdentifier();
+    }
 
     return memberExpression;
   }
