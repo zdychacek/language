@@ -76,6 +76,8 @@ class Evaluator {
         return new object.NullObject();
       case ast.BooleanLiteral:
         return this.nativeBoolToBooleanObject(node.literal);
+      case ast.ObjectLiteral:
+        return this.evalObjectLiteral(node, env);
       case ast.PrefixExpression: {
         const right = this.evaluate(node.right, env);
 
@@ -139,23 +141,62 @@ class Evaluator {
         return exps[exps.length - 1];
       }
       case ast.AssignmentExpression: {
-        const bindingName = node.left.value;
+        if (node.left instanceof ast.MemberExpression) {
+          const memberExpression = node.left;
+          const obj = this.evaluate(memberExpression.left, env);
 
-        if (!env.get(bindingName)) {
-          return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+          if (this.isError(obj)) {
+            return obj;
+          }
+
+          const index = this.evaluate(memberExpression.index, env);
+
+          if (this.isError(index)) {
+            return index;
+          }
+
+          if (!index.getHashKey) {
+            return new object.ErrorObject(`Unusable as object key: ${index.getType()}.`);
+          }
+
+          const value = this.evaluate(node.right, env);
+
+          if (this.isError(value)) {
+            return value;
+          }
+
+          const pair = obj.pairs.get(index.getHashKey());
+
+          // if pair exists, update it
+          if (pair) {
+            pair.value = value;
+          }
+          // ... pair does not exist, so create new
+          else {
+            obj.pairs.set(index.getHashKey(), { key: index, value });
+          }
+
+          return obj;
         }
+        else {
+          const bindingName = node.left.value;
 
-        const right = this.evaluate(node.right, env);
+          if (!env.get(bindingName)) {
+            return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+          }
 
-        if (this.isError(right)) {
+          const right = this.evaluate(node.right, env);
+
+          if (this.isError(right)) {
+            return right;
+          }
+
+          if (!env.set(bindingName, right)) {
+            return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
+          }
+
           return right;
         }
-
-        if (!env.set(bindingName, right)) {
-          return new object.ErrorObject(`Cannot assign to undeclared identifier: "${bindingName}".`);
-        }
-
-        return right;
       }
       case ast.ArrayLiteral: {
         const elements = this.evalExpressions(node.elements, env);
@@ -166,7 +207,7 @@ class Evaluator {
 
         return new object.ArrayObject(elements);
       }
-      case ast.IndexExpression: {
+      case ast.MemberExpression: {
         const left = this.evaluate(node.left, env);
 
         if (this.isError(left)) {
@@ -179,7 +220,7 @@ class Evaluator {
           return index;
         }
 
-        return this.evalIndexExpression(left, index);
+        return this.evalMemberExpression(left, index);
       }
     }
 
@@ -470,7 +511,7 @@ class Evaluator {
     return obj instanceof object.ErrorObject;
   }
 
-  evalArrayOrStringIndexExpression (arrayOrString, index) {
+  evalArrayOrStringMemberExpression (arrayOrString, index) {
     const idx = index.value;
     let max = null;
 
@@ -495,12 +536,29 @@ class Evaluator {
     }
   }
 
-  evalIndexExpression (left, index) {
+  evalObjectMemberExpression (obj, index) {
+    if (!index.getHashKey) {
+      return new object.ErrorObject(`Unusable as object key: ${index.getType()}.`);
+    }
+
+    const pair = obj.pairs.get(index.getHashKey());
+
+    if (!pair) {
+      return consts.NULL;
+    }
+
+    return pair.value;
+  }
+
+  evalMemberExpression (left, index) {
     if (
       (left.getType() === ObjectType.ARRAY_OBJ || left.getType() === ObjectType.STRING_OBJ) &&
       index.getType() === ObjectType.NUMBER_OBJ
     ) {
-      return this.evalArrayOrStringIndexExpression(left, index);
+      return this.evalArrayOrStringMemberExpression(left, index);
+    }
+    else if (left.getType() === ObjectType.OBJECT_OBJ) {
+      return this.evalObjectMemberExpression(left, index);
     }
 
     return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
@@ -539,6 +597,32 @@ class Evaluator {
       .forEach(([ name, value ]) => env.assign(name, value));
 
     return new object.ModuleObject(sourceFilePath, bindings);
+  }
+
+  evalObjectLiteral (node, env) {
+    const pairs = new Map();
+
+    for (const [ keyNode, valueNode ] of node.pairs) {
+      const key = this.evaluate(keyNode, env);
+
+      if (this.isError(key)) {
+        return key;
+      }
+
+      if (!key.getHashKey) {
+        return new object.ErrorObject(`Unusable as object key: ${key.getType()}.`);
+      }
+
+      const value = this.evaluate(valueNode, env);
+
+      if (this.isError(value)) {
+        return value;
+      }
+
+      pairs.set(key.getHashKey(), { key, value });
+    }
+
+    return new object.ObjectObject(pairs);
   }
 }
 

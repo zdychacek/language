@@ -268,7 +268,7 @@ export class SequenceExpression extends Expression {
   }
 }
 
-export class IndexExpression extends Expression {
+export class MemberExpression extends Expression {
   constructor (token, left, index) {
     super(token);
 
@@ -295,5 +295,25 @@ export class ImportStatement extends Statement {
     }
 
     return `${this.getTokenValue()} "${this.source}"`;
+  }
+}
+
+export class ObjectLiteral extends Expression {
+  constructor (token, pairs) {
+    super(token);
+
+    this.pairs = pairs;
+  }
+
+  toString () {
+    const pairs = Object.entries(this.pairs)
+      .map(([ key, value ]) => `  ${key.toString()}: ${value.toString()}`)
+      .join(',');
+
+    if (pairs) {
+      return `{\n${pairs}\n}`;
+    }
+
+    return '{}';
   }
 }

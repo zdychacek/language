@@ -23,7 +23,7 @@ test('Parser - Index expression', (t) => {
 
   const indexExp = stmt.expression;
 
-  t.ok(is(indexExp, ast.IndexExpression), 'expression is ast.IndexExpression');
+  t.ok(is(indexExp, ast.MemberExpression), 'expression is ast.MemberExpression');
 
   testIdentifier(t, indexExp.left, 'myArray');
   testInfixExpression(t, indexExp.index, 1, '+', 1);

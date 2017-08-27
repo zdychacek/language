@@ -51,6 +51,10 @@ test('Evaluator - Error handling', (t) => {
       'import "module.lang"',
       'Error while importing "module.lang" file.',
     ],
+    [
+      '({ "name": "Monkey" })[(x) -> x]',
+      'Unusable as object key: FUNCTION.',
+    ],
   ];
 
   tests.forEach(([ input, expected ]) => {

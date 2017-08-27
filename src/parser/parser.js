@@ -34,6 +34,7 @@ class Parser {
     this._registerPrefixParser(Punctuator.LPAREN, this._parseEmptyParamListOrGroupedExpression);
     this._registerPrefixParser(Keyword.IF, this._parseIfExpression);
     this._registerPrefixParser(Punctuator.LBRACKET, this._parseArrayLiteral);
+    this._registerPrefixParser(Punctuator.LBRACE, this._parseObjectLiteral);
 
     // infix parsers
     this._registerInfixParser(Punctuator.PLUS, this._parseInfixExpression);
@@ -50,7 +51,7 @@ class Parser {
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
     this._registerInfixParser(Punctuator.ASSIGN, this._parseAssignmentExpression);
-    this._registerInfixParser(Punctuator.LBRACKET, this._parseIndexExpression);
+    this._registerInfixParser(Punctuator.LBRACKET, this._parseMemberExpression);
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -136,7 +137,6 @@ class Parser {
     const prefix = this._getPrefixParser(token);
 
     if (!prefix) {
-      // TODO: refactor printing errors
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
       throw new SyntaxError(`Unexpected token "${this._resolveTokenValue(token)}" (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
@@ -271,8 +271,7 @@ class Parser {
 
     const expression = new ast.AssignmentExpression(token, left, token.value);
 
-    // TODO: add MemberExpression when implemented
-    if (!(left instanceof ast.Identifier)) {
+    if (!(left instanceof ast.Identifier) && !(left instanceof ast.MemberExpression)) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
       throw new SyntaxError(`The left-hand side of an assignment must be an identifier (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
@@ -393,14 +392,49 @@ class Parser {
     return new ast.ArrayLiteral(token, elements);
   }
 
-  _parseIndexExpression = (left) => {
+  _parseObjectPair (objectLiteral) {
+    const key = this._parseExpression();
+
+    this._consume(Punctuator.COLON);
+
+    const value = this._parseExpression(Precedence.SEQUENCE);
+
+    objectLiteral.pairs.set(key, value);
+  }
+
+  _parseObjectLiteral = () => {
+    const token = this._consume(Punctuator.LBRACE);
+    const objectLiteral = new ast.ObjectLiteral(token);
+
+    objectLiteral.pairs = new Map();
+
+    this._consumeOptionalEOL();
+
+    if (!this._match(Punctuator.RBRACE)) {
+      this._parseObjectPair(objectLiteral);
+
+      while (this._match(Punctuator.COMMA)) {
+        this._consume(Punctuator.COMMA);
+        this._consumeOptionalEOL();
+
+        this._parseObjectPair(objectLiteral);
+      }
+    }
+
+    this._consumeOptionalEOL();
+    this._consume(Punctuator.RBRACE);
+
+    return objectLiteral;
+  }
+
+  _parseMemberExpression = (left) => {
     const token = this._consume(Punctuator.LBRACKET);
 
-    const indexExpression = new ast.IndexExpression(token, left, this._parseExpression(Precedence.SEQUENCE));
+    const memberExpression = new ast.MemberExpression(token, left, this._parseExpression(Precedence.SEQUENCE));
 
     this._consume(Punctuator.RBRACKET);
 
-    return indexExpression;
+    return memberExpression;
   }
 
   _parseExpressionOrBlockStatement () {

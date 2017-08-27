@@ -10,6 +10,7 @@ export const ObjectType = {
   BUILTIN_OBJ: 'BUILTIN',
   ARRAY_OBJ: 'ARRAY',
   MODULE_OBJ: 'MODULE',
+  OBJECT_OBJ: 'OBJECT',
 };
 
 export class ObjectValue {
@@ -34,11 +35,23 @@ export class NumberObject extends ObjectValue {
   getType () {
     return ObjectType.NUMBER_OBJ;
   }
+
+  getHashKey () {
+    return this.value.toString();
+  }
 }
 
 export class BooleanObject extends ObjectValue {
   getType () {
     return ObjectType.BOOLEAN_OBJ;
+  }
+
+  getHashKey () {
+    if (this.value) {
+      return '1';
+    }
+
+    return '0';
   }
 }
 
@@ -49,6 +62,10 @@ export class StringObject extends ObjectValue {
 
   toString () {
     return `"${this.value.toString()}"`;
+  }
+
+  getHashKey () {
+    return this.value.toString();
   }
 }
 
@@ -166,10 +183,34 @@ export class ModuleObject extends ObjectValue {
         const bindingValue = binding instanceof FunctionObject ?
           binding.toShortString() : binding.toString();
 
-        return `\t${name}: ${bindingValue}`;
+        return `  ${name}: ${bindingValue}`;
       })
       .join(',\n');
 
     return `<Module: "${this.name}"> ${bindings.length ? `{\n${bindings}\n}` : '{}'}`;
+  }
+}
+
+export class ObjectObject extends ObjectValue {
+  constructor (pairs) {
+    super();
+
+    this.pairs = pairs;
+  }
+
+  getType () {
+    return ObjectType.OBJECT_OBJ;
+  }
+
+  toString () {
+    const pairs = Array.from(this.pairs)
+      .map(([ , { key, value } ]) => `  ${key.toString()}: ${value.toString()}`)
+      .join(',\n');
+
+    if (pairs) {
+      return `{\n${pairs}\n}`;
+    }
+
+    return '{}';
   }
 }

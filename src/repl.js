@@ -30,10 +30,10 @@ function doInterpret (input, context, filename, callback) {
     result = interpret(input, globalEnv);
   }
   catch (ex) {
-    return callback(`There are some errors:\n ${ex.toString()}`);
+    return callback(`There are some errors:\n ${ex}`);
   }
 
-  return callback(result.toString());
+  return callback(result ? result.toString() : '');
 }
 
 // create REPL server
