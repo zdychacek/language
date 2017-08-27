@@ -16,4 +16,4 @@ null
 a && b || c
 import "./module" as mod
 import "./module"
-obj.property
+export obj.property

@@ -303,6 +303,23 @@ export class ImportStatement extends Statement {
   }
 }
 
+export class ExportStatement extends Statement {
+  constructor (token, alias, declaration) {
+    super(token);
+
+    this.alias = alias;
+    this.declaration = declaration;
+  }
+
+  toString () {
+    if (this.alias) {
+      return `${this.getTokenValue()} ${this.declaration.toString()} as ${this.alias}"`;
+    }
+
+    return `${this.getTokenValue()} ${this.declaration.toString()}`;
+  }
+}
+
 export class ObjectLiteral extends Expression {
   constructor (token, pairs) {
     super(token);

@@ -59,6 +59,7 @@ class Parser {
     this._registerStatement(Keyword.RETURN, this._parseReturnStatement);
     this._registerStatement(Punctuator.LBRACE, this._parseBlockStatement);
     this._registerStatement(Keyword.IMPORT, this._parseImportStatement);
+    this._registerStatement(Keyword.EXPORT, this._parseExportStatement);
   }
 
   parseProgram = () => {
@@ -112,6 +113,39 @@ class Parser {
     }
 
     return new ast.ImportStatement(token, alias, source);
+  }
+
+  _parseExportStatement = () => {
+    const token = this._consume(Keyword.EXPORT);
+
+    let alias = null;
+    let declaration = null;
+
+    // export variable or function declaration
+    if (this._match(Keyword.LET)) {
+      declaration = this._parseLetStatement();
+    }
+    // export any expression
+    else {
+      declaration = this._parseExpression();
+
+      // if we are exporting an identifier, then export alias is not required
+      if (declaration instanceof ast.Identifier) {
+        if (this._match(Keyword.AS)) {
+          this._consume();
+
+          alias = this._parseIdentifier();
+        }
+      }
+      // if declaration is anything else than an `ast.Identifier`, we have to specify export alias
+      else {
+        this._consume(Keyword.AS);
+
+        alias = this._parseIdentifier();
+      }
+    }
+
+    return new ast.ExportStatement(token, alias, declaration);
   }
 
   _parseReturnStatement = () => {

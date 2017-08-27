@@ -48,6 +48,7 @@ export const Keyword = {
   RETURN: 'return',
   IMPORT: 'import',
   AS: 'as',
+  EXPORT: 'export',
 };
 
 export const BooleanLiteral = {
