@@ -8,7 +8,7 @@ import * as object from '../../src/evaluator/object';
 import Environment from '../../src/evaluator/environment';
 
 test('Evaluator - Import statement', (t) => {
-  const fileName = path.join(__dirname, 'fixtures/module1.lang');
+  const fileName = path.join(__dirname, 'fixtures/import_without_alias.lang');
 
   const input = fs.readFileSync(fileName, 'utf8');
   const env = new Environment();

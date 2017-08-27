@@ -1,0 +1,3 @@
+import "./module.lang" as mod
+
+mod.greeting

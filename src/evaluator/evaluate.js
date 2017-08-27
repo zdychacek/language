@@ -543,17 +543,30 @@ class Evaluator {
       this.evaluate(parser.parseProgram(), moduleEnv);
     }
     catch (ex) {
-      // TODO: implement better error handling
       return this._moduleImportError = new object.ErrorObject(ex.message);
     }
 
-    const bindings = moduleEnv.getAllBindings();
+    const moduleBindings = moduleEnv.getAllBindings();
 
-    // merge module environment with current one
-    Object.entries(bindings)
-      .forEach(([ name, value ]) => env.assign(name, value));
+    if (node.alias) {
+      const pairs = new Map();
 
-    return new object.ModuleObject(sourceFilePath, bindings);
+      Object.entries(moduleBindings).forEach(([ name, value ]) => {
+        const key = new object.StringObject(name);
+
+        pairs.set(key.getHashKey(), { key, value });
+      });
+
+      // merge module environment with current one under the alias
+      env.assign(node.alias, new object.ObjectObject(pairs));
+    }
+    else {
+      // merge module environment with current one
+      Object.entries(moduleBindings)
+        .forEach(([ name, value ]) => env.assign(name, value));
+    }
+
+    return new object.ModuleObject(sourceFilePath, moduleBindings);
   }
 
   evalObjectLiteral (node, env) {
