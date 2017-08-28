@@ -8,7 +8,7 @@ import { testInfixExpression } from './utils';
 import { is } from '../utils';
 
 test('Parser - Object literal with expressions', (t) => {
-  const input = '({ "one": 0 + 1, "two": 10 - 8, "three": 15 / 5 })';
+  const input = '({ one: 0 + 1, two: 10 - 8, "three": 15 / 5 })';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);

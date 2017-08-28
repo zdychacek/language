@@ -329,7 +329,7 @@ export class ObjectLiteral extends Expression {
 
   toString () {
     const pairs = Object.entries(this.pairs)
-      .map(([ key, value ]) => `  ${key.toString()}: ${value.toString()}`)
+      .map((pair) => `  ${pair.toString()}`)
       .join(',');
 
     if (pairs) {
@@ -337,5 +337,22 @@ export class ObjectLiteral extends Expression {
     }
 
     return '{}';
+  }
+}
+
+export class ObjectLiteralPair {
+  constructor (token, key, value, computed) {
+    this.key = key;
+    this.value = value;
+    this.computed = computed;
+  }
+
+  toString () {
+    if (this.computed) {
+      return `[${this.key.toString()}]: ${this.value}`;
+    }
+    else {
+      return `${this.key.toString()}: ${this.value}`;
+    }
   }
 }

@@ -7,7 +7,7 @@ import { testNumberLiteral } from './utils';
 import { is } from '../utils';
 
 test('Parser - Object literal with string keys', (t) => {
-  const input = '({ "one": 1, "two": 2, "three": 3 })';
+  const input = '({ ["one"]: 1, two: 2, "three": 3 })';
 
   const lexer = new Lexer(input);
   const parser = new Parser(lexer);

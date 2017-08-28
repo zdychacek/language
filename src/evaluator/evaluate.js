@@ -111,10 +111,7 @@ class Evaluator {
       case ast.Identifier:
         return this.evalIdentifier(node, env);
       case ast.FunctionLiteral: {
-        const params = node.parameters;
-        const body = node.body;
-
-        return new object.FunctionObject(params, body, env);
+        return new object.FunctionObject(node.parameters, node.body, env);
       }
       case ast.CallExpression: {
         const fn = this.evaluate(node.fn, env);
@@ -572,8 +569,10 @@ class Evaluator {
   evalObjectLiteral (node, env) {
     const pairs = new Map();
 
-    for (const [ keyNode, valueNode ] of node.pairs) {
-      const key = this.evaluate(keyNode, env);
+    for (const [ keyNode, { value: valueNode, computed } ] of node.pairs) {
+      const key = computed ?
+        this.evaluate(keyNode, env) :
+        new object.StringObject(keyNode.literal || keyNode.value);
 
       if (this.isError(key)) {
         return key;

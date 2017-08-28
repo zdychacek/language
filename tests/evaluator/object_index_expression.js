@@ -9,8 +9,8 @@ test('Evaluator - Object index expression', (t) => {
     [ 'let key = "foo"\n ({ "foo": 5 })[key]', 5 ],
     [ '({})["foo"]', null ],
     [ '({ 5: 5 })[5]', 5 ],
-    [ '({ true: 5 })[true]', 5 ],
-    [ '({ false: 5 })[false]', 5 ],
+    [ '({ [true]: 5 })[true]', 5 ],
+    [ '({ [false]: 5 })[false]', 5 ],
   ];
 
   tests.forEach(([ input, expected ]) => {

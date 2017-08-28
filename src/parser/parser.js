@@ -427,14 +427,35 @@ class Parser {
     return new ast.ArrayLiteral(token, elements);
   }
 
-  _parseObjectPair (objectLiteral) {
-    const key = this._parseExpression();
+  _parseObjectLiteralPair (objectLiteral) {
+    const pair = new ast.ObjectLiteralPair();
+
+    pair.computed = false;
+
+    // computed
+    if (this._match(Punctuator.LBRACKET)) {
+      this._consume();
+
+      pair.key = this._parseExpression();
+      pair.computed = true;
+
+      this._consume(Punctuator.RBRACKET);
+    }
+    else if (this._matchType(TokenType.STRING)) {
+      pair.key = this._parseStringLiteral();
+    }
+    else if (this._matchType(TokenType.NUMBER)) {
+      pair.key = this._parseNumberLiteral();
+    }
+    else {
+      pair.key = this._parseIdentifier();
+    }
 
     this._consume(Punctuator.COLON);
 
-    const value = this._parseExpression(Precedence.SEQUENCE);
+    pair.value = this._parseExpression(Precedence.SEQUENCE);
 
-    objectLiteral.pairs.set(key, value);
+    objectLiteral.pairs.set(pair.key, pair);
   }
 
   _parseObjectLiteral = () => {
@@ -446,13 +467,13 @@ class Parser {
     this._consumeOptionalEOL();
 
     if (!this._match(Punctuator.RBRACE)) {
-      this._parseObjectPair(objectLiteral);
+      this._parseObjectLiteralPair(objectLiteral);
 
       while (this._match(Punctuator.COMMA)) {
         this._consume(Punctuator.COMMA);
         this._consumeOptionalEOL();
 
-        this._parseObjectPair(objectLiteral);
+        this._parseObjectLiteralPair(objectLiteral);
       }
     }
 

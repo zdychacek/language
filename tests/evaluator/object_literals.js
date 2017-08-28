@@ -11,11 +11,12 @@ test('Evaluator - Object literals', (t) => {
     let two = "two"
     ({
       "one": 10 - 9,
-      two: 1 + 1,
-      "thr" + "ee": 6 / 2,
+      [two]: 1 + 1,
+      ["thr" + "ee"]: 6 / 2,
       4: 4,
-      true: 5,
-      false: 6
+      [true]: 5,
+      [false]: 6,
+      seven: 7 / 1
     })
   `;
 
@@ -31,6 +32,7 @@ test('Evaluator - Object literals', (t) => {
   expected.set(new object.NumberObject(4).getHashKey(), 4);
   expected.set(consts.TRUE.getHashKey(), 5);
   expected.set(consts.FALSE.getHashKey(), 6);
+  expected.set(new object.StringObject('seven').getHashKey(), 7);
 
   t.equal(result.pairs.size, expected.size, 'eval returned right pairs count');
 
