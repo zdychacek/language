@@ -17,3 +17,7 @@ a && b || c
 import "./module" as mod
 import "./module"
 export obj.property
+for true {
+  break
+  continue
+}

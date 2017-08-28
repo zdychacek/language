@@ -1,0 +1,11 @@
+let counter = 0
+
+for counter < 5 {
+  if counter == 2 {
+    break
+  }
+
+  counter = counter + 1
+}
+
+counter

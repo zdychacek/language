@@ -60,6 +60,9 @@ class Parser {
     this._registerStatement(Punctuator.LBRACE, this._parseBlockStatement);
     this._registerStatement(Keyword.IMPORT, this._parseImportStatement);
     this._registerStatement(Keyword.EXPORT, this._parseExportStatement);
+    this._registerStatement(Keyword.FOR, this._parseForStatement);
+    this._registerStatement(Keyword.BREAK, this._parseBreakStatement);
+    this._registerStatement(Keyword.CONTINUE, this._parseContinueStatement);
   }
 
   parseProgram = () => {
@@ -146,6 +149,23 @@ class Parser {
     }
 
     return new ast.ExportStatement(token, alias, declaration);
+  }
+
+  _parseForStatement = () => {
+    const forStmt = new ast.ForStatement(this._consume(Keyword.FOR));
+
+    forStmt.condition = this._parseExpression();
+    forStmt.body = this._parseBlockStatement();
+
+    return forStmt;
+  }
+
+  _parseBreakStatement = () => {
+    return new ast.BreakStatement(this._consume(Keyword.BREAK));
+  }
+
+  _parseContinueStatement = () => {
+    return new ast.ContinueStatement(this._consume(Keyword.BREAK));
   }
 
   _parseReturnStatement = () => {

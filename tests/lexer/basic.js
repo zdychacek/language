@@ -82,6 +82,16 @@ test('Lexer#nextToken - basic', (t) => {
     [ TokenType.PUNCTUATOR, '.' ],
     [ TokenType.IDENT, 'property' ],
     [ TokenType.EOL, '' ],
+    [ TokenType.KEYWORD, 'for' ],
+    [ TokenType.BOOLEAN, 'true' ],
+    [ TokenType.PUNCTUATOR, '{' ],
+    [ TokenType.EOL, '' ],
+    [ TokenType.KEYWORD, 'break' ],
+    [ TokenType.EOL, '' ],
+    [ TokenType.KEYWORD, 'continue' ],
+    [ TokenType.EOL, '' ],
+    [ TokenType.PUNCTUATOR, '}' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

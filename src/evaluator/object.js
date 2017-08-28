@@ -11,6 +11,8 @@ export const ObjectType = {
   ARRAY_OBJ: 'ARRAY',
   MODULE_OBJ: 'MODULE',
   OBJECT_OBJ: 'OBJECT',
+  BREAK_OBJ: 'BREAK',
+  CONTINUE_OBJ: 'CONTINUE',
 };
 
 export class ObjectValue {
@@ -102,6 +104,18 @@ export class ErrorObject extends ObjectValue {
 
   toString () {
     return `ERROR: ${this.value}`;
+  }
+}
+
+export class BreakObject extends ObjectValue {
+  getType () {
+    return ObjectType.BREAK_OBJ;
+  }
+}
+
+export class ContinueObject extends ObjectValue {
+  getType () {
+    return ObjectType.CONTINUE_OBJ;
   }
 }
 

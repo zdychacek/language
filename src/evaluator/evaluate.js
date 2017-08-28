@@ -67,6 +67,12 @@ class Evaluator {
 
         return result;
       }
+      case ast.ForStatement:
+        return this.evalForStatement(node, env);
+      case ast.BreakStatement:
+        return new object.BreakObject();
+      case ast.ContinueStatement:
+        return new object.ContinueObject();
       // Expressions
       case ast.NumberLiteral:
         return new object.NumberObject(node.literal);
@@ -208,7 +214,9 @@ class Evaluator {
 
       if (
         result instanceof object.ReturnValueObject ||
-        result instanceof object.ErrorObject
+        result instanceof object.ErrorObject ||
+        result instanceof object.BreakObject ||
+        result instanceof object.ContinueObject
       ) {
         return result;
       }
@@ -657,6 +665,33 @@ class Evaluator {
     }
 
     return obj;
+  }
+
+  evalForStatement (node, env) {
+    const { condition, body } = node;
+
+    let result = null;
+
+    while (this.evaluate(condition, env) === consts.TRUE) {
+      result = this.evalBlockStatement(body.statements, env);
+
+      if (result instanceof object.BreakObject) {
+        break;
+      }
+
+      if (result instanceof object.ContinueObject) {
+        continue;
+      }
+
+      if (
+        result instanceof object.ReturnValueObject ||
+        result instanceof object.ErrorObject
+      ) {
+        return result;
+      }
+    }
+
+    return result;
   }
 }
 

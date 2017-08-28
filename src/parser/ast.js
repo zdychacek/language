@@ -356,3 +356,28 @@ export class ObjectLiteralProperty {
     }
   }
 }
+
+export class ForStatement extends Statement {
+  constructor (token, condition, body) {
+    super(token);
+
+    this.condition = condition;
+    this.body = body;
+  }
+
+  toString () {
+    return `${this.getTokenValue()} ${this.condition.toString()} ${this.body.toString()}`;
+  }
+}
+
+export class BreakStatement extends Statement {
+  toString () {
+    return 'break';
+  }
+}
+
+export class ContinueStatement extends Statement {
+  toString () {
+    return 'continue';
+  }
+}

@@ -49,6 +49,9 @@ export const Keyword = {
   IMPORT: 'import',
   AS: 'as',
   EXPORT: 'export',
+  FOR: 'for',
+  CONTINUE: 'continue',
+  BREAK: 'break',
 };
 
 export const BooleanLiteral = {
