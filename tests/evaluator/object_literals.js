@@ -34,14 +34,14 @@ test('Evaluator - Object literals', (t) => {
   expected.set(consts.FALSE.getHashKey(), 6);
   expected.set(new object.StringObject('seven').getHashKey(), 7);
 
-  t.equal(result.pairs.size, expected.size, 'eval returned right pairs count');
+  t.equal(result.properties.size, expected.size, 'eval returned right properties count');
 
   expected.forEach((expectedValue, expectedKey) => {
-    const pair = result.pairs.get(expectedKey);
+    const property = result.properties.get(expectedKey);
 
-    t.ok(pair, 'pair for given key in pairs found');
+    t.ok(property, 'property for given key found');
 
-    testNumberObject(t, pair.value, expectedValue);
+    testNumberObject(t, property.value, expectedValue);
   });
 
   t.end();

@@ -18,7 +18,7 @@ test('Parser - Empty object literal', (t) => {
   const { expression: object } = program.statements[0];
 
   t.ok(is(object, ast.ObjectLiteral), 'program.statements[0] is ast.ObjectLiteral');
-  t.equal(object.pairs.size, 0, 'object literal has no pairs');
+  t.equal(object.properties.size, 0, 'object literal has no properties');
 
   t.end();
 });

@@ -21,9 +21,9 @@ test('Evaluator - Import statement alias', (t) => {
 
   t.ok(moduleBinding, 'environment contains "mod" binding');
   t.ok(is(moduleBinding, object.ObjectObject), 'binding is an object');
-  t.equal(moduleBinding.pairs.size, 1, 'binding object has one pair');
+  t.equal(moduleBinding.properties.size, 1, 'binding object has one property');
 
-  const binding = moduleBinding.pairs.get('greeting');
+  const binding = moduleBinding.properties.get('greeting');
 
   t.ok(binding, 'binding object has "greeting" property');
   t.deepEqual(binding.value, { value: 'Hello World!!!' }, 'binding value is "Hello World!!!"');

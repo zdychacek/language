@@ -495,13 +495,13 @@ class Evaluator {
       return new object.ErrorObject(`Unusable as object key: ${index.getType()}.`);
     }
 
-    const pair = obj.pairs.get(index.getHashKey());
+    const property = obj.properties.get(index.getHashKey());
 
-    if (!pair) {
+    if (!property) {
       return consts.NULL;
     }
 
-    return pair.value;
+    return property.value;
   }
 
   evalMemberExpression (left, index) {
@@ -546,16 +546,16 @@ class Evaluator {
     const moduleBindings = moduleEnv.getAllBindings();
 
     if (node.alias) {
-      const pairs = new Map();
+      const properties = new Map();
 
       Object.entries(moduleBindings).forEach(([ name, value ]) => {
         const key = new object.StringObject(name);
 
-        pairs.set(key.getHashKey(), { key, value });
+        properties.set(key.getHashKey(), { key, value });
       });
 
       // merge module environment with current one under the alias
-      env.assign(node.alias, new object.ObjectObject(pairs));
+      env.assign(node.alias, new object.ObjectObject(properties));
     }
     else {
       // merge module environment with current one
@@ -567,9 +567,9 @@ class Evaluator {
   }
 
   evalObjectLiteral (node, env) {
-    const pairs = new Map();
+    const properties = new Map();
 
-    for (const [ keyNode, { value: valueNode, computed } ] of node.pairs) {
+    for (const [ keyNode, { value: valueNode, computed } ] of node.properties) {
       const key = computed ?
         this.evaluate(keyNode, env) :
         new object.StringObject(keyNode.literal || keyNode.value);
@@ -588,10 +588,10 @@ class Evaluator {
         return value;
       }
 
-      pairs.set(key.getHashKey(), { key, value });
+      properties.set(key.getHashKey(), { key, value });
     }
 
-    return new object.ObjectObject(pairs);
+    return new object.ObjectObject(properties);
   }
 
   evalExpressionAssignment (node, env) {
@@ -645,15 +645,15 @@ class Evaluator {
       return value;
     }
 
-    const pair = obj.pairs.get(index.getHashKey());
+    const property = obj.properties.get(index.getHashKey());
 
-    // if pair exists, update it
-    if (pair) {
-      pair.value = value;
+    // if property exists, update it
+    if (property) {
+      property.value = value;
     }
-    // ... pair does not exist, so create new
+    // ... property does not exist, so create new
     else {
-      obj.pairs.set(index.getHashKey(), { key: index, value });
+      obj.properties.set(index.getHashKey(), { key: index, value });
     }
 
     return obj;

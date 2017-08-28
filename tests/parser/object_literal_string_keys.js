@@ -19,7 +19,7 @@ test('Parser - Object literal with string keys', (t) => {
   const { expression: object } = program.statements[0];
 
   t.ok(is(object, ast.ObjectLiteral), 'program.statements[0] is ast.ObjectLiteral');
-  t.equal(object.pairs.size, 3, 'object literal has right pairs count');
+  t.equal(object.properties.size, 3, 'object literal has right properties count');
 
   const expected = {
     one: 1,
@@ -27,7 +27,7 @@ test('Parser - Object literal with string keys', (t) => {
     three: 3,
   };
 
-  Object.entries(object.pairs).forEach(([ key, value ]) => {
+  Object.entries(object.properties).forEach(([ key, value ]) => {
     t.ok(is(object, ast.StringLiteral), 'key is ast.StringLiteral');
 
     testNumberLiteral(t, value, expected[key.toString()]);

@@ -192,10 +192,10 @@ export class ModuleObject extends ObjectValue {
 }
 
 export class ObjectObject extends ObjectValue {
-  constructor (pairs) {
+  constructor (properties) {
     super();
 
-    this.pairs = pairs;
+    this.properties = properties;
   }
 
   getType () {
@@ -203,12 +203,12 @@ export class ObjectObject extends ObjectValue {
   }
 
   toString () {
-    const pairs = Array.from(this.pairs)
+    const properties = Array.from(this.properties)
       .map(([ , { key, value } ]) => `  ${key.toString()}: ${value.toString()}`)
       .join(',\n');
 
-    if (pairs) {
-      return `{\n${pairs}\n}`;
+    if (properties) {
+      return `{\n${properties}\n}`;
     }
 
     return '{}';

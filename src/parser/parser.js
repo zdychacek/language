@@ -427,53 +427,53 @@ class Parser {
     return new ast.ArrayLiteral(token, elements);
   }
 
-  _parseObjectLiteralPair (objectLiteral) {
-    const pair = new ast.ObjectLiteralPair();
+  _parseObjectLiteralProperty (objectLiteral) {
+    const property = new ast.ObjectLiteralProperty();
 
-    pair.computed = false;
+    property.computed = false;
 
     // computed
     if (this._match(Punctuator.LBRACKET)) {
       this._consume();
 
-      pair.key = this._parseExpression();
-      pair.computed = true;
+      property.key = this._parseExpression();
+      property.computed = true;
 
       this._consume(Punctuator.RBRACKET);
     }
     else if (this._matchType(TokenType.STRING)) {
-      pair.key = this._parseStringLiteral();
+      property.key = this._parseStringLiteral();
     }
     else if (this._matchType(TokenType.NUMBER)) {
-      pair.key = this._parseNumberLiteral();
+      property.key = this._parseNumberLiteral();
     }
     else {
-      pair.key = this._parseIdentifier();
+      property.key = this._parseIdentifier();
     }
 
     this._consume(Punctuator.COLON);
 
-    pair.value = this._parseExpression(Precedence.SEQUENCE);
+    property.value = this._parseExpression(Precedence.SEQUENCE);
 
-    objectLiteral.pairs.set(pair.key, pair);
+    objectLiteral.properties.set(property.key, property);
   }
 
   _parseObjectLiteral = () => {
     const token = this._consume(Punctuator.LBRACE);
     const objectLiteral = new ast.ObjectLiteral(token);
 
-    objectLiteral.pairs = new Map();
+    objectLiteral.properties = new Map();
 
     this._consumeOptionalEOL();
 
     if (!this._match(Punctuator.RBRACE)) {
-      this._parseObjectLiteralPair(objectLiteral);
+      this._parseObjectLiteralProperty(objectLiteral);
 
       while (this._match(Punctuator.COMMA)) {
         this._consume(Punctuator.COMMA);
         this._consumeOptionalEOL();
 
-        this._parseObjectLiteralPair(objectLiteral);
+        this._parseObjectLiteralProperty(objectLiteral);
       }
     }
 

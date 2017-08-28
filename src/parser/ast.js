@@ -321,26 +321,26 @@ export class ExportStatement extends Statement {
 }
 
 export class ObjectLiteral extends Expression {
-  constructor (token, pairs) {
+  constructor (token, properties) {
     super(token);
 
-    this.pairs = pairs;
+    this.properties = properties;
   }
 
   toString () {
-    const pairs = Object.entries(this.pairs)
-      .map((pair) => `  ${pair.toString()}`)
+    const properties = Object.entries(this.properties)
+      .map((property) => `  ${property.toString()}`)
       .join(',');
 
-    if (pairs) {
-      return `{\n${pairs}\n}`;
+    if (properties) {
+      return `{\n${properties}\n}`;
     }
 
     return '{}';
   }
 }
 
-export class ObjectLiteralPair {
+export class ObjectLiteralProperty {
   constructor (token, key, value, computed) {
     this.key = key;
     this.value = value;
