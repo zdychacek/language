@@ -45,8 +45,12 @@ class Evaluator {
 
         return new object.ReturnValueObject(value);
       }
-      case ast.BlockStatement:
+      case ast.BlockStatement: {
+        // create new scope
+        env = env.extend();
+
         return this.evalBlockStatement(node.statements, env);
+      }
       case ast.LetStatement: {
         const value = this.evaluate(node.expression, env);
 
@@ -206,8 +210,6 @@ class Evaluator {
 
   evalBlockStatement (statements, env) {
     let result = null;
-
-    env = env.extend();
 
     for (const stmt of statements) {
       result = this.evaluate(stmt, env);
@@ -457,7 +459,15 @@ class Evaluator {
   applyFunction (fn, args) {
     if (fn instanceof object.FunctionObject) {
       const extendedEnv = this.extendFunctionEnv(fn, args);
-      const evaluated = this.evaluate(fn.body, extendedEnv);
+      let evaluated = null;
+
+      if (fn.body instanceof ast.BlockStatement) {
+        // call `evalBlockStatement` with extended env directly
+        evaluated = this.evalBlockStatement(fn.body.statements, extendedEnv);
+      }
+      else {
+        evaluated = this.evaluate(fn.body, extendedEnv);
+      }
 
       return this.unwrapReturnValue(evaluated);
     }
