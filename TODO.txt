@@ -1,13 +1,36 @@
+- implement optional chaining:
+  ```
+  let obj = {
+    a: {
+      b: {
+        c: 1
+      }
+    }
+  }
+
+  obj.a?.c # -> `void`
+  obj.a.b.d?.() # -> `void`
+  ```
+- implement variadic parameters:
+  `(first, rest...) -> push(rest, first)`
+- use `void` type instead of `null`:
+  ```
+  let obj = {}
+
+  obj.a # -> `void`
+  ```
+- implement `is<Type>` builtins
+- implement `|>` function chaining operator:
+  `arg |> fn1 |> fn2`
+- implement `>>` function composition operator:
+  `let composed = fn1 >> fn2`
 - fix `ObjectObject` indentation:
-```
-{
-  "a": {
-  "b": 13
-}
-}```
-- implement module imports with simple specifier
+  ```
+  {
+    "a": {
+    "b": 13
+  }
+  }```
 - track AST node start/end positions
 - refactor parser/evaluator error throwing (line, column)
 - implement error stack traces
-- implement `|>` function chaining operator: `arg |> fn1 |> fn2`
-- implement `>>` function composition operator: `let composed = fn1 >> fn2`
