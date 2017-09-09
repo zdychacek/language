@@ -632,7 +632,7 @@ class Evaluator {
     return right;
   }
 
-  evalMemberExpressionAssignment (node, env) {
+  evalObjectMemberExpressionAssignment (node, env) {
     const memberExpression = node.left;
     const obj = this.evaluate(memberExpression.left, env);
 
@@ -674,7 +674,61 @@ class Evaluator {
       obj.properties.set(index.getHashKey(), { key: index, value });
     }
 
-    return obj;
+    return value;
+  }
+
+  evalArrayMemberExpressionAssignment (node, env) {
+    const memberExpression = node.left;
+    const array = this.evaluate(memberExpression.left, env);
+
+    if (this.isError(array)) {
+      return array;
+    }
+
+    const index = this.evaluate(memberExpression.index, env);
+
+    if (this.isError(index)) {
+      return index;
+    }
+
+    if (index.getType() !== ObjectType.NUMBER_OBJ) {
+      return new object.ErrorObject(`Index expression must evaluate to ${ObjectType.NUMBER_OBJ}, got ${index.getType()} instead.`);
+    }
+
+    const idx = index.value;
+    const max = array.elements.length - 1;
+
+    if (idx < 0 || idx > max) {
+      return new object.ErrorObject(`Index expression must evaluate to value in range <0,${max}>.`);
+    }
+
+    const value = this.evaluate(node.right, env);
+
+    if (this.isError(value)) {
+      return value;
+    }
+
+    // update value at specified index
+    array.elements[idx] = value;
+
+    return value;
+  }
+
+  evalMemberExpressionAssignment (node, env) {
+    const left = this.evaluate(node.left.left, env);
+
+    if (this.isError(left)) {
+      return left;
+    }
+
+    if (left instanceof object.ObjectObject) {
+      return this.evalObjectMemberExpressionAssignment(node, env);
+    }
+    else if (left instanceof object.ArrayObject) {
+      return this.evalArrayMemberExpressionAssignment(node, env);
+    }
+
+    return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
   }
 
   evalForStatement (node, env) {

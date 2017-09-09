@@ -11,7 +11,8 @@ test('Evaluator - Error handling', (t) => {
       'Type mismatch: NUMBER + BOOLEAN.',
     ],
     [
-      '5 + true\n 5\n',
+      `5 + true
+      5`,
       'Type mismatch: NUMBER + BOOLEAN.',
     ],
     [
@@ -23,7 +24,9 @@ test('Evaluator - Error handling', (t) => {
       'Unknown operator: BOOLEAN + BOOLEAN.',
     ],
     [
-      '5\n true + false\n 5',
+      `5
+      true + false
+      5`,
       'Unknown operator: BOOLEAN + BOOLEAN.',
     ],
     [
@@ -52,8 +55,23 @@ test('Evaluator - Error handling', (t) => {
       'Error while importing "module.lang" file.',
     ],
     [
-      '({ "name": "Monkey" })[(x) -> x]',
+      `let obj = { "name": "Monkey" }
+      obj[(x) -> x]`,
       'Unusable as object key: FUNCTION.',
+    ],
+    [
+      `let arr = [ 1, 2, 3 ]
+      arr["a"] = 2`,
+      'Index expression must evaluate to NUMBER, got STRING instead.',
+    ],
+    [
+      `let arr = [ 1, 2, 3 ]
+      arr[5] = 2`,
+      'Index expression must evaluate to value in range <0,2>.',
+    ],
+    [
+      '"hello"[0]="H"',
+      'Index operator not supported: STRING.',
     ],
   ];
 
