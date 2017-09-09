@@ -1,5 +1,5 @@
 # Array map function
-let map = (arr, predicate) -> {
+export let map = (arr, predicate) -> {
   let iterator = (arr, accumulated, index) -> {
     if len(arr) == 0:
       accumulated
@@ -16,7 +16,7 @@ let map = (arr, predicate) -> {
 }
 
 # Array foreach function
-let foreach = (arr, predicate) -> {
+export let foreach = (arr, predicate) -> {
   let iterator = (arr, index) -> {
     if len(arr) == 0 {
       return
@@ -32,7 +32,7 @@ let foreach = (arr, predicate) -> {
 }
 
 # Array reduce function
-let reduce = (arr, initial, predicate) -> {
+export let reduce = (arr, initial, predicate) -> {
   let iterator = (arr, result, index) -> {
     if len(arr) == 0:
       result
@@ -49,7 +49,7 @@ let reduce = (arr, initial, predicate) -> {
 }
 
 # Array filter function
-let filter = (arr, predicate) -> {
+export let filter = (arr, predicate) -> {
   let iterator = (arr, accumulated, index) -> {
     if len(arr) == 0:
       accumulated
@@ -65,8 +65,10 @@ let filter = (arr, predicate) -> {
   iterator(arr, [], 0)
 }
 
-let every = (arr, predicate) ->
+
+export let every = (arr, predicate) ->
   reduce(arr, true, (acc, item, index) -> acc && predicate(item, index))
 
-let some = (arr, predicate) ->
+
+export let some = (arr, predicate) ->
   reduce(arr, false, (acc, item, index) -> predicate(item, index) || acc)

@@ -13,6 +13,7 @@ export const ObjectType = {
   OBJECT_OBJ: 'OBJECT',
   BREAK_OBJ: 'BREAK',
   CONTINUE_OBJ: 'CONTINUE',
+  EXPORT_OBJ: 'EXPORT',
 };
 
 export class ObjectValue {
@@ -226,5 +227,16 @@ export class ObjectObject extends ObjectValue {
     }
 
     return '{}';
+  }
+}
+
+// wrapper around `ObjectValue`
+export class ExportObject extends ObjectValue {
+  constructor (value) {
+    super(value);
+  }
+
+  getType () {
+    return ObjectType.EXPORT_OBJ;
   }
 }

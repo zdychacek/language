@@ -23,6 +23,8 @@ class Parser {
   constructor (lexer) {
     this._lexer = lexer;
 
+    this._fileName = lexer._fileName;
+
     // prefix parsers
     this._registerPrefixParser(TokenType.IDENT, this._parseIdentifier);
     this._registerPrefixParser(TokenType.NUMBER, this._parseNumberLiteral);
@@ -122,18 +124,18 @@ class Parser {
     const token = this._consume(Keyword.EXPORT);
 
     let alias = null;
-    let declaration = null;
+    let value = null;
 
     // export variable or function declaration
     if (this._match(Keyword.LET)) {
-      declaration = this._parseLetStatement();
+      value = this._parseLetStatement();
     }
     // export any expression
     else {
-      declaration = this._parseExpression();
+      value = this._parseExpression();
 
       // if we are exporting an identifier, then export alias is not required
-      if (declaration instanceof ast.Identifier) {
+      if (value instanceof ast.Identifier) {
         if (this._match(Keyword.AS)) {
           this._consume();
 
@@ -148,7 +150,7 @@ class Parser {
       }
     }
 
-    return new ast.ExportStatement(token, alias, declaration);
+    return new ast.ExportStatement(token, alias, value);
   }
 
   _parseForStatement = () => {

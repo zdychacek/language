@@ -1,0 +1,5 @@
+export let age = 29
+export "Ondrej" as firstName
+
+let lastName = "Zdych"
+export lastName

@@ -1,0 +1,11 @@
+# import module members with `person` alias
+import "person" as person
+
+# import module members into this module scope
+import "helpers"
+
+let fullName = person.firstName + " " + person.lastName
+
+puts("name: " + fullName + ", age: " + string(person.age))
+
+puts(increment(1))

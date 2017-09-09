@@ -21,7 +21,7 @@ test('Parser - Export statement', (t) => {
 
   t.ok(is(exportStmt, ast.ExportStatement), 'node is ExportStatement');
   t.equal(exportStmt.getTokenValue(), 'export', 'node.getTokenValue is "export"');
-  testLetStatement(t, exportStmt.declaration, 'greeting');
+  testLetStatement(t, exportStmt.value, 'greeting');
   t.equal(exportStmt.alias, null, 'alias is not present');
 
   t.end();

@@ -304,19 +304,19 @@ export class ImportStatement extends Statement {
 }
 
 export class ExportStatement extends Statement {
-  constructor (token, alias, declaration) {
+  constructor (token, alias, value) {
     super(token);
 
     this.alias = alias;
-    this.declaration = declaration;
+    this.value = value;
   }
 
   toString () {
     if (this.alias) {
-      return `${this.getTokenValue()} ${this.declaration.toString()} as ${this.alias}"`;
+      return `${this.getTokenValue()} ${this.value.toString()} as ${this.alias}"`;
     }
 
-    return `${this.getTokenValue()} ${this.declaration.toString()}`;
+    return `${this.getTokenValue()} ${this.value.toString()}`;
   }
 }
 

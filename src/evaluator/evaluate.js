@@ -1,5 +1,3 @@
-/* eslint-disable no-use-before-define */
-
 import fs from 'fs';
 import path from 'path';
 import * as ast from '../parser/ast';
@@ -15,8 +13,6 @@ const ObjectType = object.ObjectType;
 class Evaluator {
   // file name we are evaluating
   _fileName = '';
-  // contains error object if any occured while importing modules
-  _moduleImportError = null;
   // evaluator internal state
   _state = {};
 
@@ -26,51 +22,22 @@ class Evaluator {
     switch (type) {
       // Statements
       case ast.Program:
-        // save file name
-        this._fileName = node.fileName;
-
-        return this.evalProgram(node.statements, env);
-      case ast.ExpressionStatement:
-        return this.evaluate(node.expression, env);
-      case ast.ReturnStatement: {
-        let value = consts.VOID;
-
-        if (this.isError(value)) {
-          return value;
-        }
-
-        if (node.returnValue) {
-          value = this.evaluate(node.returnValue, env);
-        }
-
-        return new object.ReturnValueObject(value);
-      }
-      case ast.BlockStatement: {
+        return this.evalProgram(node, env);
+      case ast.BlockStatement:
         // create new scope
         env = env.extend();
 
         return this.evalBlockStatement(node.statements, env);
-      }
-      case ast.LetStatement: {
-        const value = this.evaluate(node.expression, env);
-
-        if (this.isError(value)) {
-          return value;
-        }
-
-        env.assign(node.name.value, value);
-
-        return value;
-      }
-      case ast.ImportStatement: {
-        const result = this.evalImportStatement(node, env);
-
-        if (this._moduleImportError) {
-          return this._moduleImportError;
-        }
-
-        return result;
-      }
+      case ast.ExpressionStatement:
+        return this.evaluate(node.expression, env);
+      case ast.ReturnStatement:
+        return this.evalReturnStatement(node, env);
+      case ast.LetStatement:
+        return this.evalLetStatement(node, env);
+      case ast.ImportStatement:
+        return this.evalImportStatement(node, env);
+      case ast.ExportStatement:
+        return this.evalExportStatement(node, env);
       case ast.ForStatement:
         return this.evalForStatement(node, env);
       case ast.BreakStatement:
@@ -78,6 +45,23 @@ class Evaluator {
       case ast.ContinueStatement:
         return new object.ContinueObject();
       // Expressions
+      case ast.Identifier:
+        return this.evalIdentifier(node, env);
+      case ast.PrefixExpression:
+        return this.evalPrefixExpression(node, env);
+      case ast.InfixExpression:
+        return this.evalInfixExpression(node, env);
+      case ast.IfExpression:
+        return this.evalIfExpression(node, env);
+      case ast.CallExpression:
+        return this.evalCallExpression(node, env);
+      case ast.SequenceExpression:
+        return this.evalSequenceExpression(node, env);
+      case ast.AssignmentExpression:
+        return this.evalAssignmentExpression(node, env);
+      case ast.MemberExpression:
+        return this.evalMemberExpression(node, env);
+      // Literals
       case ast.NumberLiteral:
         return new object.NumberObject(node.literal);
       case ast.StringLiteral:
@@ -88,113 +72,22 @@ class Evaluator {
         return this.nativeBoolToBooleanObject(node.literal);
       case ast.ObjectLiteral:
         return this.evalObjectLiteral(node, env);
-      case ast.PrefixExpression: {
-        const right = this.evaluate(node.right, env);
-
-        if (this.isError(right)) {
-          return right;
-        }
-
-        return this.evalPrefixExpression(node.operator, right);
-      }
-      case ast.InfixExpression: {
-        if ([ '&&', '||' ].includes(node.operator)) {
-          return this.evalLogicalExpression(node, env);
-        }
-
-        const left = this.evaluate(node.left, env);
-
-        if (this.isError(left)) {
-          return left;
-        }
-
-        const right = this.evaluate(node.right, env);
-
-        if (this.isError(right)) {
-          return right;
-        }
-
-        return this.evalInfixExpression(node.operator, left, right);
-      }
-      case ast.IfExpression:
-        return this.evalIfExpression(node, env);
-      case ast.Identifier:
-        return this.evalIdentifier(node, env);
-      case ast.FunctionLiteral: {
+      case ast.ArrayLiteral:
+        return this.evalArrayLiteral(node, env);
+      case ast.FunctionLiteral:
         return new object.FunctionObject(node.parameters, node.body, env);
-      }
-      case ast.CallExpression: {
-        const fn = this.evaluate(node.fn, env);
-
-        if (this.isError(fn)) {
-          return fn;
-        }
-
-        const args = this.evalExpressions(node.arguments, env);
-
-        if (args.length === 1 && this.isError(args[0])) {
-          return args[0];
-        }
-
-        return this.applyFunction(fn, args);
-      }
-      case ast.SequenceExpression: {
-        const exps = this.evalExpressions(node.expressions, env);
-
-        if (exps.length === 1 && this.isError(exps[0])) {
-          return exps[0];
-        }
-
-        return exps[exps.length - 1];
-      }
-      case ast.AssignmentExpression: {
-        if (node.left instanceof ast.MemberExpression) {
-          return this.evalMemberExpressionAssignment(node, env);
-        }
-        else {
-          return this.evalExpressionAssignment(node, env);
-        }
-      }
-      case ast.ArrayLiteral: {
-        const elements = this.evalExpressions(node.elements, env);
-
-        if (elements.length === 1 && this.isError(elements[0])) {
-          return elements[0];
-        }
-
-        return new object.ArrayObject(elements);
-      }
-      case ast.MemberExpression: {
-        const left = this.evaluate(node.left, env);
-
-        if (this.isError(left)) {
-          return left;
-        }
-
-        let index = null;
-
-        if (node.computed) {
-          index = this.evaluate(node.index, env);
-
-          if (this.isError(index)) {
-            return index;
-          }
-        }
-        else {
-          index = new object.StringObject(node.index.value);
-        }
-
-        return this.evalMemberExpression(left, index);
-      }
     }
 
     return null;
   }
 
-  evalProgram (statements, env) {
+  evalProgram (node, env) {
     let result = null;
 
-    for (const stmt of statements) {
+    // save file name
+    this._fileName = node.fileName;
+
+    for (const stmt of node.statements) {
       result = this.evaluate(stmt, env);
 
       if (result instanceof object.ReturnValueObject) {
@@ -235,15 +128,29 @@ class Evaluator {
     return consts.FALSE;
   }
 
-  evalPrefixExpression (operator, right) {
-    switch (operator) {
+  evalPrefixExpression (node, env) {
+    const right = this.evaluate(node.right, env);
+
+    if (this.isError(right)) {
+      return right;
+    }
+
+    switch (node.operator) {
       case '!':
         return this.evalBangOperatorExpression(right);
       case '-':
         return this.evalMinusPrefixOperatorExpression(right);
       default:
-        return new object.ErrorObject(`Unknown operator: ${operator}${right.getType()}.`);
+        return new object.ErrorObject(`Unknown operator: ${node.operator}${right.getType()}.`);
     }
+  }
+
+  evalInfixExpression (node, env) {
+    if ([ '&&', '||' ].includes(node.operator)) {
+      return this.evalLogicalExpression(node, env);
+    }
+
+    return this.evalBinaryExpression(node, env);
   }
 
   evalBangOperatorExpression (right) {
@@ -306,7 +213,21 @@ class Evaluator {
     }
   }
 
-  evalInfixExpression (operator, left, right) {
+  evalBinaryExpression (node, env) {
+    const left = this.evaluate(node.left, env);
+
+    if (this.isError(left)) {
+      return left;
+    }
+
+    const right = this.evaluate(node.right, env);
+
+    if (this.isError(right)) {
+      return right;
+    }
+
+    const { operator } = node;
+
     if (left.getType() === ObjectType.NUMBER_OBJ && right.getType() === ObjectType.NUMBER_OBJ) {
       return this.evalNumberInfixExpression(operator, left, right);
     }
@@ -422,6 +343,51 @@ class Evaluator {
     return value;
   }
 
+  evalCallExpression (node, env) {
+    const fn = this.evaluate(node.fn, env);
+
+    if (this.isError(fn)) {
+      return fn;
+    }
+
+    const args = this.evalExpressions(node.arguments, env);
+
+    if (args.length === 1 && this.isError(args[0])) {
+      return args[0];
+    }
+
+    return this.applyFunction(fn, args);
+  }
+
+  evalSequenceExpression (node, env) {
+    const exps = this.evalExpressions(node.expressions, env);
+
+    if (exps.length === 1 && this.isError(exps[0])) {
+      return exps[0];
+    }
+
+    return exps[exps.length - 1];
+  }
+
+  evalAssignmentExpression (node, env) {
+    if (node.left instanceof ast.MemberExpression) {
+      return this.evalMemberExpressionAssignment(node, env);
+    }
+    else {
+      return this.evalExpressionAssignment(node, env);
+    }
+  }
+
+  evalArrayLiteral (node, env) {
+    const elements = this.evalExpressions(node.elements, env);
+
+    if (elements.length === 1 && this.isError(elements[0])) {
+      return elements[0];
+    }
+
+    return new object.ArrayObject(elements);
+  }
+
   evalExpressions (exps, env) {
     const result = [];
 
@@ -457,7 +423,11 @@ class Evaluator {
   }
 
   applyFunction (fn, args) {
-    if (fn instanceof object.FunctionObject) {
+    if (fn.getType() === ObjectType.EXPORT_OBJ) {
+      fn = fn.value;
+    }
+
+    if (fn.getType() === ObjectType.FUNCTION_OBJ) {
       const extendedEnv = this.extendFunctionEnv(fn, args);
       let evaluated = null;
 
@@ -471,12 +441,11 @@ class Evaluator {
 
       return this.unwrapReturnValue(evaluated);
     }
-    else if (fn instanceof object.BuiltinObject) {
+    else if (fn.getType() === ObjectType.BUILTIN_OBJ) {
       return fn.value(...args);
     }
-    else {
-      return new object.ErrorObject(`Not a function: ${fn.getType()}.`);
-    }
+
+    return new object.ErrorObject(`Not a function: ${fn.getType()}.`);
   }
 
   isError (obj) {
@@ -522,7 +491,26 @@ class Evaluator {
     return property.value;
   }
 
-  evalMemberExpression (left, index) {
+  evalMemberExpression (node, env) {
+    const left = this.evaluate(node.left, env);
+
+    if (this.isError(left)) {
+      return left;
+    }
+
+    let index = null;
+
+    if (node.computed) {
+      index = this.evaluate(node.index, env);
+
+      if (this.isError(index)) {
+        return index;
+      }
+    }
+    else {
+      index = new object.StringObject(node.index.value);
+    }
+
     if (
       (left.getType() === ObjectType.ARRAY_OBJ || left.getType() === ObjectType.STRING_OBJ) &&
       index.getType() === ObjectType.NUMBER_OBJ
@@ -536,16 +524,39 @@ class Evaluator {
     return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
   }
 
+  evalExportStatement (node, env) {
+    const value = this.evaluate(node.value, env);
+
+    if (this.isError(value)) {
+      return value;
+    }
+
+    if (node.alias) {
+      env.assign(node.alias.value, new object.ExportObject(value));
+    }
+    else if (node.value instanceof ast.LetStatement) {
+      env.assign(node.value.name.value, new object.ExportObject(value));
+    }
+    else if (node.value instanceof ast.Identifier) {
+      env.assign(node.value.value, new object.ExportObject(value));
+    }
+
+    return value;
+  }
+
   evalImportStatement (node, env) {
-    // TODO: implement parser check if `node.source` has some length
-    const sourceFilePath = path.join(path.dirname(this._fileName), node.source.literal);
+    // if the file extension is missing, attach "lang"
+    const moduleName =
+      path.extname(node.source.literal) ? node.source.literal : `${node.source.literal}.lang`;
+
+    const sourceFilePath = path.join(path.dirname(this._fileName), moduleName);
 
     let fileContent = '';
 
     try {
       fileContent = fs.readFileSync(sourceFilePath, 'utf8');
     }
-    catch (_) {
+    catch (ex) {
       return new object.ErrorObject(`Error while importing "${sourceFilePath}" file.`);
     }
 
@@ -555,10 +566,14 @@ class Evaluator {
       const lexer = new Lexer(fileContent, sourceFilePath);
       const parser = new Parser(lexer);
 
-      this.evaluate(parser.parseProgram(), moduleEnv);
+      const result = this.evaluate(parser.parseProgram(), moduleEnv);
+
+      if (this.isError(result)) {
+        return result;
+      }
     }
     catch (ex) {
-      return this._moduleImportError = new object.ErrorObject(ex.message);
+      return new object.ErrorObject(ex.message);
     }
 
     const moduleBindings = moduleEnv.getAllBindings();
@@ -566,11 +581,14 @@ class Evaluator {
     if (node.alias) {
       const properties = new Map();
 
-      Object.entries(moduleBindings).forEach(([ name, value ]) => {
-        const key = new object.StringObject(name);
+      Object.entries(moduleBindings)
+        .filter(([ , value ]) => value.getType() === ObjectType.EXPORT_OBJ)
+        .map(([ name, value ]) => [ name, value.value ])
+        .forEach(([ name, value ]) => {
+          const key = new object.StringObject(name);
 
-        properties.set(key.getHashKey(), { key, value });
-      });
+          properties.set(key.getHashKey(), { key, value });
+        });
 
       // merge module environment with current one under the alias
       env.assign(node.alias, new object.ObjectObject(properties));
@@ -578,10 +596,38 @@ class Evaluator {
     else {
       // merge module environment with current one
       Object.entries(moduleBindings)
+        .filter(([ , value ]) => value.getType() === ObjectType.EXPORT_OBJ)
+        .map(([ name, value ]) => [ name, value.value ])
         .forEach(([ name, value ]) => env.assign(name, value));
     }
 
     return new object.ModuleObject(sourceFilePath, moduleBindings);
+  }
+
+  evalLetStatement (node, env) {
+    const value = this.evaluate(node.expression, env);
+
+    if (this.isError(value)) {
+      return value;
+    }
+
+    env.assign(node.name.value, value);
+
+    return value;
+  }
+
+  evalReturnStatement (node, env) {
+    let value = consts.VOID;
+
+    if (this.isError(value)) {
+      return value;
+    }
+
+    if (node.returnValue) {
+      value = this.evaluate(node.returnValue, env);
+    }
+
+    return new object.ReturnValueObject(value);
   }
 
   evalObjectLiteral (node, env) {

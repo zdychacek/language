@@ -13,7 +13,9 @@ test('Evaluator - Import statement alias', (t) => {
   const input = fs.readFileSync(fileName, 'utf8');
   const env = new Environment();
 
-  testEval(input, env, fileName);
+  const result = testEval(input, env, fileName);
+
+  t.notOk(is(result, object.ErrorObject), 'result is not an ErrorObject');
 
   t.equal(Object.keys(env.getAllBindings()).length, 1, 'environment contains one binding');
 

@@ -21,7 +21,7 @@ test('Parser - Export statement alias', (t) => {
 
   t.ok(is(exportStmt, ast.ExportStatement), 'node is ExportStatement');
   t.equal(exportStmt.getTokenValue(), 'export', 'node.getTokenValue is "export"');
-  testInfixExpression(t, exportStmt.declaration, 1, '+', 2);
+  testInfixExpression(t, exportStmt.value, 1, '+', 2);
   testIdentifier(t, exportStmt.alias, 'value');
 
   t.end();
