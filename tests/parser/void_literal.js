@@ -5,7 +5,7 @@ import Parser from '../../src/parser/parser';
 import * as ast from '../../src/parser/ast';
 import { is } from '../utils';
 
-test('Parser - Void expression', (t) => {
+test('Parser - Void literal expression', (t) => {
   const input = 'void';
 
   const lexer = new Lexer(input);

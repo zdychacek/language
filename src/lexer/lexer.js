@@ -160,7 +160,6 @@ class Lexer {
       case Punctuator.LT:
       case Punctuator.GT:
       case Punctuator.DOT:
-        return new Token(TokenType.PUNCTUATOR, this._getChar());
       case Punctuator.MINUS:
         punctuator = this._getChar();
 
@@ -202,6 +201,17 @@ class Lexer {
 
         // ||
         if (this._peekChar() === '|') {
+          punctuator += this._getChar();
+        }
+
+        return new Token(TokenType.PUNCTUATOR, punctuator);
+      case Punctuator.QUESTIONMARK:
+        punctuator = this._getChar();
+
+        const nextChar = this._peekChar();
+
+        // ?. or ?(
+        if (nextChar === '.' || nextChar === '(') {
           punctuator += this._getChar();
         }
 

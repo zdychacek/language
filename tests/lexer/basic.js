@@ -94,6 +94,16 @@ test('Lexer#nextToken - basic', (t) => {
     [ TokenType.EOL, '' ],
     [ TokenType.VOID, 'void' ],
     [ TokenType.EOL, '' ],
+    [ TokenType.PUNCTUATOR, '?' ],
+    [ TokenType.EOL, '' ],
+    [ TokenType.IDENT, 'fn' ],
+    [ TokenType.PUNCTUATOR, '?(' ],
+    [ TokenType.PUNCTUATOR, ')' ],
+    [ TokenType.EOL, '' ],
+    [ TokenType.IDENT, 'a' ],
+    [ TokenType.PUNCTUATOR, '?.' ],
+    [ TokenType.IDENT, 'b' ],
+    [ TokenType.EOL, '' ],
     [ TokenType.EOF, '' ],
   ];
 

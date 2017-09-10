@@ -7,6 +7,7 @@ import {
   BooleanLiteral,
 } from '../lexer/token';
 import * as ast from './ast';
+import { is } from '../utils';
 
 class Parser {
   // Lexer reference
@@ -50,12 +51,14 @@ class Parser {
     this._registerInfixParser(Punctuator.GT, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.DOUBLE_AMPERSAND, this._parseInfixExpression);
     this._registerInfixParser(Punctuator.DOUBLE_PIPE, this._parseInfixExpression);
-    this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression);
+    this._registerInfixParser(Punctuator.LPAREN, this._parseCallExpression(Punctuator.LPAREN));
+    this._registerInfixParser(Punctuator.QUESTIONMARK_LPAREN, this._parseCallExpression(Punctuator.QUESTIONMARK_LPAREN));
     this._registerInfixParser(Punctuator.COMMA, this._parseSequenceExpression);
     this._registerInfixParser(Punctuator.DASH_ARROW, this._parseFunctionLiteral);
     this._registerInfixParser(Punctuator.ASSIGN, this._parseAssignmentExpression);
-    this._registerInfixParser(Punctuator.LBRACKET, this._parseMemberExpression(true));
-    this._registerInfixParser(Punctuator.DOT, this._parseMemberExpression(false));
+    this._registerInfixParser(Punctuator.LBRACKET, this._parseMemberExpression(Punctuator.LBRACKET));
+    this._registerInfixParser(Punctuator.DOT, this._parseMemberExpression(Punctuator.DOT));
+    this._registerInfixParser(Punctuator.QUESTIONMARK_DOT, this._parseMemberExpression(Punctuator.QUESTIONMARK_DOT));
 
     // statements
     this._registerStatement(Keyword.LET, this._parseLetStatement);
@@ -136,7 +139,7 @@ class Parser {
       value = this._parseExpression();
 
       // if we are exporting an identifier, then export alias is not required
-      if (value instanceof ast.Identifier) {
+      if (is(value, ast.Identifier)) {
         if (this._match(Keyword.AS)) {
           this._consume();
 
@@ -295,8 +298,9 @@ class Parser {
     return new ast.BlockStatement(token, statements);
   }
 
-  _parseCallExpression = (left) => {
-    const token = this._consume(Punctuator.LPAREN);
+  // fn() or fn?()
+  _parseCallExpression = (punctuator) => (left) => {
+    const token = this._consume(punctuator);
     const args = [];
 
     while (!this._match(Punctuator.RPAREN)) {
@@ -333,7 +337,7 @@ class Parser {
 
     const expression = new ast.AssignmentExpression(token, left, token.value);
 
-    if (!(left instanceof ast.Identifier) && !(left instanceof ast.MemberExpression)) {
+    if (!is(left, ast.Identifier) && !is(left, ast.MemberExpression)) {
       const [ lineNo, columnNo ] = this._lexer.getCurrentPosition();
 
       throw new SyntaxError(`The left-hand side of an assignment must be an identifier or a member expression (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
@@ -396,14 +400,14 @@ class Parser {
     const token = this._consume(Punctuator.DASH_ARROW);
     const params = [];
 
-    if (left instanceof ast.Identifier) {
+    if (is(left, ast.Identifier)) {
       params.push(left);
     }
     // we get multiple parameters as a `SequenceExpression,`
     // so we have to map this expression to identifiers or throw an error
-    else if (left instanceof ast.SequenceExpression) {
+    else if (is(left, ast.SequenceExpression)) {
       left.expressions.forEach((exp) => {
-        if (exp instanceof ast.Identifier) {
+        if (is(exp, ast.Identifier)) {
           params.push(exp);
         }
         else {
@@ -414,7 +418,7 @@ class Parser {
       });
     }
     // throw if we get anything else except `EmptyParamListPlaceholder`
-    else if (!(left instanceof ast.EmptyParamListPlaceholder)) {
+    else if (!is(left, ast.EmptyParamListPlaceholder)) {
       const { start } = left.token;
 
       throw new SyntaxError(`Function argument must be an identifier, got "${left.toString()}" (${this._lexer.getFileName()}@${start.join(':')}).`);
@@ -510,17 +514,42 @@ class Parser {
     return objectLiteral;
   }
 
-  _parseMemberExpression = (computed) => (left) => {
-    const memberExpression = new ast.MemberExpression(this._consume(), left);
+  _parseMemberExpression = (punctuator) => (left) => {
+    const memberExpression = new ast.MemberExpression(this._consume(punctuator), left);
 
-    memberExpression.computed = computed;
+    memberExpression.optional = false;
+    memberExpression.computed = false;
 
-    // [index] variant
-    if (computed) {
+    // [prop] variant
+    if (punctuator === Punctuator.LBRACKET) {
+      memberExpression.computed = true;
       memberExpression.index = this._parseExpression(Precedence.SEQUENCE);
       this._consume(Punctuator.RBRACKET);
     }
-    // . variant
+    // .prop variant
+    else if (punctuator === Punctuator.DOT) {
+      memberExpression.index = this._parseIdentifier();
+    }
+    else if (punctuator === Punctuator.QUESTIONMARK_DOT) {
+      return this._parseOptionalMemberExpression(memberExpression);
+    }
+
+    return memberExpression;
+  }
+
+  _parseOptionalMemberExpression (memberExpression) {
+    memberExpression.optional = true;
+
+    // .?[prop] variant
+    if (this._match(Punctuator.LBRACKET)) {
+      this._consume(Punctuator.LBRACKET);
+
+      memberExpression.computed = true;
+      memberExpression.index = this._parseExpression(Precedence.SEQUENCE);
+
+      this._consume(Punctuator.RBRACKET);
+    }
+    // ?.prop variant
     else {
       memberExpression.index = this._parseIdentifier();
     }
@@ -547,7 +576,6 @@ class Parser {
     if (stmt) {
       statements.push(stmt);
     }
-
 
     if (!this._match(Punctuator.RBRACE) && !this._matchType(TokenType.EOF)) {
       this._consumeType(TokenType.EOL);

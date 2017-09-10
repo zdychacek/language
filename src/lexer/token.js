@@ -40,6 +40,9 @@ export const Punctuator = {
   DOUBLE_PIPE: '||',
   DOUBLE_AMPERSAND: '&&',
   DOT: '.',
+  QUESTIONMARK: '?',
+  QUESTIONMARK_LPAREN: '?(',
+  QUESTIONMARK_DOT: '?.',
 };
 
 export const Keyword = {
@@ -73,7 +76,7 @@ export const Precedence = {
   PREFIX: 80,       // -X or !X
   DASH_ARROW: 90,   // ->
   CALL: 100,        // myFunction(X)
-  INDEX: 110,       // [] or .
+  INDEX: 110,       // [] or . or ?.[] or ?()
 };
 
 export const TokenPrecedence = {
@@ -93,6 +96,8 @@ export const TokenPrecedence = {
   [Punctuator.DOT]: Precedence.INDEX,
   [Punctuator.DOUBLE_PIPE]: Precedence.BITWISE_OR,
   [Punctuator.DOUBLE_AMPERSAND]: Precedence.BITWISE_AND,
+  [Punctuator.QUESTIONMARK_LPAREN]: Precedence.CALL,
+  [Punctuator.QUESTIONMARK_DOT]: Precedence.INDEX,
 };
 
 export class Token {

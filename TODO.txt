@@ -9,8 +9,11 @@
   }
 
   obj.a?.c # -> `void`
-  obj.a.b.d?.() # -> `void`
+  obj.a.b.d?() # -> `void`
   ```
+  https://github.com/claudepache/es-optional-chaining
+  http://valve.github.io/blog/2013/07/13/existential-operator-in-coffeescript/
+- implement automatic semicolon insertion
 - implement variadic parameters:
   `(first, rest...) -> push(rest, first)`
 - implement `is<Type>` builtins

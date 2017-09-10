@@ -22,3 +22,6 @@ for true {
   continue
 }
 void
+?
+fn?()
+a?.b
