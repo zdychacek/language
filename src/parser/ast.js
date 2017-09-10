@@ -246,17 +246,19 @@ export class FunctionLiteral extends Expression {
 }
 
 export class CallExpression extends Expression {
-  constructor (token, fn, args) {
+  constructor (token, fn, args, optional) {
     super(token);
 
     this.fn = fn;
     this.arguments = args;
+    this.optional = optional;
   }
 
   toString () {
+    const name = this.fn.toString() + (this.optional ? '?' : '');
     const args = this.arguments.map((arg) => arg.toString()).join(', ');
 
-    return `${this.fn.toString()}(${args})`;
+    return `${name}(${args})`;
   }
 }
 

@@ -318,7 +318,9 @@ class Parser {
     this._consumeOptionalEOL();
     this._consume(Punctuator.RPAREN);
 
-    return new ast.CallExpression(token, left, args);
+    const isOptional = punctuator === Punctuator.QUESTIONMARK_LPAREN;
+
+    return new ast.CallExpression(token, left, args, isOptional);
   }
 
   _parsePrefixExpression = () => {

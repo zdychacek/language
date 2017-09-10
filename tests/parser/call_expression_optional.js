@@ -27,6 +27,8 @@ test('Parser - Call expression (optional)', (t) => {
   const { expression } = stmt;
 
   t.ok(is(expression, ast.CallExpression), 'stmt.expression is ast.CallExpression');
+  t.equal(expression.getTokenValue(), '?(', 'node.getTokenValue is "?("');
+  t.ok(expression.optional, 'node has `optional` property set to true');
   testIdentifier(t, expression.fn, 'add');
   t.equal(expression.arguments.length, 3, 'stmt.expression has right arguments count');
   testLiteralExpression(t, expression.arguments[0], 1);
