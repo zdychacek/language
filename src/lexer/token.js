@@ -4,6 +4,7 @@ export const TokenType = {
   NUMBER: 'NUMBER',
   BOOLEAN: 'BOOLEAN',
   NULL: 'NULL',
+  VOID: 'VOID',
   STRING: 'STRING',
   KEYWORD: 'KEYWORD',
   PUNCTUATOR: 'PUNCTUATOR',

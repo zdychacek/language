@@ -1,3 +1,5 @@
+import { is } from '../utils';
+
 export const ObjectType = {
   NUMBER_OBJ: 'NUMBER',
   BOOLEAN_OBJ: 'BOOLEAN',
@@ -90,7 +92,7 @@ export class ReturnValueObject extends ObjectValue {
 
 export class VoidObject extends ObjectValue {
   constructor () {
-    super('<void>');
+    super('void');
   }
 
   getType () {
@@ -195,7 +197,7 @@ export class ModuleObject extends ObjectValue {
   toString () {
     const bindings = Object.entries(this.bindings)
       .map(([ name, binding ]) => {
-        const bindingValue = binding instanceof FunctionObject ?
+        const bindingValue = is(binding, FunctionObject) ?
           binding.toShortString() : binding.toString();
 
         return `  ${name}: ${bindingValue}`;

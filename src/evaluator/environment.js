@@ -1,6 +1,20 @@
+const EXPORTS_KEY = Symbol('$$exports$$');
+
 export default class Environment {
   _store = Object.create(null);
   _outer = null;
+
+  constructor () {
+    this._store[EXPORTS_KEY] = Object.create(null);
+  }
+
+  extend () {
+    const env = new Environment();
+
+    env._outer = this;
+
+    return env;
+  }
 
   get (name) {
     const result = this._store[name];
@@ -30,15 +44,19 @@ export default class Environment {
     return null;
   }
 
-  extend () {
-    const env = new Environment();
-
-    env._outer = this;
-
-    return env;
+  has (name) {
+    return Boolean(this._store[name]);
   }
 
-  getAllBindings () {
+  assignExport (name, value) {
+    return this._store[EXPORTS_KEY][name] = value;
+  }
+
+  getAll () {
     return this._store;
+  }
+
+  getExports () {
+    return this._store[EXPORTS_KEY];
   }
 }

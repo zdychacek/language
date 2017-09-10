@@ -7,5 +7,4 @@ import "helpers"
 let fullName = person.firstName + " " + person.lastName
 
 puts("name: " + fullName + ", age: " + string(person.age))
-
 puts(increment(1))

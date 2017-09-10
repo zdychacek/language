@@ -17,7 +17,7 @@ test('Evaluator - Import statement alias', (t) => {
 
   t.notOk(is(result, object.ErrorObject), 'result is not an ErrorObject');
 
-  t.equal(Object.keys(env.getAllBindings()).length, 1, 'environment contains one binding');
+  t.equal(Object.keys(env.getAll()).length, 1, 'environment contains one binding');
 
   const moduleBinding = env.get('mod');
 

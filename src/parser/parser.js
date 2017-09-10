@@ -30,6 +30,7 @@ class Parser {
     this._registerPrefixParser(TokenType.NUMBER, this._parseNumberLiteral);
     this._registerPrefixParser(TokenType.BOOLEAN, this._parseBooleanLiteral);
     this._registerPrefixParser(TokenType.NULL, this._parseNullLiteral);
+    this._registerPrefixParser(TokenType.VOID, this._parseVoidLiteral);
     this._registerPrefixParser(TokenType.STRING, this._parseStringLiteral);
     this._registerPrefixParser(Punctuator.BANG, this._parsePrefixExpression);
     this._registerPrefixParser(Punctuator.MINUS, this._parsePrefixExpression);
@@ -243,6 +244,10 @@ class Parser {
 
   _parseNullLiteral = () => {
     return new ast.NullLiteral(this._consumeType(TokenType.NULL));
+  }
+
+  _parseVoidLiteral = () => {
+    return new ast.VoidLiteral(this._consumeType(TokenType.VOID));
   }
 
   _parseIfExpression = () => {

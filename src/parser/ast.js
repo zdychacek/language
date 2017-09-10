@@ -168,6 +168,12 @@ export class NullLiteral extends Literal {
   }
 }
 
+export class VoidLiteral extends Literal {
+  constructor (token) {
+    super(token, 'void');
+  }
+}
+
 export class ArrayLiteral extends Literal {
   constructor (token, elements) {
     super(token, null);
@@ -279,7 +285,7 @@ export class MemberExpression extends Expression {
   }
 
   toString () {
-    const left = this.left.toString() + this.optional ? '?' : '';
+    const left = this.left.toString() + (this.optional ? '?' : '');
 
     if (this.computed) {
       return `(${left}[${this.index.toString()}])`;

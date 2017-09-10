@@ -1,6 +1,8 @@
 import * as object from '../object';
 import * as consts from '../constants';
 
+const { ObjectType } = object;
+
 // Convert an argument to number value or return NULL
 export default new object.BuiltinObject((...args) => {
   if (args.length !== 1) {
@@ -8,12 +10,13 @@ export default new object.BuiltinObject((...args) => {
   }
 
   const [ arg ] = args;
+  const argType = arg.getType();
 
-  if (arg instanceof object.NumberObject) {
+  if (argType === ObjectType.NUMBER_OBJ) {
     return arg;
   }
 
-  if (arg instanceof object.StringObject) {
+  if (argType === ObjectType.STRING_OBJ) {
     const parsedNum = Number.parseFloat(arg.value);
 
     if (!Number.isNaN(parsedNum) && isFinite(arg.value)) {
@@ -24,7 +27,7 @@ export default new object.BuiltinObject((...args) => {
     }
   }
 
-  if (arg instanceof object.BooleanObject) {
+  if (argType === ObjectType.BOOLEAN_OBJ) {
     if (arg === consts.TRUE) {
       return new object.NumberObject(1);
     }
@@ -33,7 +36,7 @@ export default new object.BuiltinObject((...args) => {
     }
   }
 
-  if (arg instanceof object.NullObject) {
+  if (argType === ObjectType.NULL_OBJ || argType === ObjectType.VOID_OBJ) {
     return new object.NumberObject(0);
   }
 

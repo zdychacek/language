@@ -1,6 +1,8 @@
 import * as object from '../object';
 import * as consts from '../constants';
 
+const { ObjectType } = object;
+
 // Convert an argument to string value or return NULL
 export default new object.BuiltinObject((...args) => {
   if (args.length !== 1) {
@@ -8,25 +10,19 @@ export default new object.BuiltinObject((...args) => {
   }
 
   const [ arg ] = args;
+  const argType = arg.getType();
 
-  if (arg instanceof object.StringObject) {
+  if (argType === ObjectType.STRING_OBJ) {
     return arg;
   }
 
-  if (arg instanceof object.NumberObject) {
-    return new object.StringObject(arg.toString());
-  }
-
-  if (arg instanceof object.BooleanObject) {
-    return new object.StringObject(arg.toString());
-  }
-
-  if (arg instanceof object.FunctionObject) {
-    return new object.StringObject(arg.toString());
-  }
-
-  if (arg instanceof object.NullObject) {
-    return new object.StringObject(arg.toString());
+  switch (argType) {
+    case ObjectType.NUMBER_OBJ:
+    case ObjectType.BOOLEAN_OBJ:
+    case ObjectType.FUNCTION_OBJ:
+    case ObjectType.NULL_OBJ:
+    case ObjectType.VOID_OBJ:
+      return new object.StringObject(arg.toString());
   }
 
   return consts.NULL;

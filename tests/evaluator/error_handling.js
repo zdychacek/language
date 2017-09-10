@@ -44,7 +44,7 @@ test('Evaluator - Error handling', (t) => {
     ],
     [
       'foobar',
-      'Identifier not found: "foobar".',
+      'Identifier "foobar" not found.',
     ],
     [
       '"Hello" - "World"',
@@ -71,7 +71,7 @@ test('Evaluator - Error handling', (t) => {
     ],
     [
       '"hello"[0]="H"',
-      'Index operator not supported: STRING.',
+      'Cannot set property of STRING.',
     ],
   ];
 

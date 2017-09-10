@@ -26,7 +26,6 @@ export function testNullObject (t, obj) {
 
 export function testVoidObject (t, obj) {
   t.ok(is(obj, object.VoidObject), 'object is Void');
-  t.equal(obj.value, '<void>', 'object has void value');
 }
 
 export function testEval (input, env = new Environment(), fileName = '') {

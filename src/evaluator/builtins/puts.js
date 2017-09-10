@@ -7,7 +7,7 @@ export default new object.BuiltinObject((...args) => {
     .map((arg) => {
       let value = arg.toString();
 
-      if (arg instanceof object.StringObject) {
+      if (arg.getType() === object.ObjectType.STRING_OBJ) {
         // we want strings to be logged without quotes
         value = arg.toString().replace(/^"|"$/g, '');
       }

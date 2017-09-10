@@ -3,12 +3,13 @@ import path from 'path';
 import * as ast from '../parser/ast';
 import * as object from './object';
 import * as consts from './constants';
+import { is } from '../utils';
 import builtins from './builtins';
 import Environment from './environment';
 import Lexer from '../lexer/lexer';
 import Parser from '../parser/parser';
 
-const ObjectType = object.ObjectType;
+const { ObjectType } = object;
 
 class Evaluator {
   // file name we are evaluating
@@ -27,7 +28,7 @@ class Evaluator {
         // create new scope
         env = env.extend();
 
-        return this.evalBlockStatement(node.statements, env);
+        return this.evalBlockStatement(node, env);
       case ast.ExpressionStatement:
         return this.evaluate(node.expression, env);
       case ast.ReturnStatement:
@@ -67,7 +68,9 @@ class Evaluator {
       case ast.StringLiteral:
         return new object.StringObject(node.literal);
       case ast.NullLiteral:
-        return new object.NullObject();
+        return consts.NULL;
+      case ast.VoidLiteral:
+        return consts.VOID;
       case ast.BooleanLiteral:
         return this.nativeBoolToBooleanObject(node.literal);
       case ast.ObjectLiteral:
@@ -90,10 +93,10 @@ class Evaluator {
     for (const stmt of node.statements) {
       result = this.evaluate(stmt, env);
 
-      if (result instanceof object.ReturnValueObject) {
+      if (result.getType() === ObjectType.RETURN_VALUE_OBJ) {
         return result.value;
       }
-      else if (result instanceof object.ErrorObject) {
+      else if (result.getType() === ObjectType.ERROR_OBJ) {
         return result;
       }
     }
@@ -101,17 +104,19 @@ class Evaluator {
     return result;
   }
 
-  evalBlockStatement (statements, env) {
+  evalBlockStatement (node, env) {
     let result = null;
 
-    for (const stmt of statements) {
+    for (const stmt of node.statements) {
       result = this.evaluate(stmt, env);
 
+      const type = result.getType();
+
       if (
-        result instanceof object.ReturnValueObject ||
-        result instanceof object.ErrorObject ||
-        result instanceof object.BreakObject ||
-        result instanceof object.ContinueObject
+        type === ObjectType.RETURN_VALUE_OBJ ||
+        type === ObjectType.ERROR_OBJ ||
+        type === ObjectType.BREAK_OBJ ||
+        type === ObjectType.CONTINUE_OBJ
       ) {
         return result;
       }
@@ -341,7 +346,7 @@ class Evaluator {
     }
 
     if (!value) {
-      return new object.ErrorObject(`Identifier not found: "${node.value}".`);
+      return new object.ErrorObject(`Identifier "${node.value}" not found.`);
     }
 
     return value;
@@ -374,7 +379,7 @@ class Evaluator {
   }
 
   evalAssignmentExpression (node, env) {
-    if (node.left instanceof ast.MemberExpression) {
+    if (is(node.left, ast.MemberExpression)) {
       return this.evalMemberExpressionAssignment(node, env);
     }
     else {
@@ -419,7 +424,7 @@ class Evaluator {
   }
 
   unwrapReturnValue (obj) {
-    if (obj instanceof object.ReturnValueObject) {
+    if (obj.getType() === ObjectType.RETURN_VALUE_OBJ) {
       return obj.value;
     }
 
@@ -427,17 +432,13 @@ class Evaluator {
   }
 
   applyFunction (fn, args) {
-    if (fn.getType() === ObjectType.EXPORT_OBJ) {
-      fn = fn.value;
-    }
-
     if (fn.getType() === ObjectType.FUNCTION_OBJ) {
       const extendedEnv = this.extendFunctionEnv(fn, args);
       let evaluated = null;
 
-      if (fn.body instanceof ast.BlockStatement) {
+      if (is(fn.body, ast.BlockStatement)) {
         // call `evalBlockStatement` with extended env directly
-        evaluated = this.evalBlockStatement(fn.body.statements, extendedEnv);
+        evaluated = this.evalBlockStatement(fn.body, extendedEnv);
       }
       else {
         evaluated = this.evaluate(fn.body, extendedEnv);
@@ -453,7 +454,7 @@ class Evaluator {
   }
 
   isError (obj) {
-    return obj instanceof object.ErrorObject;
+    return obj.getType() === ObjectType.ERROR_OBJ;
   }
 
   evalArrayOrStringMemberExpression (arrayOrString, index) {
@@ -525,7 +526,7 @@ class Evaluator {
       return this.evalObjectMemberExpression(left, index);
     }
 
-    return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
+    return new object.ErrorObject(`Cannot read property "${index.value}" of ${left.getType()}.`);
   }
 
   evalExportStatement (node, env) {
@@ -536,13 +537,13 @@ class Evaluator {
     }
 
     if (node.alias) {
-      env.assign(node.alias.value, new object.ExportObject(value));
+      env.assignExport(node.alias.value, value);
     }
-    else if (node.value instanceof ast.LetStatement) {
-      env.assign(node.value.name.value, new object.ExportObject(value));
+    else if (is(node.value, ast.LetStatement)) {
+      env.assignExport(node.value.name.value, value);
     }
-    else if (node.value instanceof ast.Identifier) {
-      env.assign(node.value.value, new object.ExportObject(value));
+    else if (is(node.value, ast.Identifier)) {
+      env.assignExport(node.value.value, value);
     }
 
     return value;
@@ -580,14 +581,12 @@ class Evaluator {
       return new object.ErrorObject(ex.message);
     }
 
-    const moduleBindings = moduleEnv.getAllBindings();
+    const moduleExports = moduleEnv.getExports();
 
     if (node.alias) {
       const properties = new Map();
 
-      Object.entries(moduleBindings)
-        .filter(([ , value ]) => value.getType() === ObjectType.EXPORT_OBJ)
-        .map(([ name, value ]) => [ name, value.value ])
+      Object.entries(moduleExports)
         .forEach(([ name, value ]) => {
           const key = new object.StringObject(name);
 
@@ -599,13 +598,11 @@ class Evaluator {
     }
     else {
       // merge module environment with current one
-      Object.entries(moduleBindings)
-        .filter(([ , value ]) => value.getType() === ObjectType.EXPORT_OBJ)
-        .map(([ name, value ]) => [ name, value.value ])
+      Object.entries(moduleExports)
         .forEach(([ name, value ]) => env.assign(name, value));
     }
 
-    return new object.ModuleObject(sourceFilePath, moduleBindings);
+    return new object.ModuleObject(sourceFilePath, moduleExports);
   }
 
   evalLetStatement (node, env) {
@@ -771,14 +768,14 @@ class Evaluator {
       return left;
     }
 
-    if (left instanceof object.ObjectObject) {
+    if (left.getType() === ObjectType.OBJECT_OBJ) {
       return this.evalObjectMemberExpressionAssignment(node, env);
     }
-    else if (left instanceof object.ArrayObject) {
+    else if (left.getType() === ObjectType.ARRAY_OBJ) {
       return this.evalArrayMemberExpressionAssignment(node, env);
     }
 
-    return new object.ErrorObject(`Index operator not supported: ${left.getType()}.`);
+    return new object.ErrorObject(`Cannot set property of ${left.getType()}.`);
   }
 
   evalForStatement (node, env) {
@@ -787,19 +784,19 @@ class Evaluator {
     let result = null;
 
     while (this.evaluate(condition, env) === consts.TRUE) {
-      result = this.evalBlockStatement(body.statements, env);
+      result = this.evalBlockStatement(body, env);
 
-      if (result instanceof object.BreakObject) {
+      if (result.getType() === ObjectType.BREAK_OBJ) {
         break;
       }
 
-      if (result instanceof object.ContinueObject) {
+      if (result.getType() === ObjectType.CONTINUE_OBJ) {
         continue;
       }
 
       if (
-        result instanceof object.ReturnValueObject ||
-        result instanceof object.ErrorObject
+        result.getType() === ObjectType.RETURN_VALUE_OBJ ||
+        result.getType() === ObjectType.ERROR_OBJ
       ) {
         return result;
       }
