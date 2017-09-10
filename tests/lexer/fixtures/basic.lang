@@ -21,3 +21,4 @@ for true {
   break
   continue
 }
+void
