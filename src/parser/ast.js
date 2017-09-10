@@ -269,20 +269,23 @@ export class SequenceExpression extends Expression {
 }
 
 export class MemberExpression extends Expression {
-  constructor (token, left, index, computed) {
+  constructor (token, left, index, computed, optional) {
     super(token);
 
     this.left = left;
     this.index = index;
     this.computed = computed;
+    this.optional = optional;
   }
 
   toString () {
+    const left = this.left.toString() + this.optional ? '?' : '';
+
     if (this.computed) {
-      return `(${this.left.toString()}[${this.index.toString()}])`;
+      return `(${left}[${this.index.toString()}])`;
     }
 
-    return `(${this.left.toString()}.${this.index.toString()})`;
+    return `(${left}.${this.index.toString()})`;
   }
 }
 
