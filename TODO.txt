@@ -13,12 +13,6 @@
   ```
 - implement variadic parameters:
   `(first, rest...) -> push(rest, first)`
-- use `void` type instead of `null`:
-  ```
-  let obj = {}
-
-  obj.a # -> `void`
-  ```
 - implement `is<Type>` builtins
 - implement `|>` function chaining operator:
   `arg |> fn1 |> fn2`

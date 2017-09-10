@@ -1,13 +1,17 @@
 import test from 'tape';
 
-import { testEval, testNumberObject, testNullObject } from './utils';
+import { testEval, testVoidObject, testNumberObject } from './utils';
 
 test('Evaluator - Object index expression', (t) => {
   const tests = [
     [ '({ "foo": 5 }).foo', 5 ],
-    [ '({ "foo": 5 }).bar', null ],
-    [ 'let key = "foo"\n ({ "foo": 5 })[key]', 5 ],
-    [ '({})["foo"]', null ],
+    [ '({ "foo": 5 }).bar', '<void>' ],
+    [
+      `let key = "foo"
+      ({ "foo": 5 })[key]`,
+      5,
+    ],
+    [ '({})["foo"]', '<void>' ],
     [ '({ 5: 5 })[5]', 5 ],
     [ '({ [true]: 5 })[true]', 5 ],
     [ '({ [false]: 5 })[false]', 5 ],
@@ -20,7 +24,7 @@ test('Evaluator - Object index expression', (t) => {
       testNumberObject(t, result, expected);
     }
     else {
-      testNullObject(t, result);
+      testVoidObject(t, result);
     }
   });
 

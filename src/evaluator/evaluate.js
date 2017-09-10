@@ -161,6 +161,8 @@ class Evaluator {
         return consts.TRUE;
       case consts.NULL:
         return consts.TRUE;
+      case consts.VOID:
+        return consts.TRUE;
       default:
         return consts.FALSE;
     }
@@ -300,6 +302,8 @@ class Evaluator {
         return true;
       case consts.FALSE:
         return false;
+      case consts.VOID:
+        return false;
       default:
         return true;
     }
@@ -319,7 +323,7 @@ class Evaluator {
       return this.evaluate(node.alternative, env);
     }
     else {
-      return consts.NULL;
+      return consts.VOID;
     }
   }
 
@@ -465,7 +469,7 @@ class Evaluator {
     }
 
     if (idx < 0 || idx > max) {
-      return consts.NULL;
+      return consts.VOID;
     }
 
     if (arrayOrString.getType() === ObjectType.ARRAY_OBJ) {
@@ -485,7 +489,7 @@ class Evaluator {
     const property = obj.properties.get(index.getHashKey());
 
     if (!property) {
-      return consts.NULL;
+      return consts.VOID;
     }
 
     return property.value;
