@@ -5,10 +5,10 @@ import { testVoidObject, testNumberObject, testEval } from './utils';
 test('Evaluator - If/else expression', (t) => {
   const tests = [
     [ 'if true: 10', 10 ],
-    [ 'if false: 10', '<void>' ],
+    [ 'if false: 10', 'void' ],
     [ 'if 1: 10', 10 ],
     [ 'if 1 < 2: 10', 10 ],
-    [ 'if 1 > 2: 10', '<void>' ],
+    [ 'if 1 > 2: 10', 'void' ],
     [ 'if 1 < 2 { 10 } else { 20 }', 10 ],
     [ 'if 1 > 2: 10 else 20', 20 ],
   ];

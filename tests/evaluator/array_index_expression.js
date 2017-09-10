@@ -30,10 +30,10 @@ test('Evaluator - Array index expression', (t) => {
       myArray[i]`,
       2,
     ],
-    [ '[1, 2, 3][3]', '<void>' ],
+    [ '[1, 2, 3][3]', 'void' ],
     [ '"hello"[0]', 'h' ],
     [ '"hello"[1]', 'e' ],
-    [ '"hello"[10]', '<void>' ],
+    [ '"hello"[10]', 'void' ],
     //[ '[1, 2, 3][-1]', 3 ],
     //[ '[1, 2, 3, 4][1:3]', [ 2, 3 ] ],
   ];
@@ -44,7 +44,7 @@ test('Evaluator - Array index expression', (t) => {
     if (typeof expected === 'number') {
       testNumberObject(t, evaluated, expected);
     }
-    else if (typeof expected === 'string' && expected !== '<void>') {
+    else if (typeof expected === 'string' && expected !== 'void') {
       testStringObject(t, evaluated, expected);
     }
     else {

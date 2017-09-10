@@ -19,3 +19,7 @@ export function loadFile (fileName) {
     die(ex.message);
   }
 }
+
+export function is (instance, Type) {
+  return instance instanceof Type;
+}

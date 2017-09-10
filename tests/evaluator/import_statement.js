@@ -15,7 +15,7 @@ test('Evaluator - Import statement', (t) => {
 
   testEval(input, env, fileName);
 
-  t.equal(Object.keys(env.getAllBindings()).length, 1, 'environment contains one binding');
+  t.equal(Object.keys(env.getAll()).length, 1, 'environment contains one binding');
 
   const binding = env.get('greeting');
 

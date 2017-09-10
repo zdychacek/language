@@ -5,13 +5,13 @@ import { testEval, testVoidObject, testNumberObject } from './utils';
 test('Evaluator - Object index expression', (t) => {
   const tests = [
     [ '({ "foo": 5 }).foo', 5 ],
-    [ '({ "foo": 5 }).bar', '<void>' ],
+    [ '({ "foo": 5 }).bar', 'void' ],
     [
       `let key = "foo"
       ({ "foo": 5 })[key]`,
       5,
     ],
-    [ '({})["foo"]', '<void>' ],
+    [ '({})["foo"]', 'void' ],
     [ '({ 5: 5 })[5]', 5 ],
     [ '({ [true]: 5 })[true]', 5 ],
     [ '({ [false]: 5 })[false]', 5 ],

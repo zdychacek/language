@@ -70,6 +70,9 @@ class Lexer {
       else if (value === 'null') {
         type = TokenType.NULL;
       }
+      else if (value === 'void') {
+        type = TokenType.VOID;
+      }
 
       return this._finishToken(type, value);
     }

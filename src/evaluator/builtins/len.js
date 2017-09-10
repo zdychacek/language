@@ -1,5 +1,7 @@
 import * as object from '../object';
 
+const { ObjectType } = object;
+
 // Get length of an argument
 export default new object.BuiltinObject((...args) => {
   if (args.length !== 1) {
@@ -8,13 +10,13 @@ export default new object.BuiltinObject((...args) => {
 
   const [ arg ] = args;
 
-  switch (arg.constructor) {
-    case object.StringObject:
+  switch (arg.getType()) {
+    case ObjectType.STRING_OBJ:
       return new object.NumberObject(arg.value.length);
-    case object.ArrayObject:
+    case ObjectType.ARRAY_OBJ:
       return new object.NumberObject(arg.elements.length);
     // get function parameters count
-    case object.FunctionObject:
+    case ObjectType.FUNCTION_OBJ:
       return new object.NumberObject(arg.parameters.length);
   }
 
