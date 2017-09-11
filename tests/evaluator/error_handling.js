@@ -73,6 +73,11 @@ test('Evaluator - Error handling', (t) => {
       '"hello"[0]="H"',
       'Cannot set property of STRING.',
     ],
+    [
+      `let fn = null
+      fn()`,
+      'Cannot call NULL as a function.',
+    ],
   ];
 
   tests.forEach(([ input, expected ]) => {

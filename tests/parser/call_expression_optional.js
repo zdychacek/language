@@ -10,7 +10,7 @@ import {
 } from './utils';
 import { is } from '../utils';
 
-test('Parser - Call expression (optional)', (t) => {
+test('Parser - Call expression: optional chaining', (t) => {
   const input = 'add?(1, 2 * 3, 4 + 5)';
 
   const lexer = new Lexer(input);

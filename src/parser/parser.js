@@ -566,7 +566,7 @@ class Parser {
     else {
       this._consumeOptionalEOL();
 
-      return this._parseExpression();
+      return this._parseExpression(Precedence.SEQUENCE);
     }
   }
 

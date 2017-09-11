@@ -105,7 +105,7 @@ class Evaluator {
   }
 
   evalBlockStatement (node, env) {
-    let result = null;
+    let result = consts.VOID;
 
     for (const stmt of node.statements) {
       result = this.evaluate(stmt, env);
@@ -314,6 +314,10 @@ class Evaluator {
     }
   }
 
+  isVoidOrEmpty (obj) {
+    return obj.getType() === ObjectType.NULL_OBJ || obj.getType() === ObjectType.VOID_OBJ;
+  }
+
   evalIfExpression (node, env) {
     const condition = this.evaluate(node.condition, env);
 
@@ -357,6 +361,13 @@ class Evaluator {
 
     if (this.isError(fn)) {
       return fn;
+    }
+
+    if (node.fn.stopEvaluation || node.optional && this.isVoidOrEmpty(fn)) {
+      // marker to stop chain evaluation
+      node.stopEvaluation = true;
+
+      return consts.VOID;
     }
 
     const args = this.evalExpressions(node.arguments, env);
@@ -450,7 +461,7 @@ class Evaluator {
       return fn.value(...args);
     }
 
-    return new object.ErrorObject(`Not a function: ${fn.getType()}.`);
+    return new object.ErrorObject(`Cannot call ${fn.getType()} as a function.`);
   }
 
   isError (obj) {
@@ -498,6 +509,13 @@ class Evaluator {
 
   evalMemberExpression (node, env) {
     const left = this.evaluate(node.left, env);
+
+    if (node.left.stopEvaluation || node.optional && this.isVoidOrEmpty(left)) {
+      // marker to stop chain evaluation
+      node.stopEvaluation = true;
+
+      return consts.VOID;
+    }
 
     if (this.isError(left)) {
       return left;

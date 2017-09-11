@@ -1,18 +1,9 @@
-- implement optional chaining:
+- implement optional member expression assign:
   ```
-  let obj = {
-    a: {
-      b: {
-        c: 1
-      }
-    }
-  }
+  let obj = { a: { b: { c: 1 } }}
 
-  obj.a?.c # -> `void`
-  obj.a.b.d?() # -> `void`
+  obj.a?.c.d = 1 # -> `void`
   ```
-  https://github.com/claudepache/es-optional-chaining
-  http://valve.github.io/blog/2013/07/13/existential-operator-in-coffeescript/
 - implement automatic semicolon insertion
 - implement variadic parameters:
   `(first, rest...) -> push(rest, first)`
