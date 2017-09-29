@@ -4,4 +4,4 @@ let obj = {
   }
 }
 
-obj.a.b?()()()
+obj.a.b()?()()
