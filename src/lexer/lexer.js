@@ -6,6 +6,7 @@ import {
   Punctuator,
   Keyword,
  } from './token';
+import { NUMERIC_SEPARATOR } from '../lexer/constants';
 
 class Lexer {
   // input source code
@@ -77,7 +78,7 @@ class Lexer {
       return this._finishToken(type, value);
     }
     else if (this._isDigit(char)) {
-      const value = this._readDigit();
+      const value = this._readNumber();
 
       return this._finishToken(TokenType.NUMBER, value);
     }
@@ -222,18 +223,66 @@ class Lexer {
   _readLiteral () {
     let value = '';
 
-    while (this._isLetter(this._peekChar())) {
+    // first char must be "_" or in range "a-z" or "A-Z"
+    if (this._isLetter(this._peekChar())) {
+      value += this._getChar();
+    }
+
+    // other chars can be numbers
+    while (this._isLetter(this._peekChar()) || this._isDigit(this._peekChar())) {
       value += this._getChar();
     }
 
     return value;
   }
 
-  _readDigit () {
+  _checkNumberEnd () {
+    if (this._peekChar() === '_' && !this._isDigit(this._peekChar(1))) {
+      throw new SyntaxError(`Illegal place for numeric separator (${this._fileName}@${this._lineNo}:${this._columnNo}).`);
+    }
+  }
+
+  _readNumberPart () {
     let value = '';
 
-    while (this._isDigit(this._peekChar())) {
+    while (this._isDigitOrNumericSeparator(this._peekChar())) {
+      this._checkNumberEnd();
+
       value += this._getChar();
+    }
+
+    return value;
+  }
+
+  _isDigitOrNumericSeparator (char) {
+    return this._isDigit(char) || char === NUMERIC_SEPARATOR;
+  }
+
+  _readNumber () {
+    let value = this._readNumberPart();
+
+    if (this._peekChar() === '.') {
+      value += this._getChar();
+
+      if (this._peekChar() === NUMERIC_SEPARATOR) {
+        throw new SyntaxError(`Illegal place for numeric separator (${this._fileName}@${this._lineNo}:${this._columnNo}).`);
+      }
+
+      value += this._readNumberPart();
+    }
+
+    const expSymbol = this._peekChar();
+
+    if (expSymbol === 'e' || expSymbol === 'E') {
+      value += this._getChar();
+
+      const sign = this._peekChar();
+
+      if (sign === '+' || sign === '-') {
+        value += this._getChar();
+      }
+
+      value += this._readNumberPart();
     }
 
     return value;

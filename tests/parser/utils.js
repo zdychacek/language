@@ -3,7 +3,7 @@ import * as ast from '../../src/parser/ast';
 export function testNumberLiteral (t, node, expected) {
   t.ok(node instanceof ast.NumberLiteral, 'node is ast.NumberLiteral');
   t.equal(node.literal, expected, `node.literal is ${expected}`);
-  t.equal(node.getTokenValue(), expected.toString(), `node.getTokenValue() is "${expected.toString()}"`);
+  t.equal(node.literal, expected, `node.literal value is "${expected}"`);
 }
 
 export function testBooleanLiteral (t, node, expected) {

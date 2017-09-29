@@ -7,6 +7,7 @@ import {
   BooleanLiteral,
 } from '../lexer/token';
 import * as ast from './ast';
+import { NUMERIC_SEPARATOR } from '../lexer/constants';
 import { is } from '../utils';
 
 class Parser {
@@ -228,15 +229,15 @@ class Parser {
 
   _parseNumberLiteral = () => {
     const token = this._consumeType(TokenType.NUMBER);
-    const value = Number.parseInt(token.value, 10);
+    const cleanValue = token.value.replace(new RegExp(NUMERIC_SEPARATOR, 'g'), '');
 
-    if (!Number.isInteger(value)) {
+    if (isNaN(Number(cleanValue))) {
       const [ lineNo, columnNo ] = token.start;
 
-      throw new SyntaxError(`Could not parse ${token.value} as integer (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
+      throw new SyntaxError(`Could not parse ${token.value} as a number (${this._lexer.getFileName()}@${lineNo}:${columnNo}).`);
     }
 
-    return new ast.NumberLiteral(token, value);
+    return new ast.NumberLiteral(token, Number.parseFloat(cleanValue));
   }
 
   _parseBooleanLiteral = () => {
