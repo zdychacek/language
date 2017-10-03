@@ -1,7 +1,6 @@
 /* eslint-disable max-params */
 
 import fs from 'fs';
-import path from 'path';
 import repl from 'repl';
 import touch from 'touch';
 
