@@ -1,7 +1,7 @@
-let obj = {
-  a: {
-    b: () -> null
+let user = {
+  address: {
+    street: "Londynske namesti"
   }
 }
 
-obj.a.b()?()()
+let street = user.address?.street

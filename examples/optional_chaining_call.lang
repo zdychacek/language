@@ -1,0 +1,13 @@
+let obj = {
+  a: {
+    b: (val) -> {
+      if val == 0:
+        null
+      else
+        () -> val
+    }
+  }
+}
+
+puts(obj.a.b(0)?()()()()())
+puts(obj.a.b(1)?())
